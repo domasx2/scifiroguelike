@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GameJS Application</title>
+<!-- Styling -->
+    <style type=text/css>
+        body{
+           background:#fff;
+           color:#222;
+           margin:1em 0 2em 6em;
+           padding:0;
+        }
+        #gjs-loader {
+            width: 50%;
+            height: 50%;
+            background: url('./public/ajax-loader.gif');
+        }
+        
+        #gjs-canvas {
+        	border: solid 1px gray;
+        	image-rendering: optimizeSpeed; 
+		    image-rendering: -moz-crisp-edges; 
+		    image-rendering: -webkit-optimize-contrast;
+		    image-rendering: optimize-contrast;        
+		    -ms-interpolation-mode: nearest-neighbor;   
+		        	
+        }
+    </style>
+<!-- Start javascript/main.js -->
+    <script src="./public/yabble.js"></script>
+    <script src="./public/gamejs.min.js"></script>
+    <script>
+        require.setModuleRoot('./javascript/');
+        require.run('main')
+    </script>
+</head>
+<!-- Html -->
+<body>
+    <div>
+        <div id="gjs-loader">
+         Loading...
+        </div>
+        <canvas id="gjs-canvas"></canvas>
+        <p>
+        Powered by <a href="http://gamejs.org">GameJs</a>.
+        </p>
+    </div>
+</body>
+</html>
