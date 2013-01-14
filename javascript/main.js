@@ -16,10 +16,7 @@ gamejs.ready(function() {
     var scene = new GameScene({});
 
     var tick = function(deltams) {
-        gamejs.event.get().forEach(function(event) {
-            scene.handle(event);
-        });
-        scene.update(deltams);
+        scene.update(deltams, gamejs.event.get());
         display.clear();
         scene.draw(display);
     };

@@ -3,17 +3,20 @@ var utils = require('./utils');
 var sprite = require('./sprite');
 var game = require('./game').game;
 
+var _next_object_id=0;
+
 var Object = exports.Object = function(options){
+    this.id = _next_object_id++;
     utils.process_options(this, options, {
-       sprite: 'protagonist',
+       sprite: utils.required,
+       controller: null,
        solid: false,     //can other object pass through
        position: [0, 0], //in tiles
        angle: 0          //facing, angle, 0 faces top, 90 right, 180 bot,..
     });
     
     this.sprites = {
-        static: sprite.new_sprite(this.sprite),
-        move: sprite.new_sprite(this.sprite+'_move')
+        static: sprite.new_sprite(this.sprite)
     }    
     
     this.active_sprite = this.sprites.static;
@@ -69,14 +72,16 @@ var Creature = exports.Creature = function(options){
     Creature.superConstructor.apply(this, [options]);
     
     utils.process_options(this, options, {
+       controller: utils.required,
        max_health: 100,
        health: null
     });
     
+    this.controller.creature = this;
+    
+    this.sprites.move = sprite.new_sprite(this.sprite+'_move');
+    
     if(this.health == null) this.health = this.max_health;
-    
-    
-  
 };
 
 gamejs.utils.objects.extend(Creature, Object);

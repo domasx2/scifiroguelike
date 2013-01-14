@@ -18,34 +18,14 @@ var WorldScene = exports.WorldScene = function(options){
     this.view = new view.View({
         world: this.world
     });
-    
-    this.event_frames = [];
 };
 
 gamejs.utils.objects.extend(WorldScene, Scene);
 
-WorldScene.prototype.add_event = function(event, new_frame){
-    if(this.event_frames.length==0 || new_frame){
-        var frame = new events.EventFrame();
-        frame.add(event);
-        this.event_frames.push(frame);
-    } else {
-        this.event_frames[0].add(event);
-    }
+WorldScene.prototype.handle_events = function(events){
+    
 };
 
-WorldScene.prototype.update_events = function(deltams){
-    if(this.event_frames.length){
-        this.event_frames[0].update(deltams);
-        if(this.event_frames[0].is_finished()){
-            this.event_frames.shift(0);
-        }
-    }  
-};
-
-WorldScene.prototype.events_in_progress = function(){
-    return this.event_frames.length > 0;  
-};
 
 WorldScene.prototype.draw = function(surface){
     this.view.surface = surface;
@@ -56,18 +36,10 @@ WorldScene.prototype.draw = function(surface){
     }, this);
 };
 
-WorldScene.prototype.move_object = function(object, direction){
-    this.add_event(new events.ObjectMoveEvent({
-        direction: direction,
-        object: object
-    }));
-};
 
-WorldScene.prototype.update = function(deltams){
-    this.update_events(deltams);
-    this.world.objects.forEach(function(object){
-         object.update(deltams);
-    });
+
+WorldScene.prototype.update = function(deltams, events){
+    this.world.update(deltams, events);
 };
 
 

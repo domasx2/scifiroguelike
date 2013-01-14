@@ -10,10 +10,10 @@ var View = exports.View = function(options){
     
     utils.process_options(this, options, {
        world: utils.required,
-       width: 800,
-       height: 600,
+       width: game.settings.DISPLAY_SIZE[0],
+       height: game.settings.DISPLAY_SIZE[1],
        offset: [0, 0],
-       zoom: 3
+       zoom: game.settings.ZOOM
     });
     this.surface = null;
 };

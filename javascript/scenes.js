@@ -4,7 +4,7 @@ var Map = require('./engine/map').Map;
 var World = require('./engine/world').World;
 var Creature = require('./engine/object').Creature;
 var sprites = require('./engine/sprite');
-var events = require('./engine/events');
+var controller = require('./engine/controller');
     
 var GameScene = exports.GameScene = function(options){
     var map = new Map('./public/maps/testmap.tmx');
@@ -16,8 +16,10 @@ var GameScene = exports.GameScene = function(options){
     options.world = world;
     
     this.protagonist = new Creature({
+        sprite: 'protagonist',
         position:[2, 2],
-        angle: 90
+        angle: 90,
+        controller: new controller.PlayerController()
     });
     
     world.spawn(this.protagonist);
@@ -27,21 +29,8 @@ var GameScene = exports.GameScene = function(options){
 
 gamejs.utils.objects.extend(GameScene, WorldScene);
 
-GameScene.prototype.handle = function(event){
-    this.handle = function(event) {
-      if (event.type === gamejs.event.KEY_DOWN) {
-          if(!this.events_in_progress()){
-             if (event.key === gamejs.event.K_RIGHT) {
-                this.move_object(this.protagonist, 90);
-             } else if (event.key === gamejs.event.K_LEFT) {
-                this.move_object(this.protagonist, 270);
-             } else if (event.key === gamejs.event.K_UP) {
-                this.move_object(this.protagonist, 0);
-             } else if (event.key === gamejs.event.K_DOWN) {
-                this.move_object(this.protagonist, 180);
-             }
-          }
-      }
-   };
-    
+GameScene.prototype.handle_events = function(events){
+    events.forEach(function(event){
+      
+    });
 };
