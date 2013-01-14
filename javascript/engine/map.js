@@ -21,6 +21,9 @@ var Map = exports.Map = function(url){
 
 gamejs.utils.objects.extend(Map, tmx.Map);
 
+Map.prototype.is_wall = function(position){
+    return this.wall_layer.gids[position[1]][position[0]] != 0;  
+};
 
 function draw_layer_surface(layer){
     /*

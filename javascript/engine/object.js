@@ -25,6 +25,11 @@ var Object = exports.Object = function(options){
 
 Object.prototype.set_angle = function(angle){
       this.angle = angle;
+      if(this.active_sprite) this.active_sprite.angle = angle;
+};
+
+Object.prototype.position_mod = function(mod){
+    return [this.position[0]+mod[0], this.position[1]+mod[1]];  
 };
 
 Object.prototype.position_px = function(){
@@ -67,7 +72,7 @@ Object.prototype.snap_sprite = function(){
 
 var Creature = exports.Creature = function(options){
     
-    options.solid = true;
+    if(options.solid == undefined) options.solid = true;
     
     Creature.superConstructor.apply(this, [options]);
     

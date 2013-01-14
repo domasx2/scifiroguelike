@@ -1,10 +1,7 @@
 var gamejs = require('gamejs');
+var constants = require('./constants');
+var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
-var MOVE_KEY_MATRIX = {};
-MOVE_KEY_MATRIX[gamejs.event.K_RIGHT] = 90;
-MOVE_KEY_MATRIX[gamejs.event.K_LEFT] = 270;
-MOVE_KEY_MATRIX[gamejs.event.K_UP] = 0;
-MOVE_KEY_MATRIX[gamejs.event.K_DOWN] = 180;
 
 
 var Controller = exports.Controller = function(){
@@ -31,9 +28,10 @@ PlayerController.prototype.action_move = function(world, events){
     for(var i=0;i<events.length;i++){
         event = events[i];
         if(event.type === gamejs.event.KEY_DOWN){
-            if(!(MOVE_KEY_MATRIX[event.key]==undefined)){
-                world.event_move(this.creature, MOVE_KEY_MATRIX[event.key]);
-                return true;
+            var angle = MOVE_KEY_MATRIX[event.key]; 
+            if(!(angle==undefined)){
+                this.creature.set_angle(angle)
+                return world.event_move(this.creature, angle);
             }
         }  
     };

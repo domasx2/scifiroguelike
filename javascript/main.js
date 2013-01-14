@@ -9,10 +9,11 @@ gamejs.preload(resources.images);
 gamejs.ready(function() {
     game.init(settings, resources);
     gamejs.display.setCaption('SciFi roguelike project');
-    var display = gamejs.display.setMode([600, 400]);
-    display._context.mozImageSmoothingEnabled=false;
     
-
+    var display = gamejs.display.setMode([600, 400]);
+    display._context.mozImageSmoothingEnabled = false;
+    display._context.webkitImageSmoothingEnabled = false;
+    
     var scene = new GameScene({});
 
     var tick = function(deltams) {

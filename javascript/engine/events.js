@@ -1,6 +1,9 @@
 var gamejs = require('gamejs');
 var utils = require('./utils');
 var game = require('./game').game;
+var constants = require('./constants');
+
+var MOVE_MOD = constants.MOVE_MOD;
 
 var EventFrame = exports.EventFrame = function(){
     /*
@@ -46,10 +49,6 @@ Event.prototype.update = function(deltams){
 Event.prototype.finish = function(){};
 
 //im sure theres a better way to do link
-var MOVE_MOD = {  0: [ 0, -1],
-                 90: [ 1,  0],
-                180: [ 0,  1],
-                270: [-1,  0]};
                 
 var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
     

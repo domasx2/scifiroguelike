@@ -1,6 +1,7 @@
 var gamejs = require('gamejs');
 var utils = require('./utils');
 var events = require('./events');
+var constants = require('./constants');
 
 var World = exports.World = function(options){
     utils.process_options(this, options, {
@@ -21,6 +22,15 @@ World.prototype.update_objects = function(deltams){
     this.objects.forEach(function(object){
          object.update(deltams);
     });
+};
+
+World.prototype.get_objects_in_tile = function(position){
+    var retv = [];
+    this.objects.forEach(function(object){
+        if(object.position[0] == position[0] && 
+           object.position[1] == position[1] ) retv.push()  
+    });
+    return retv;
 };
 
 World.prototype.process_turn = function(events){
@@ -80,8 +90,24 @@ World.prototype.events_in_progress = function(){
 };
 
 World.prototype.event_move = function(object, direction){
-    this.add_event(new events.ObjectMoveEvent({
-        direction: direction,
-        object: object
-    }));
+    //if possible, creates a move event for object and returns true.
+    //if impossible (path blocked), returns false
+    if(!this.is_tile_solid(object.position_mod(constants.MOVE_MOD[direction]))){
+        this.add_event(new events.ObjectMoveEvent({
+            direction: direction,
+            object: object
+        }));
+        return true;
+    }
+    return false;
+};
+
+World.prototype.is_tile_solid = function(position){
+   var solid = this.map.is_wall(position);
+   if(!solid){
+       this.get_objects_in_tile(position).forEach(function(object){
+            if(object.solid) solid = true; 
+       });
+   } 
+   return solid;
 };
