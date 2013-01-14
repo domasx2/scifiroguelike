@@ -48,8 +48,7 @@ Event.prototype.update = function(deltams){
 
 Event.prototype.finish = function(){};
 
-//im sure theres a better way to do link
-                
+
 var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
     
     options.duration = game.settings.MOVE_DURATION;
@@ -78,6 +77,6 @@ ObjectMoveEvent.prototype.update = function(deltams){
     
     this.pos = [this.pos[0]+(deltapx*MOVE_MOD[this.direction][0]),
                 this.pos[1]+(deltapx*MOVE_MOD[this.direction][1])];   
-    this.object.active_sprite.position = [parseInt(this.pos[0]), parseInt(this.pos[1])];
+    this.object.active_sprite.position = [this.pos[0], this.pos[1]];
     Event.prototype.update.apply(this, [deltams]);     
 };

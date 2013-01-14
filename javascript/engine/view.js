@@ -16,15 +16,24 @@ var View = exports.View = function(options){
        zoom: game.settings.ZOOM
     });
     this.surface = null;
+    this.follow = null; //object to center view on
 };
 
 View.prototype.move_offset_x = function(x){
-    this.offset[0] = Math.max(0, Math.min(this.offset[0]+x, this.world.map.width_px*this.zoom-parseInt(this.width/this.zoom)));
-}
+    this.set_offset_x(this.offset[0]+x);
+};
 
-View.prototype.move_offset_y = function(y){
-    this.offset[1] = Math.max(0, Math.min(this.offset[1]+y, this.world.map.height_px*this.zoom-parseInt(this.height/this.zoom)));
-}
+View.prototype.move_offset_y = function(y){ 
+    this.set_offset_x(this.offset[1]+y);
+};
+
+View.prototype.set_offset_x = function(x){
+    this.offset[0] = Math.max(0, Math.min(x, this.world.map.width_px*this.zoom-parseInt(this.width/this.zoom)));
+};
+
+View.prototype.set_offset_y = function(y){
+    this.offset[1] = Math.max(0, Math.min(y, this.world.map.height_px*this.zoom-parseInt(this.height/this.zoom)));
+};
 
 View.prototype.draw_layer = function(layer){
     utils.draw(this.surface, layer.surface, [0,0], [parseInt(this.offset[0]/this.zoom), parseInt(this.offset[1]/this.zoom)], this.zoom);
@@ -36,7 +45,12 @@ View.prototype.draw_surface = function(surface, dst_position, src_position, src_
 };
 
 View.prototype.update = function(deltams){
-    
+    if(this.follow && this.surface){
+        var pos = this.follow.active_sprite.position;
+        var ds = this.surface.getSize();
+        this.set_offset_x(parseInt(pos[0]*this.zoom- ds[0]/2));
+        this.set_offset_y(parseInt(pos[1]*this.zoom- ds[1]/2));
+    }
 };
 
 

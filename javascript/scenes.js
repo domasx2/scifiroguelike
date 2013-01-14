@@ -22,9 +22,13 @@ var GameScene = exports.GameScene = function(options){
         controller: new controller.PlayerController()
     });
     
+    
+    
     world.spawn(this.protagonist);
     
     GameScene.superConstructor.apply(this, [options]);
+    
+    this.view.follow = this.protagonist;
 };
 
 gamejs.utils.objects.extend(GameScene, WorldScene);

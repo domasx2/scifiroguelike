@@ -84,7 +84,7 @@ var Creature = exports.Creature = function(options){
     
     this.controller.creature = this;
     
-    this.sprites.move = sprite.new_sprite(this.sprite+'_move');
+    this.sprites.move = sprite.new_sprite(this.sprite + '_move');
     
     if(this.health == null) this.health = this.max_health;
 };

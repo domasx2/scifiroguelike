@@ -18,6 +18,8 @@ var WorldScene = exports.WorldScene = function(options){
     this.view = new view.View({
         world: this.world
     });
+    
+    
 };
 
 gamejs.utils.objects.extend(WorldScene, Scene);
@@ -37,9 +39,9 @@ WorldScene.prototype.draw = function(surface){
 };
 
 
-
 WorldScene.prototype.update = function(deltams, events){
     this.world.update(deltams, events);
+    this.view.update(deltams);
 };
 
 

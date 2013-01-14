@@ -22,6 +22,6 @@ gamejs.ready(function() {
         scene.draw(display);
     };
 
-    gamejs.time.fpsCallback(tick, this, 60);
+    gamejs.time.fpsCallback(tick, this, settings.FPS);
 
 });
