@@ -72,7 +72,7 @@ Object.prototype.snap_sprite = function(){
 
 var Creature = exports.Creature = function(options){
     
-    if(options.solid == undefined) options.solid = true;
+    if(options.solid === undefined) options.solid = true;
     
     Creature.superConstructor.apply(this, [options]);
     

@@ -28,7 +28,7 @@ World.prototype.get_objects_in_tile = function(position){
     var retv = [];
     this.objects.forEach(function(object){
         if(object.position[0] == position[0] && 
-           object.position[1] == position[1] ) retv.push()  
+           object.position[1] == position[1] ) retv.push(object)  
     });
     return retv;
 };

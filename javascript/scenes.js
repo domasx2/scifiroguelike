@@ -5,6 +5,7 @@ var World = require('./engine/world').World;
 var Creature = require('./engine/object').Creature;
 var sprites = require('./engine/sprite');
 var controller = require('./engine/controller');
+var new_creature =require('./creatures/creatures').new;
     
 var GameScene = exports.GameScene = function(options){
     var map = new Map('./public/maps/testmap.tmx');
@@ -25,6 +26,8 @@ var GameScene = exports.GameScene = function(options){
     
     
     world.spawn(this.protagonist);
+    
+    world.spawn(new_creature('engineer', [5, 3], 0));
     
     GameScene.superConstructor.apply(this, [options]);
     
