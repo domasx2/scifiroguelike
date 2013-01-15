@@ -38,6 +38,8 @@ exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, 
 
     var dst_rect = new gamejs.Rect([i(dst_offset[0]), i(dst_offset[1])], [i(w), i(h)]);
     var src_rect = new gamejs.Rect([i(src_offset[0]), i(src_offset[1])], 
-                                   [i(w/zoom),      i(h/zoom)]);                            
-    dst_surface.blit(src_surface, dst_rect, src_rect);                        
+                                   [i(w/zoom),      i(h/zoom)]);
+                                
+    dst_surface.blit(src_surface, dst_rect, src_rect); 
+                     
 }

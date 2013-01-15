@@ -3,7 +3,7 @@ var engine = require('./engine');
 var creatures = require('./creatures');
     
 var GameScene = exports.GameScene = function(options){
-    var map = new engine.Map('./public/maps/testmap.tmx');
+    var map = engine.maps.from_tmx('./public/maps/testmap.tmx');
 
     var world = new engine.World({
         'map': map

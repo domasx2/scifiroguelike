@@ -1,6 +1,7 @@
 exports.game = require('./engine/game').game;
 
-exports.Map = require('./engine/map').Map;
+exports.maps = require('./engine/maps');
+exports.Map = exports.maps.Map;
 
 exports.World = require('./engine/world').World;
 
