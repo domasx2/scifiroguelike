@@ -30,6 +30,28 @@ EventFrame.prototype.is_finished = function(){
     return true;
 };
 
+/************************
+ * PersistentEventFrame
+ * destroys finished events, but is never finished itself
+ */
+
+var PersistentEventFrame = exports.PersistentEventFrame = function(){
+    PersistentEventFrame.superConstructor.apply(this, []);
+};
+
+gamejs.utils.objects.extend(PersistentEventFrame, EventFrame);
+
+PersistentEventFrame.prototype.is_finished = function(){return true;};
+
+PersistentEventFrame.prototype.update = function(deltams){
+      EventFrame.prototype.update.apply(this, [deltams]);
+      var events = [];
+      this.events.forEach(function(event){
+          if(!event.finished) events.push(event); 
+      });
+      this.events = events;
+};
+
 var Event = exports.Event = function(options){  
     utils.process_options(this, options, {
         duration: 0,   
@@ -50,7 +72,6 @@ Event.prototype.finish = function(){};
 
 
 var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
-    
     options.duration = game.settings.MOVE_DURATION;
     utils.process_options(this, options, {
         object: utils.required,
@@ -63,12 +84,13 @@ var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
     this.object.set_sprite('move', true);
     
     this.pos = this.object.active_sprite.position.slice(0);
+    
+    this.object.teleport_relative([MOVE_MOD[this.direction][0], MOVE_MOD[this.direction][1]]);
 };
 
 gamejs.utils.objects.extend(ObjectMoveEvent, Event);
 
 ObjectMoveEvent.prototype.finish = function(){
-    this.object.teleport_relative([MOVE_MOD[this.direction][0], MOVE_MOD[this.direction][1]]);
     this.object.set_sprite('static', true);
 };
 

@@ -10,6 +10,7 @@ var World = exports.World = function(options){
   
     this.objects = [];
     this.event_frames = [];
+    this.persistent_events = new events.PersistentEventFrame();
     
     this.turn_queue = []; //all objects that can act, in sequence of their action
     this.turn_pending_queue = []; //all objects that have not yet acted this turn
@@ -82,21 +83,29 @@ World.prototype.update_events = function(deltams){
         if(this.event_frames[0].is_finished()){
             this.event_frames.shift(0);
         }
-    }  
+    }
+    this.persistent_events.update(deltams);
 };
 
 World.prototype.events_in_progress = function(){
     return this.event_frames.length > 0;  
 };
 
-World.prototype.event_move = function(object, direction){
-    //if possible, creates a move event for object and returns true.
-    //if impossible (path blocked), returns false
+World.prototype.event_move = function(object, direction, no_wait){
+    /*if possible, creates a move event for object and returns true.
+    * if impossible (path blocked), returns false
+    * 
+    * no_wait - optional. if true, does not wait for this event to finish before initating next turn.
+    * useful for AI creatures, so player is not forced to wait excessively
+    */
     if(!this.is_tile_solid(object.position_mod(constants.MOVE_MOD[direction]))){
-        this.add_event(new events.ObjectMoveEvent({
+        var event = new events.ObjectMoveEvent({
             direction: direction,
             object: object
-        }));
+        });
+        
+        if(no_wait) this.persistent_events.add(event);
+        else this.add_event(event);
         return true;
     }
     return false;
