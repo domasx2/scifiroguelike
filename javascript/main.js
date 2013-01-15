@@ -1,5 +1,6 @@
 var gamejs = require('gamejs');
-var game = require('./engine/game').game;
+var engine = require('./engine');
+var game = engine.game;
 var GameScene  = require('./scenes').GameScene;
 var resources = require('./resources');
 var settings = require('./settings');

@@ -1,40 +1,33 @@
 var gamejs = require('gamejs');
-var WorldScene = require('./engine/scene').WorldScene;
-var Map = require('./engine/map').Map;
-var World = require('./engine/world').World;
-var Creature = require('./engine/object').Creature;
-var sprites = require('./engine/sprite');
-var controller = require('./engine/controller');
-var new_creature =require('./creatures/creatures').new;
+var engine = require('./engine');
+var creatures = require('./creatures');
     
 var GameScene = exports.GameScene = function(options){
-    var map = new Map('./public/maps/testmap.tmx');
+    var map = new engine.Map('./public/maps/testmap.tmx');
 
-    var world = new World({
+    var world = new engine.World({
         'map': map
     });
     
     options.world = world;
     
-    this.protagonist = new Creature({
+    this.protagonist = new engine.Creature({
         sprite: 'protagonist',
         position:[2, 2],
         angle: 90,
-        controller: new controller.PlayerController()
+        controller: new engine.controllers.PlayerController()
     });
-    
-    
     
     world.spawn(this.protagonist);
     
-    world.spawn(new_creature('engineer', [5, 3], 0));
+    world.spawn(creatures.new('engineer', [5, 3], 0));
     
     GameScene.superConstructor.apply(this, [options]);
     
     this.view.follow = this.protagonist;
 };
 
-gamejs.utils.objects.extend(GameScene, WorldScene);
+gamejs.utils.objects.extend(GameScene, engine.scene.WorldScene);
 
 GameScene.prototype.handle_events = function(events){
     events.forEach(function(event){

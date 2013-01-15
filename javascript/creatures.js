@@ -1,4 +1,4 @@
-var Creature = require('../engine/object').Creature;
+var engine = require('./engine');
 var controllers = require('./controllers');
 
 var creatures = {
@@ -11,10 +11,10 @@ var creatures = {
 
 exports.new = function(name, position, angle){
     var def = creatures[name];
-    return new Creature({
+    return new engine.Creature({
         sprite: def.sprite,
         position: position,
         angle:angle,
-        controller: new controllers[def.controller]() 
+        controller: controllers.new(def.controller)
     });
 }
