@@ -12,16 +12,7 @@ var Map = exports.Map = function(options){
     });   
     
     //default wall map with no walls
-    if(!this.walls){
-        this.walls = [];
-        for(var y=0;y<this.size[1];y++){
-            var row = [];
-            for(var x=0;x<this.size[0];x++){
-                row.push(false);
-            }
-            this.walls.push(row);
-        }  
-    }
+    if(!this.walls) this.walls = new utils.Array2D(this.size, false);
     
     if(!this.floor_surface) 
         this.floor_surface = new gamejs.Surface([this.size[0] * game.settings.TILE_WIDTH,
@@ -36,7 +27,7 @@ var Map = exports.Map = function(options){
 };
 
 Map.prototype.is_wall = function(position){
-    return this.walls[position[1]][position[0]];  
+    return this.walls.get(position);  
 };
 
 exports.from_tmx = function(url){
@@ -49,13 +40,11 @@ exports.from_tmx = function(url){
          layer.surface = draw_tmx_layer_surface(layer, tmxmap);
     }, this);
     
-    var walls = [];
+    var walls = new utils.Array2D([tmxmap.width, tmxmap.height], false);
     for(var y = 0;y<wall_layer.gids.length;y++){
-        var row = [];
         for(var x=0; x<wall_layer.gids[y].length;x++){
-            row.push(wall_layer.gids[y][x]!=0);
+            walls.set([x, y], wall_layer.gids[y][x]!=0);
         }
-        walls.push(row);
     }
 
     options = {

@@ -2,7 +2,11 @@ exports.images = ['./public/img/tiles/default.png',
                   './public/img/characters/protagonist.png',
                   './public/img/characters/engineer.png'];
                   
-                  
+      
+      
+exports.tilesheets = {
+    'default': './public/img/tiles/default.png'
+}            
  
 exports.sprites = {
     //PROTAGONIST

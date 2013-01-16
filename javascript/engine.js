@@ -1,5 +1,7 @@
 exports.game = require('./engine/game').game;
 
+exports.mapgen = require('./engine/mapgen');
+
 exports.maps = require('./engine/maps');
 exports.Map = exports.maps.Map;
 

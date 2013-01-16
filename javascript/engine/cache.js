@@ -35,9 +35,16 @@ SpriteSheet.prototype.prerotate = function(step, size){
 
 exports.Cache = function(resources){
     this.spritesheets = {};
+    this.tilesheets = {};
+    
+    gamejs.utils.objects.keys(resources.tilesheets).forEach(function(key){
+        this.tilesheets[key] = gamejs.image.load(resources.tilesheets[key]); 
+    }, this);
+    
     resources.images.forEach(function(url){
         this.spritesheets[url] = new SpriteSheet(url);
     }, this);
+    
     gamejs.utils.objects.keys(resources.sprites).forEach(function(sprite_def_key){
         var sprite_def = resources.sprites[sprite_def_key];
         
