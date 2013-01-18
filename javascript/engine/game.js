@@ -1,5 +1,4 @@
 var Game =  function(){
-  
 };
 
 Game.prototype.init = function(settings,  resources){

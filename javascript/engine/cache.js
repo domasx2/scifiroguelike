@@ -1,5 +1,28 @@
 var gamejs = require('gamejs');
 var game = require('./game').game;
+var utils = require('./utils');
+
+var TileSheet = function(def){
+    this.def = def;
+    this.surface = gamejs.image.load(def.url); 
+    this.floor_ofst = def.floor;
+};
+
+TileSheet.prototype.get_tile_ofsts = function(walls){
+    //walls is a 3x3 utils.Array2D instance.
+    //returns list of tile offsets to paint on middle square.
+    var retv = [];
+    gamejs.utils.objects.keys(this.def.wallmap).forEach(function(key){
+        var ok =true;
+        utils.iter2d([3, 3], function(pos){
+            var k = key[pos[1]*3+pos[1]+pos[0]];
+            var p = walls.get(pos);
+            if((k=='0' && (p===true || p===null)) || (k==='1' && p==false)) ok = false;
+        });
+        if(ok) retv.push(this.def.wallmap[key]);
+    }, this); 
+    return retv;
+};
 
 var SpriteSheet = function(url){
     this.url = url;
@@ -38,7 +61,7 @@ exports.Cache = function(resources){
     this.tilesheets = {};
     
     gamejs.utils.objects.keys(resources.tilesheets).forEach(function(key){
-        this.tilesheets[key] = gamejs.image.load(resources.tilesheets[key]); 
+        this.tilesheets[key] = new TileSheet(resources.tilesheets[key]); 
     }, this);
     
     resources.images.forEach(function(url){

@@ -18,8 +18,6 @@ var WorldScene = exports.WorldScene = function(options){
     this.view = new view.View({
         world: this.world
     });
-    
-    
 };
 
 gamejs.utils.objects.extend(WorldScene, Scene);

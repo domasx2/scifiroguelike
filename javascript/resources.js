@@ -5,8 +5,32 @@ exports.images = ['./public/img/tiles/default.png',
       
       
 exports.tilesheets = {
-    'default': './public/img/tiles/default.png'
-}            
+    'default': {'url':'./public/img/tiles/default.png',
+                'floor': [1, 1],
+                'wallmap': {
+                    'xxx x11 x10':[0, 0],
+                    'xxx 111 x0x':[1, 0],
+                    'xxx 11x 01x':[2, 0],
+                    'x0x 011 x1x':[3, 0],
+                    'x0x 110 x1x':[4, 0],
+                    
+                    'x1x x10 x1x':[0, 1],
+                    'x1x 01x x1x':[2, 1],
+                    'x1x 011 x0x':[3, 1],
+                    'x1x 110 x0x':[4, 1],
+                    
+                    'x10 x11 xxx':[0, 2],
+                    'x0x 111 xxx':[1, 2],
+                    '01x 11x xxx':[2, 2],
+                    'x0x 110 x0x':[3, 2],
+                    
+                    'x0x 010 x1x':[1, 3],
+                    'x0x 010 x0x':[2, 3],
+                    'x1x 010 x0x':[3, 3],
+                    'x0x 011 x0x':[4, 1]
+                }
+           }
+};           
  
 exports.sprites = {
     //PROTAGONIST

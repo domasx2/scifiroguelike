@@ -1,2 +1,2 @@
-exports.MapCanvas = require('./mapgen/generator').MapCanvas;
+exports.Generator = require('./mapgen/generator').Generator;
 exports.pieces = require('./mapgen/pieces');

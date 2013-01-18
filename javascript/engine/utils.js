@@ -97,9 +97,23 @@ Array2D.prototype.line_v = function(pos, mody, val){
     for(var y=0;y<=c;y++) this.set([pos[0], pos[1]+y*mod], val);
 };
 
-Array2D.prototype.square = function(pos, size, val){
-    this.line_h(pos, size[0]-1, val);
-    this.line_h([pos[0], pos[1]+size[1]-1], size[0]-1, val);
-    this.line_v(pos, size[1]-1, val);
-    this.line_v([pos[0]+size[0]-1, pos[1]], size[1]-1, val);  
+Array2D.prototype.cut = function(pos, size){
+    var retv = new Array2D(size);
+    iter2d(size, function(p){
+        retv.set(p, this.get([p[0]+pos[0], p[1]+pos[1]]));
+    }, this);
+    return retv;
+}
+
+Array2D.prototype.square = function(pos, size, val, fill){
+    if(!fill){
+        this.line_h(pos, size[0]-1, val);
+        this.line_h([pos[0], pos[1]+size[1]-1], size[0]-1, val);
+        this.line_v(pos, size[1]-1, val);
+        this.line_v([pos[0]+size[0]-1, pos[1]], size[1]-1, val);
+    }else{
+        iter2d(size, function(p){
+            this.set([p[0]+pos[0], p[1]+pos[1]], val);
+        }, this);
+    }
 };

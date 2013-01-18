@@ -5,21 +5,15 @@ var creatures = require('./creatures');
 var GameScene = exports.GameScene = function(options){
     //var map = engine.maps.from_tmx('./public/maps/testmap.tmx');
     
-    var canvas = new engine.mapgen.MapCanvas({
+    var gen = new engine.mapgen.Generator({
        size: [10, 10]
     });
     
     var room = new engine.mapgen.pieces.Room({size:[5, 5]});
-    canvas.add_piece(room, [2, 2]);
-    
-    var map = new engine.Map({
-        size: [10, 10],
-        walls: canvas.walls,
-        wall_surface: canvas.draw_walls()
-    })
+    gen.add_piece(room, [2, 2]);
     
     var world = new engine.World({
-        'map': map
+        'map': gen.get_map()
     });
     
     options.world = world;

@@ -3,27 +3,71 @@ var tmx    = require('gamejs/tmx');
 var utils = require('./utils');
 var game = require('./game').game;
 
+
+
 var Map = exports.Map = function(options){
     utils.process_options(this, options, {
         size: [100, 100],
         walls: null,
         floor_surface: null,
-        wall_surface: null  
+        wall_surface: null,
+        tilesheet: 'default'
     });   
+    
+    this.tilesheet = game.cache.tilesheets[this.tilesheet];
+    
+    this.size_px = [this.size[0] * game.settings.TILE_WIDTH,
+                    this.size[1] * game.settings.TILE_WIDTH]; 
     
     //default wall map with no walls
     if(!this.walls) this.walls = new utils.Array2D(this.size, false);
     
     if(!this.floor_surface) 
-        this.floor_surface = new gamejs.Surface([this.size[0] * game.settings.TILE_WIDTH,
-                                                 this.size[1] * game.settings.TILE_WIDTH]);
+        this.floor_surface = this.draw_floor();
                                                  
     if(!this.wall_surface) 
-        this.wall_surface = new gamejs.Surface([this.size[0] * game.settings.TILE_WIDTH,
-                                                this.size[1] * game.settings.TILE_WIDTH]); 
+        this.wall_surface = this.draw_walls();
                                                 
-    this.size_px = [this.size[0] * game.settings.TILE_WIDTH,
-                    this.size[1] * game.settings.TILE_WIDTH];  
+     
+};
+
+Map.prototype.new_surface = function(){
+    return new gamejs.Surface([this.size[0]*game.settings.TILE_WIDTH,
+                               this.size[1]*game.settings.TILE_WIDTH]);
+};
+
+Map.prototype.draw_walls = function(tilesheet){
+    var t = game.settings.TILE_WIDTH;
+    var tile_size = [t, t];
+    var surface = this.new_surface();
+
+    this.walls.iter2d(function(pos, wall){
+        if(wall){
+            this.tilesheet.get_tile_ofsts(this.walls.cut([pos[0]-1, pos[1]-1], [3, 3])).forEach(function(ofst){
+                surface.blit(this.tilesheet.surface, 
+                    new gamejs.Rect([pos[0]*t, pos[1]*t], tile_size), 
+                    new gamejs.Rect([ofst[0]*t, ofst[1]*t], tile_size));
+            }, this);     
+        } 
+    }, this);
+    
+    return surface;                                        
+};
+
+Map.prototype.draw_floor = function(tilesheet){
+    var t = game.settings.TILE_WIDTH;
+    var tile_size = [t, t];
+    var surface = this.new_surface();
+                                      
+    this.walls.iter2d(function(pos, wall){
+        if(!wall){
+            var ofst = this.tilesheet.floor_ofst;
+            surface.blit(this.tilesheet.surface, 
+                    new gamejs.Rect([pos[0]*t, pos[1]*t], tile_size), 
+                    new gamejs.Rect([ofst[0]*t, ofst[1]*t], tile_size));
+        }
+    }, this);
+    return surface;
 };
 
 Map.prototype.is_wall = function(position){

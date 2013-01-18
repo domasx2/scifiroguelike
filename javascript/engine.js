@@ -1,5 +1,6 @@
 exports.game = require('./engine/game').game;
 
+exports.random = require('./engine/random');
 exports.mapgen = require('./engine/mapgen');
 
 exports.maps = require('./engine/maps');

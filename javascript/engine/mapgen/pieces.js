@@ -10,7 +10,7 @@ var Piece = exports.Piece = function(options){
         exits: new Array()
     });
     
-    this.walls = new utils.Array2D(this.size, false);   
+    this.walls = new utils.Array2D(this.size, true);   
 };
 
 Piece.prototype.add_piece = function(piece, position){
@@ -29,13 +29,9 @@ Piece.prototype.paste_in = function(piece){
 };
 
 
-var Corridor = exports.Corridor = function(options){
-    
-};
-
 var Room = exports.Room = function(options){
     Room.superConstructor.apply(this, [options]);
-    this.walls.square([0, 0], this.size, true);
+    this.walls.square([0, 0], this.size, false, true);
 };
 
 gamejs.utils.objects.extend(Room, Piece);
