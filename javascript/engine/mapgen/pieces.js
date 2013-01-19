@@ -6,12 +6,58 @@ var Piece = exports.Piece = function(options){
         size: utils.required,
         position: [0, 0],
         parent: null,
-        children: new Array(),
-        exits: new Array()
     });
     
-    this.walls = new utils.Array2D(this.size, true);   
+    this.walls = new utils.Array2D(this.size, true);  
+    this.perimeter = [];
+    this.exits = [];
+    this.children = [];
 };
+
+Piece.prototype.global_pos = function(pos){
+    //translate local position to parent position
+    return [this.position[0]+pos[0], this.position[1]+pos[1]];
+};
+
+Piece.prototype.local_pos = function(pos){
+    //translate parent position to local position
+    return [pos[0]-this.position[0], pos[1]-this.position[1]];
+};
+
+Piece.prototype.perimeter_by_facing = function(facing){
+    var retv = [];
+    for(var i=0;i<this.perimeter.length;i++){
+        if(this.perimeter[i][1]==facing){
+            retv.push(this.perimeter[i]);
+        }
+    }  
+    return retv;
+};
+
+Piece.prototype.rect = function(){
+      return new gamejs.Rect(this.position, this.size);
+};
+
+Piece.prototype.add_perimeter = function(from, to, facing){
+    utils.iter2drange(from, to, function(pos){
+        this.perimeter.push([pos, facing]);
+    }, this);
+};
+
+Piece.prototype.intersects = function(piece){
+    return this.rect().collideRect(piece.rect());
+};
+
+Piece.prototype.remove_perimeter = function(intersecting_rect){
+    var p;
+    var n = [];
+    for(var i=0;i<this.perimeter.length;i++){
+        p = this.perimeter[i];
+        if(!intersecting_rect.collidePoint(p[0])) n.push(p);
+    }
+    this.perimeter = n;
+};
+
 
 Piece.prototype.add_piece = function(piece, position){
     piece.parent = this;
@@ -23,15 +69,34 @@ Piece.prototype.add_piece = function(piece, position){
 Piece.prototype.paste_in = function(piece){
     for(var y=0;y<piece.size[1]; y++){
         for(var x=0; x<piece.size[0];x++){
-            this.walls.set([piece.position[0]+x, piece.position[1]+y], piece.walls.get([x, y]));
+            var p = piece.walls.get([x, y]);
+            if(p==false) this.walls.set([piece.position[0]+x, piece.position[1]+y], false);
         }
     }
 };
 
+Piece.prototype.add_exit = function(exit){
+      this.walls.set(exit[0], false);
+      this.exits.push(exit);
+};
+
+Piece.prototype.center_pos = function(piece){
+    //returns pos of piece at which it would be centered inside this piece. OK??
+    return [parseInt(this.size[0]/2 - piece.size[0]/2), parseInt(this.size[1]/2 - piece.size[1]/2)]; 
+};
+
 
 var Room = exports.Room = function(options){
+    this.room_size = options.size
+    options.size = [options.size[0]+2, options.size[1]+2];
     Room.superConstructor.apply(this, [options]);
-    this.walls.square([0, 0], this.size, false, true);
+    this.walls.square([1, 1], this.room_size, false, true);
+
+    this.add_perimeter([1, 0], [this.size[0]-2, 0], 0);
+    this.add_perimeter([0, 1], [0, this.size[1]-2], 270);
+    this.add_perimeter([1, this.size[1]-1], [this.size[0]-2, this.size[1]-1], 180);
+    this.add_perimeter([this.size[0]-1, 1], [this.size[0]-1, this.size[1]-2], 90);
+    
 };
 
 gamejs.utils.objects.extend(Room, Piece);

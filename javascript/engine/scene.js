@@ -38,6 +38,7 @@ WorldScene.prototype.draw = function(surface){
 
 
 WorldScene.prototype.update = function(deltams, events){
+    this.handle_events(events);
     this.world.update(deltams, events);
     this.view.update(deltams);
 };

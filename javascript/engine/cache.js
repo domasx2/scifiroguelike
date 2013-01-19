@@ -6,22 +6,28 @@ var TileSheet = function(def){
     this.def = def;
     this.surface = gamejs.image.load(def.url); 
     this.floor_ofst = def.floor;
-};
-
-TileSheet.prototype.get_tile_ofsts = function(walls){
-    //walls is a 3x3 utils.Array2D instance.
-    //returns list of tile offsets to paint on middle square.
-    var retv = [];
-    gamejs.utils.objects.keys(this.def.wallmap).forEach(function(key){
-        var ok =true;
-        utils.iter2d([3, 3], function(pos){
-            var k = key[pos[1]*3+pos[1]+pos[0]];
-            var p = walls.get(pos);
-            if((k=='0' && (p===true || p===null)) || (k==='1' && p==false)) ok = false;
-        });
-        if(ok) retv.push(this.def.wallmap[key]);
-    }, this); 
-    return retv;
+    
+    
+    var hash2ofst = {};
+    function rec(h, k, okey){
+        if(k.length){
+            c = k[0];
+            if(c=='x'){
+                rec(h+'0', k.substr(1), okey);
+                rec(h+'1', k.substr(1), okey);
+            }else{
+                rec(h+c, k.substr(1), okey);
+            }
+        } else {
+            if(!hash2ofst[h]) hash2ofst[h] = [def.wallmap[okey]];
+            else hash2ofst[h].push(def.wallmap[okey]);
+        }
+    };
+    gamejs.utils.objects.keys(this.def.wallmap).forEach(function(okey){
+        key = okey.replace(/ /g, '');
+        rec('', key, okey);
+    });
+    this.hash2ofst = hash2ofst;
 };
 
 var SpriteSheet = function(url){

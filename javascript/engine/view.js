@@ -45,11 +45,13 @@ View.prototype.draw_surface = function(surface, dst_position, src_position, src_
 };
 
 View.prototype.update = function(deltams){
-    if(this.follow && this.surface){
+    if(this.follow && this.follow.active_sprite){
         var pos = this.follow.active_sprite.position;
-        var ds = this.surface.getSize();
-        this.set_offset_x(parseInt(pos[0]*this.zoom- ds[0]/2));
-        this.set_offset_y(parseInt(pos[1]*this.zoom- ds[1]/2));
+        var cs = this.follow.active_sprite.definition.cell_size
+        this.set_offset_x(parseInt(pos[0]*this.zoom - (this.width)/3)  + (cs[0]*this.zoom)/2);
+        this.set_offset_y(parseInt(pos[1]*this.zoom - (this.height)/3) + (cs[1]*this.zoom)/2);
+        //WHY DO SCREEN DIMENSIONS HAVE TO BE DIVIDED BY 3, NOT 2, TO CENTER???
+        //I DONT KNOW! IM DUMB! WTF MATH!
     }
 };
 

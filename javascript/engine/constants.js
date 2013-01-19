@@ -5,6 +5,13 @@ exports.MOVE_MOD = {  0: [ 0, -1],
                     180: [ 0,  1],
                     270: [-1,  0]};
                     
+exports.INVERSE  = {
+    0: 180,
+    90: 270,
+    270: 90,
+    180: 0
+};
+                    
 
 var MOVE_KEY_MATRIX = exports.MOVE_KEY_MATRIX = {};
 MOVE_KEY_MATRIX[gamejs.event.K_RIGHT] = 90;

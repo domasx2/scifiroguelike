@@ -27,6 +27,29 @@ var iter2d = exports.iter2d = function(size, callback, context){
     }
 };
 
+var iter2drange = exports.iter2drange = function(from, to, callback, context){
+    var fx, fy, tx, ty;
+    if(from[0]<to[0]){
+        fx = from[0]; 
+        tx = to[0];      
+    } else {
+        fx = to[0];
+        tx = from[0];
+    };
+    if(from[1]<to[1]){
+        fy = from[1]; 
+        ty = to[1];      
+    } else {
+        fy = to[1];
+        ty = from[1];
+    };
+    for(var x=fx;x<=tx;x++){
+        for(var y=fy;y<=ty;y++){
+            callback.apply(context, [[x,y]]);
+        }
+    }  
+};
+
 exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, size){
     //wow this is a cryptic mess
     var dst_size = dst_surface.getSize();
@@ -40,15 +63,16 @@ exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, 
         var src_available = [(src_size[0] - src_offset[0]) * zoom, (src_size[1] - src_offset[1]) * zoom];
     }
     
-    var w = Math.min(dst_available[0], src_available[0]);
-    var h = Math.min(dst_available[1], src_available[1]);
-  
+    var w = Math.max(Math.min(dst_available[0], src_available[0]), 0);
+    var h = Math.max(Math.min(dst_available[1], src_available[1]), 0);
+    
+    if(!w || !h) return;
 
     var dst_rect = new gamejs.Rect([i(dst_offset[0]), i(dst_offset[1])], [i(w), i(h)]);
     var src_rect = new gamejs.Rect([i(src_offset[0]), i(src_offset[1])], 
                                    [i(w/zoom),      i(h/zoom)]);
-                                
     dst_surface.blit(src_surface, dst_rect, src_rect); 
+    
                      
 };
 
@@ -116,4 +140,15 @@ Array2D.prototype.square = function(pos, size, val, fill){
             this.set([p[0]+pos[0], p[1]+pos[1]], val);
         }, this);
     }
+};
+
+exports.t = function(){
+    return (new Date()).getTime(); 
+};
+
+//mod js objects
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
 };

@@ -10,7 +10,6 @@ Controller.prototype.act = function(world, events){
     return true;
 };
 
-
 var PlayerController = exports.PlayerController = function(){
       PlayerController.superConstructor.apply(this, []);
 };
