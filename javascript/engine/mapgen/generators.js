@@ -16,13 +16,20 @@ var Generator = exports.Generator = function(options){
     Generator.superConstructor.apply(this, [options]);
 };
 
+
 gamejs.utils.objects.extend(Generator, pieces.Piece);
+
+Generator.prototype.reset = function(){
+    this.children = [];
+    this.walls = new utils.Array2D(this.size, true);   
+};
+
 
 Generator.prototype.get_map = function(){
     return new Map({
         size: this.size,
         walls: this.walls
-    })  
+    });  
 };
 
 Generator.prototype.generate = function(){
@@ -41,10 +48,11 @@ Generator.prototype.fits = function(piece, position){
     return true; 
 };
 
-Generator.prototype.join = function(piece1, piece1_exit, piece2){
+Generator.prototype.join = function(piece1, piece2_exit, piece2){
+
       //find a matching piece2 exit
-      var piece2_exit = this.rnd.choose(piece2.perimeter_by_facing(constants.INVERSE[piece1_exit[1]]));
-      
+      var piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
+
       //piece 2 exit global position
       var piece2_exit_pos = piece1.global_pos(piece1_exit[0]);
       
@@ -70,6 +78,14 @@ Generator.prototype.join = function(piece1, piece1_exit, piece2){
       
 };
 
+Generator.prototype.valid_choices = function(choices){
+    var retv = [];
+    choices.forEach(function(child){
+        if((child.exits.length < child.max_exits) && child.perimeter.length) retv.push(child);
+    }, this);
+    return retv;
+};
+
 var Dungeon = exports.Dungeon = function(options){
     Dungeon.superConstructor.apply(this, [options]);
     
@@ -77,33 +93,44 @@ var Dungeon = exports.Dungeon = function(options){
         size: utils.required,
         min_room_size:[2, 2],
         max_room_size:[6, 6],
-        max_corridor_length:6
+        max_corridor_length:6,
+        min_corridor_length:2,
+        max_exits_per_room: 4,
+        corridor_density: 1
     });
+    
+    this.rooms = [];
+    this.corridors = [];
     
 };
 
 gamejs.utils.objects.extend(Dungeon, Generator);
 
-Dungeon.prototype.add_room = function(){
-    console.log('adding room..');
+Dungeon.prototype.add_room = function(room, exit){
+    console.log('adding a piece..');
     var t = utils.t();
-    //choose a random room
-    var old_room = this.rnd.choose(this.children);
     
-     
+    //get a list of random pieces to choose from 
+    
+       
     var exit, room;
     var ok = false;
     var i = 0;
     while(!ok){
-        //choose a random exit for this room
-        exit = this.rnd.choose(old_room.perimeter); 
-        room = this.new_room();
-        ok=this.join(old_room, exit, room);
-        if(i++ ==100){
-            console.log('sorry, couldnt fit a piece :( :( :()))')
+        
+        choices = this.valid_choices(this.children);
+        if(choices){
+            var old_room = this.rnd.choose(choices);
+            //choose a random exit for this room
+            if(!exit) exit = this.rnd.choose(room.perimeter); 
+            ok=this.join(old_room, exit, room);
+        }
+        if(i++ == 100){
+            console.log('sorry, couldnt fit a piece :(')
             break;
         }
     }
+    return ok;
     console.log('done. '+(utils.t()-t));
     
     
@@ -111,15 +138,36 @@ Dungeon.prototype.add_room = function(){
 
 Dungeon.prototype.new_room = function(){
     return new pieces.Room({
-        size: this.rnd.vec(this.min_room_size, this.max_room_size)
+        size: this.rnd.vec(this.min_room_size, this.max_room_size),
+        max_exits: this.max_exits_per_room
     })
-}
+};
+
+Dungeon.prototype.new_corridor = function(){
+    return new pieces.Corridor({
+       length: this.rnd.int(this.min_corridor_length, this.max_corridor_length),
+       facing: this.rnd.choose([0, 90, 180, 270])
+    });  
+};
 
 Dungeon.prototype.generate = function(no_rooms){    
     //place first room in the middle
+    
     var room = this.new_room();
-    console.log(this.start_pos);
     this.add_piece(room, this.center_pos(room));
     this.start_pos = room.global_pos([1, 1]);
-    for(var i =1;i<no_rooms;i++) this.add_room();
+    var no_corridors = parseInt(this.corridor_density * no_rooms);
+    console.log(no_corridors);
+    var k;
+    while(no_corridors||no_rooms){
+        k=this.rnd.int(1, no_corridors+no_rooms);
+        if(k<=no_corridors){
+            var corridor = this.new_corridor();
+            this.add_room(corridor, corridor.perimeter[0]);
+            no_corridors--;
+        }  else {
+            this.add_room(this.new_room());
+            no_rooms--;
+        }
+    } 
 };

@@ -1,13 +1,17 @@
 var utils = require('../utils');
 var gamejs = require('gamejs');
 
+
+var next_piece_id = 0;
+
 var Piece = exports.Piece = function(options){
     utils.process_options(this, options, {
         size: utils.required,
         position: [0, 0],
         parent: null,
+        max_exits: 10
     });
-    
+    this.id = next_piece_id ++;
     this.walls = new utils.Array2D(this.size, true);  
     this.perimeter = [];
     this.exits = [];
@@ -81,7 +85,7 @@ Piece.prototype.add_exit = function(exit){
 };
 
 Piece.prototype.center_pos = function(piece){
-    //returns pos of piece at which it would be centered inside this piece. OK??
+    //returns pos of 'piece' at which it would be centered inside this piece. OK??
     return [parseInt(this.size[0]/2 - piece.size[0]/2), parseInt(this.size[1]/2 - piece.size[1]/2)]; 
 };
 
@@ -100,3 +104,29 @@ var Room = exports.Room = function(options){
 };
 
 gamejs.utils.objects.extend(Room, Piece);
+
+var Corridor = exports.Corridor = function(options){
+    utils.process_options(this, options, {
+       length: 2,
+       facing: 0,
+    });
+    options.max_exits = 4;
+    options.size = (this.facing == 0 || this.facing == 180) ? [1, this.length] : [this.length, 1];
+    
+    Corridor.superConstructor.apply(this, [options]);
+    
+    this.perimeter = [];
+    
+    var w = this.size[0]-1;
+    var h = this.size[1]-1;
+    
+    //special perimeter: allow only 4 exit points, to keep this corridor corridor-like..
+    if(this.facing==0) this.perimeter = [        [[1, h], 180], [[0, 1],  270], [[2, 1],    90], [[1, 0],    0] ];
+    else if(this.facing==90) this.perimeter = [   [[0, 1], 270], [[w-1, 0],  0], [[w-1, 2], 180], [[w, 1],   90] ];
+    else if(this.facing==180) this.perimeter = [ [[1, 0],   0], [[2, h-1], 90], [[0, h-1], 270], [[1, h],  180] ];
+    else if(this.facing==270) this.perimeter = [ [[w, 1],  90], [[1, 2],  180], [[1, 0],     0], [[0, 1],  270] ];
+     
+};
+
+gamejs.utils.objects.extend(Corridor, Room);
+

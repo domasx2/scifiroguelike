@@ -5,10 +5,14 @@ var creatures = require('./creatures');
 var GameScene = exports.GameScene = function(options){
     //var map = engine.maps.from_tmx('./public/maps/testmap.tmx');
     
-    var gen = new engine.mapgen.generators.Dungeon({
-       size: [100, 100]
+    var gen = this.gen = new engine.mapgen.generators.Dungeon({
+       size: [100, 100],
+       max_corridor_length:4,
+       min_corridor_length:2,
+       corridor_density: 0.4,
+       max_exits_per_room:3
     });
-    gen.generate(30);
+    gen.generate(15);
 
     var world  = new engine.World({
         'map': gen.get_map()
@@ -37,12 +41,10 @@ gamejs.utils.objects.extend(GameScene, engine.scene.WorldScene);
 GameScene.prototype.handle_events = function(events){
     events.forEach(function(event){
         if((event.type === gamejs.event.KEY_DOWN)&&(event.key == gamejs.event.K_SPACE)){
-            var gen = new engine.mapgen.generators.Dungeon({
-               size: [100, 100]
-            });
-            gen.generate(20);
-            this.world.map = gen.get_map();
-            this.protagonist.teleport(gen.start_pos);
+            this.gen.reset();
+            this.gen.generate(15);
+            this.world.map = this.gen.get_map();
+            this.protagonist.teleport(this.gen.start_pos);
         }
     }, this);
 };

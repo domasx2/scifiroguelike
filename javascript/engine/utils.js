@@ -12,6 +12,7 @@ exports.process_options = function(object, options, default_options){
            var def = default_options[key];
            if(def == required) throw 'option ' + key + ' required!';
            object[key] = def;
+           options[key] = def;
        }        
     });
     
