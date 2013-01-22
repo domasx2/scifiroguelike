@@ -64,6 +64,7 @@ Piece.prototype.remove_perimeter = function(intersecting_rect){
 
 
 Piece.prototype.add_piece = function(piece, position){
+    for(var i=0;i<this.children.length;i++) if(this.children[i].id==piece.id) return;
     piece.parent = this;
     if(position) piece.position = position;
     this.children.push(piece);
@@ -81,6 +82,7 @@ Piece.prototype.paste_in = function(piece){
 
 Piece.prototype.add_exit = function(exit){
       this.walls.set(exit[0], false);
+      if(this.parent)this.parent.paste_in(this);
       this.exits.push(exit);
 };
 
@@ -93,13 +95,30 @@ Piece.prototype.center_pos = function(piece){
 var Room = exports.Room = function(options){
     this.room_size = options.size
     options.size = [options.size[0]+2, options.size[1]+2];
+    
+    utils.process_options(this, options, {
+         simetric: false //for lack of better word.. i  
+    });
+    
     Room.superConstructor.apply(this, [options]);
     this.walls.square([1, 1], this.room_size, false, true);
 
-    this.add_perimeter([1, 0], [this.size[0]-2, 0], 0);
-    this.add_perimeter([0, 1], [0, this.size[1]-2], 270);
-    this.add_perimeter([1, this.size[1]-1], [this.size[0]-2, this.size[1]-1], 180);
-    this.add_perimeter([this.size[0]-1, 1], [this.size[0]-1, this.size[1]-2], 90);
+    if(!this.simetric){ //any point at any wall can be exit
+        this.add_perimeter([1, 0], [this.size[0]-2, 0], 0);
+        this.add_perimeter([0, 1], [0, this.size[1]-2], 270);
+        this.add_perimeter([1, this.size[1]-1], [this.size[0]-2, this.size[1]-1], 180);
+        this.add_perimeter([this.size[0]-1, 1], [this.size[0]-1, this.size[1]-2], 90);
+    }else{ //only middle of each wall can be exit
+        var w = parseInt(Math.floor(this.size[0]/2));
+        var h = parseInt(Math.floor(this.size[1]/2));
+        this.perimeter = [
+            [[w, 0], 0],
+            [[this.size[0]-1, h], 90],
+            [[w, this.size[1]-1], 180],
+            [[0, h], 270]
+        ];
+        
+    }
     
 };
 

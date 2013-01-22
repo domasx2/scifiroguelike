@@ -1,7 +1,20 @@
 var gamejs = require('gamejs');
+var constants = require('./constants');
 
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
+
+exports.shift = function(position, direction){
+    return [position[0]+constants.MOVE_MOD[direction][0], position[1]+constants.MOVE_MOD[direction][1]];
+};
+
+exports.shift_left = function(position, direction){
+    return [position[0]+constants.MOVE_MOD_LEFT[direction][0], position[1]+constants.MOVE_MOD_LEFT[direction][1]];
+};
+
+exports.shift_right = function(position, direction){
+    return [position[0]+constants.MOVE_MOD_RIGHT[direction][0], position[1]+constants.MOVE_MOD_RIGHT[direction][1]];
+};
 
 exports.process_options = function(object, options, default_options){
     

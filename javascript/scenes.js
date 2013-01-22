@@ -9,8 +9,10 @@ var GameScene = exports.GameScene = function(options){
        size: [100, 100],
        max_corridor_length:4,
        min_corridor_length:2,
-       corridor_density: 0.4,
-       max_exits_per_room:3
+       corridor_density: 0.5,
+       max_exits_per_room:3,
+       simetric_rooms: true,
+       interconnects: 2
     });
     gen.generate(15);
 

@@ -48,20 +48,7 @@ Generator.prototype.fits = function(piece, position){
     return true; 
 };
 
-Generator.prototype.join = function(piece1, piece2_exit, piece2){
-
-      //find a matching piece2 exit
-      var piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
-
-      //piece 2 exit global position
-      var piece2_exit_pos = piece1.global_pos(piece1_exit[0]);
-      
-      //piece 2 position
-      var piece2_pos = [piece2_exit_pos[0]-piece2_exit[0][0], 
-                        piece2_exit_pos[1]-piece2_exit[0][1]];
-                        
-      if(!this.fits(piece2, piece2_pos)) return false;  
-                      
+Generator.prototype.join_exits = function(piece1, piece1_exit, piece2, piece2_exit){
       piece1.add_exit(piece1_exit);
       piece2.add_exit(piece2_exit);
       
@@ -72,8 +59,27 @@ Generator.prototype.join = function(piece1, piece2_exit, piece2){
       var isc = piece1.rect().clip(piece2.rect);
       piece1.remove_perimeter(new gamejs.Rect(piece1.local_pos([isc.x, isc.y]), [isc.width, isc.height]));
       piece2.remove_perimeter(new gamejs.Rect(piece2.local_pos([isc.x, isc.y]), [isc.width, isc.height]));
+};
+
+Generator.prototype.join = function(piece1, piece2_exit, piece2){
+
+      //find a matching piece2 exit, if not supplied
+      piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
+
+      //piece 2 exit global position
+      var piece2_exit_pos = piece1.global_pos(piece1_exit[0]);
       
+      //piece 2 position
+      var piece2_pos = [piece2_exit_pos[0]-piece2_exit[0][0], 
+                        piece2_exit_pos[1]-piece2_exit[0][1]];
+                        
+      if(!this.fits(piece2, piece2_pos)){
+          console.log('didnt fit');
+          return false;
+      };  
+      this.join_exits(piece1, piece1_exit, piece2, piece2_exit);          
       this.add_piece(piece2, piece2_pos);
+      
       return true;
       
 };
@@ -96,7 +102,9 @@ var Dungeon = exports.Dungeon = function(options){
         max_corridor_length:6,
         min_corridor_length:2,
         max_exits_per_room: 4,
-        corridor_density: 1
+        corridor_density: 0.5, // corridors per room
+        simetric_rooms: false,
+        interconnects: 1 //additional connections to make circular paths. not guaranteed
     });
     
     this.rooms = [];
@@ -139,7 +147,8 @@ Dungeon.prototype.add_room = function(room, exit){
 Dungeon.prototype.new_room = function(){
     return new pieces.Room({
         size: this.rnd.vec(this.min_room_size, this.max_room_size),
-        max_exits: this.max_exits_per_room
+        max_exits: this.max_exits_per_room,
+        simetric: this.simetric_rooms
     })
 };
 
@@ -149,6 +158,67 @@ Dungeon.prototype.new_corridor = function(){
        facing: this.rnd.choose([0, 90, 180, 270])
     });  
 };
+
+
+
+Dungeon.prototype.add_interconnect = function(){
+    //hash all perimeters
+    var perims = {};
+    var hash;
+    var exit, p;
+    this.children.forEach(function(child){
+        if(child.exits.length < child.max_exits){
+            child.perimeter.forEach(function(exit){
+                 p = child.global_pos(exit[0]);
+                 hash = p[0]+'_'+p[1];
+                 perims[hash]=[exit, child];
+            });
+        };
+    });
+    
+    
+
+    //search each room for possible interconnect
+    var room, k,  mod,  length, g, corridor, room2;
+    for(var i=this.children.length-1;i--;i>=0){
+        room = this.children[i];
+        if(room.exits.length < room.max_exits){
+            for(var k=0;k<room.perimeter.length;k++){
+                exit = room.perimeter[k];
+                p = room.global_pos(exit[0]);
+                length = -1;
+                while(length++ <= this.max_corridor_length){
+                    p=utils.shift(p, exit[1]);
+                    if(!this.walls.get(p) ||
+                       !this.walls.get(utils.shift_left(p, exit[1])) ||
+                       !this.walls.get(utils.shift_right(p, exit[1]))) break;
+                    
+                    hash = p[0]+'_'+p[1];
+                    if(perims[hash]){
+                        console.log('found candidate');
+                        this.start_pos=p;
+                        corridor = new pieces.Corridor({
+                            'length':length,
+                            facing:exit[1]
+                        });
+                        room2=perims[hash][1];
+                        if(this.join(room, corridor.perimeter[0], corridor, exit)){
+                           this.join_exits(room2, perims[hash][0], corridor, corridor.perimeter[corridor.perimeter.length-1]);
+                           return true;
+                        } else{
+                            return false;
+                        }
+                        
+                    }
+                   
+                }
+                
+            }; 
+        };
+    }
+    return false;  
+};
+
 
 Dungeon.prototype.generate = function(no_rooms){    
     //place first room in the middle
@@ -170,4 +240,7 @@ Dungeon.prototype.generate = function(no_rooms){
             no_rooms--;
         }
     } 
+    for(k=0;k<this.interconnects;k++){
+        if(this.add_interconnect()) console.log('found interconnect!');
+    }
 };
