@@ -8,7 +8,8 @@ Game.prototype.init = function(settings,  resources){
     this.sprite_defs = resources.sprites;
     this.settings = settings;
     this.cache = new (require('./cache').Cache)(resources); //workaround circular ref
+    this.scene = null;
 }
 
-exports.game = new Game();
+exports.game = window.game = new Game();
 

@@ -24,7 +24,12 @@ View.prototype.move_offset_x = function(x){
 };
 
 View.prototype.move_offset_y = function(y){ 
-    this.set_offset_x(this.offset[1]+y);
+    this.set_offset_y(this.offset[1]+y);
+};
+
+View.prototype.center_of_map = function(){
+    this.set_offset_x((this.world.map.size_px[0]*this.zoom)/2 - this.width/3);
+    this.set_offset_y((this.world.map.size_px[1]*this.zoom)/2 - this.height/3); 
 };
 
 View.prototype.set_offset_x = function(x){

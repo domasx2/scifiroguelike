@@ -74,7 +74,6 @@ Generator.prototype.join = function(piece1, piece2_exit, piece2){
                         piece2_exit_pos[1]-piece2_exit[0][1]];
                         
       if(!this.fits(piece2, piece2_pos)){
-          console.log('didnt fit');
           return false;
       };  
       this.join_exits(piece1, piece1_exit, piece2, piece2_exit);          
@@ -103,8 +102,9 @@ var Dungeon = exports.Dungeon = function(options){
         min_corridor_length:2,
         max_exits_per_room: 4,
         corridor_density: 0.5, // corridors per room
-        simetric_rooms: false,
-        interconnects: 1 //additional connections to make circular paths. not guaranteed
+        symmetric_rooms: false,
+        interconnects: 1, //additional connections to make circular paths. not guaranteed
+        max_interconnect_length:10
     });
     
     this.rooms = [];
@@ -119,8 +119,7 @@ Dungeon.prototype.add_room = function(room, exit){
     var t = utils.t();
     
     //get a list of random pieces to choose from 
-    
-       
+
     var exit, room;
     var ok = false;
     var i = 0;
@@ -148,7 +147,7 @@ Dungeon.prototype.new_room = function(){
     return new pieces.Room({
         size: this.rnd.vec(this.min_room_size, this.max_room_size),
         max_exits: this.max_exits_per_room,
-        simetric: this.simetric_rooms
+        symmetric: this.symmetric_rooms
     })
 };
 
@@ -176,8 +175,6 @@ Dungeon.prototype.add_interconnect = function(){
         };
     });
     
-    
-
     //search each room for possible interconnect
     var room, k,  mod,  length, g, corridor, room2;
     for(var i=this.children.length-1;i--;i>=0){
@@ -187,7 +184,7 @@ Dungeon.prototype.add_interconnect = function(){
                 exit = room.perimeter[k];
                 p = room.global_pos(exit[0]);
                 length = -1;
-                while(length++ <= this.max_corridor_length){
+                while(length++ <= this.max_interconnect_length){
                     p=utils.shift(p, exit[1]);
                     if(!this.walls.get(p) ||
                        !this.walls.get(utils.shift_left(p, exit[1])) ||

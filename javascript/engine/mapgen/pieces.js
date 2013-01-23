@@ -97,13 +97,13 @@ var Room = exports.Room = function(options){
     options.size = [options.size[0]+2, options.size[1]+2];
     
     utils.process_options(this, options, {
-         simetric: false //for lack of better word.. i  
+         symmetric: false //for lack of better word.. i  
     });
     
     Room.superConstructor.apply(this, [options]);
     this.walls.square([1, 1], this.room_size, false, true);
 
-    if(!this.simetric){ //any point at any wall can be exit
+    if(!this.symmetric){ //any point at any wall can be exit
         this.add_perimeter([1, 0], [this.size[0]-2, 0], 0);
         this.add_perimeter([0, 1], [0, this.size[1]-2], 270);
         this.add_perimeter([1, this.size[1]-1], [this.size[0]-2, this.size[1]-1], 180);

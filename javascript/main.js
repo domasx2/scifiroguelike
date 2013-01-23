@@ -1,7 +1,8 @@
 var gamejs = require('gamejs');
 var engine = require('./engine');
 var game = engine.game;
-var GameScene  = require('./scenes').GameScene;
+var GameScene  = require('./scenes/game').GameScene;
+var MapGenDemoScene = require('./scenes/mapgen_demo').MapGenDemoScene;
 var resources = require('./resources');
 var settings = require('./settings');
 
@@ -15,12 +16,15 @@ gamejs.ready(function() {
     display._context.mozImageSmoothingEnabled = false;
     display._context.webkitImageSmoothingEnabled = false;
     
-    var scene = new GameScene({});
+    if(window.mapgendemo) game.scene = new MapGenDemoScene({});
+    else game.scene = new GameScene({});
 
     var tick = function(deltams) {
-        scene.update(deltams, gamejs.event.get());
-        display.clear();
-        scene.draw(display);
+        if(game.scene){
+            game.scene.update(deltams, gamejs.event.get());
+            display.clear();
+            game.scene.draw(display);
+        }
     };
 
     gamejs.time.fpsCallback(tick, this, settings.FPS);

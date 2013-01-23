@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GameJS Application</title>
+<!-- Styling -->
+    <style type=text/css>
+        body{
+           background:#fff;
+           color:#222;
+           margin:1em 0 2em 6em;
+           padding:0;
+        }
+        #gjs-loader {
+            width: 50%;
+            height: 50%;
+            background: url('./public/ajax-loader.gif');
+        }
+        
+        #gjs-canvas {
+        	border: solid 1px gray;
+        	image-rendering: optimizeSpeed; 
+		    image-rendering: -moz-crisp-edges; 
+		    image-rendering: -webkit-optimize-contrast;
+		    image-rendering: optimize-contrast;        
+		    -ms-interpolation-mode: nearest-neighbor;
+		        	
+        }
+        
+        .options {
+        	display:inline-block;
+        }
+        .options li {
+        	padding:3px;
+        	list-style:none;
+        }
+        
+        .options input {
+        	width:5em;
+        }
+        
+        .options input[type="button"]{
+        	padding: 5px;
+        }
+        
+        .options li label {
+        	display:inline-block;
+        	width:200px;
+        }
+        
+    </style>
+<!-- Start javascript/main.js -->
+    <script src="./public/yabble.js"></script>
+    <script src="./public/gamejs.min.js"></script>
+    <script>
+    	window.mapgendemo=true;
+        require.setModuleRoot('./javascript/');
+        require.run('main')
+    </script>
+</head>
+<!-- Html -->
+<body>
+    <div class="container">
+        <div id="gjs-loader">
+         Loading...
+        </div>
+        
+        <canvas id="gjs-canvas"></canvas>
+        <div class="options">
+        	<ul>
+        		<li>
+        			<label>Map size:</label>
+        			<input id="map_size_x" value="100">
+        			<input id="map_size_y" value="100">
+        		</li>
+        		<li>
+        			<label>Number of rooms:</label>
+        			<input id="rooms" value="30">
+        		</li>
+        		<li>
+        			<label>Min room size:</label>
+        			<input id="min_room_size_x" value="2">
+        			<input id="min_room_size_y" value="2">
+        		</li>
+        		<li>
+        			<label>Max room size:</label>
+        			<input id="max_room_size_x" value="6">
+        			<input id="max_room_size_y" value="6">
+        		</li>
+        		<li>
+        			<label>Max exits per rooom:</label>
+        			<input id="max_exits_per_room" value="4">
+        		</li>
+        		<li>
+        			<label>Symmetric rooms:</label>
+        			<input type="checkbox" id="symmetric_rooms" value="true" checked="checked">
+        		</li>
+        		<li>
+        			<label>Corridor density:</label>
+        			<input id="corridor_density" value="0.5">
+        		</li>
+        		<li>
+        			<label>Min corridor length:</label>
+        			<input id="min_corridor_length" value="2">
+        		</li>
+        		<li>
+        			<label>Max corridor length:</label>
+        			<input id="max_corridor_length" value="6">
+        		</li>
+        		<li>
+        			<label>Number of interconnects:</label>
+        			<input id="interconnects" value="2">
+        		</li>
+        		<li>
+        			<label>Max interconnect length:</label>
+        			<input id="max_interconnect_length" value="100">
+        		</li>
+        		<li>
+        			<input type="button" onclick="window.game.scene.load_form()" value="generate">
+        		</li>
+        	</ul>       	
+        </div>
+        <p>
+        Powered by <a href="http://gamejs.org">GameJs</a>.
+        </p>
+    </div>
+</body>
+</html>
