@@ -61,10 +61,10 @@ Generator.prototype.join_exits = function(piece1, piece1_exit, piece2, piece2_ex
       piece2.remove_perimeter(new gamejs.Rect(piece2.local_pos([isc.x, isc.y]), [isc.width, isc.height]));
 };
 
-Generator.prototype.join = function(piece1, piece2_exit, piece2){
+Generator.prototype.join = function(piece1, piece2_exit, piece2, piece1_exit){
 
       //find a matching piece2 exit, if not supplied
-      piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
+      if(!piece1_exit) piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
 
       //piece 2 exit global position
       var piece2_exit_pos = piece1.global_pos(piece1_exit[0]);
@@ -115,7 +115,6 @@ var Dungeon = exports.Dungeon = function(options){
 gamejs.utils.objects.extend(Dungeon, Generator);
 
 Dungeon.prototype.add_room = function(room, exit){
-    console.log('adding a piece..');
     var t = utils.t();
     
     //get a list of random pieces to choose from 
@@ -133,12 +132,10 @@ Dungeon.prototype.add_room = function(room, exit){
             ok=this.join(old_room, exit, room);
         }
         if(i++ == 100){
-            console.log('sorry, couldnt fit a piece :(')
             break;
         }
     }
     return ok;
-    console.log('done. '+(utils.t()-t));
     
     
 };
@@ -192,8 +189,6 @@ Dungeon.prototype.add_interconnect = function(){
                     
                     hash = p[0]+'_'+p[1];
                     if(perims[hash]){
-                        console.log('found candidate');
-                        this.start_pos=p;
                         corridor = new pieces.Corridor({
                             'length':length,
                             facing:exit[1]
@@ -224,7 +219,6 @@ Dungeon.prototype.generate = function(no_rooms){
     this.add_piece(room, this.center_pos(room));
     this.start_pos = room.global_pos([1, 1]);
     var no_corridors = parseInt(this.corridor_density * no_rooms);
-    console.log(no_corridors);
     var k;
     while(no_corridors||no_rooms){
         k=this.rnd.int(1, no_corridors+no_rooms);
@@ -237,7 +231,5 @@ Dungeon.prototype.generate = function(no_rooms){
             no_rooms--;
         }
     } 
-    for(k=0;k<this.interconnects;k++){
-        if(this.add_interconnect()) console.log('found interconnect!');
-    }
+    for(k=0;k<this.interconnects;k++) this.add_interconnect();
 };

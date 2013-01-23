@@ -11,7 +11,7 @@ var GameScene = exports.GameScene = function(options){
        min_corridor_length:2,
        corridor_density: 0.5,
        max_exits_per_room:3,
-       symmetric_rooms: true,
+       symmetric_rooms: false,
        interconnects: 2
     });
     gen.generate(15);
