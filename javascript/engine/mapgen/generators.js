@@ -171,7 +171,7 @@ Dungeon.prototype.add_interconnect = function(){
             });
         };
     });
-    
+    console.log(perims);
     //search each room for possible interconnect
     var room, k,  mod,  length, g, corridor, room2;
     for(var i=this.children.length-1;i--;i>=0){
@@ -181,14 +181,13 @@ Dungeon.prototype.add_interconnect = function(){
                 exit = room.perimeter[k];
                 p = room.global_pos(exit[0]);
                 length = -1;
-                while(length++ <= this.max_interconnect_length){
-                    p=utils.shift(p, exit[1]);
+                while(length <= this.max_interconnect_length){
                     if(!this.walls.get(p) ||
                        !this.walls.get(utils.shift_left(p, exit[1])) ||
                        !this.walls.get(utils.shift_right(p, exit[1]))) break;
                     
                     hash = p[0]+'_'+p[1];
-                    if(perims[hash]){
+                    if(perims[hash] && perims[hash][1].id!=room.id){
                         corridor = new pieces.Corridor({
                             'length':length,
                             facing:exit[1]
@@ -202,6 +201,8 @@ Dungeon.prototype.add_interconnect = function(){
                         }
                         
                     }
+                    p=utils.shift(p, exit[1]);
+                    length++;
                    
                 }
                 
