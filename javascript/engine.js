@@ -9,8 +9,6 @@ exports.Map = exports.maps.Map;
 exports.World = require('./engine/world').World;
 
 exports.objects = require('./engine/objects');
-exports.Object = exports.objects.Object;
-exports.Creature = exports.objects.Creature;
 
 exports.scene = require('./engine/scene');
 
@@ -19,7 +17,6 @@ exports.Sprite = exports.sprite.Sprite;
 exports.AnimatedSprite = exports.sprite.AnimatedSprite;
 
 exports.controllers = require('./engine/controllers');
-exports.Controller = exports.controllers.Controller;
 
 exports.constants = require('./engine/constants');
 

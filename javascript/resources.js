@@ -34,7 +34,7 @@ exports.tilesheets = {
  
 exports.sprites = {
     //PROTAGONIST
-    'protagonist':{
+    'protagonist_static':{
         'type':'static',
         'angle_step': 90,
         'spritesheet_url':'./public/img/characters/protagonist.png',
@@ -49,7 +49,7 @@ exports.sprites = {
     },
     
     //ENGINEER
-    'engineer':{
+    'engineer_static':{
         'type':'static',
         'angle_step': 90,
         'spritesheet_url':'./public/img/characters/engineer.png',

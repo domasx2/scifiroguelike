@@ -54,6 +54,7 @@ PersistentEventFrame.prototype.update = function(deltams){
 
 var Event = exports.Event = function(options){  
     utils.process_options(this, options, {
+        owner: utils.required,
         duration: 0,   
     });  
     this.age = 0;

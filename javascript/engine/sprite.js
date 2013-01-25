@@ -57,7 +57,10 @@ AnimatedSprite.prototype.update = function(deltams){
 exports.new_sprite = function(name, options){
     if(!options) options = new Object();
     var definition = game.sprite_defs[name];
-    if(!definition) throw 'Undefined sprite: '+ name;
+    if(!definition){
+        console.log('Undefined sprite: '+ name);
+        return null;
+    }
    
     var cls;
     if(definition.type=='static') cls = Sprite;

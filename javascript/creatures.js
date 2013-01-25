@@ -1,20 +1,14 @@
 var engine = require('./engine');
-var controllers = require('./controllers');
 
-var creatures = {
-    'engineer':{
-        'sprite':'engineer',
-        'controller':'roam'
-    }
-}
+engine.game.objectmanager.c('engineer', {
+    'sprite_name':'engineer',
+    'team':'bandit',
+    '_requires':'creature'
+});
 
-
-exports.new = function(name, position, angle){
-    var def = creatures[name];
-    return new engine.Creature({
-        sprite: def.sprite,
-        position: position,
-        angle:angle,
-        controller: controllers.new(def.controller)
-    });
-}
+engine.game.objectmanager.c('protagonist', {
+    'sprite_name':'protagonist',
+    'team':'player',
+    'act':engine.controllers.player_move,
+    '_requires':'creature'
+});

@@ -2,93 +2,85 @@ var gamejs = require('gamejs');
 var utils = require('./utils');
 var sprite = require('./sprite');
 var game = require('./game').game;
+var controllers = require('./controllers');
 
-var _next_object_id=0;
-
-var Object = exports.Object = function(options){
-    this.id = _next_object_id++;
-    utils.process_options(this, options, {
-       sprite: utils.required,
-       controller: null,
-       solid: false,     //can other object pass through
-       position: [0, 0], //in tiles
-       angle: 0          //facing, angle, 0 faces top, 90 right, 180 bot,..
-    });
+var Object = {
     
-    this.sprites = {
-        static: sprite.new_sprite(this.sprite)
-    }    
+    //PROPERTIES
+    'position':[0, 0],
+    'angle':0,
+    'sprite_name':'', //base name for sprite
+    'sprite':'static', //currently active sprite
+    'threadable':false,      //can it be stood/waled on?
+    'transparent':true, //can it be seen through?
+    'solid': false,     //can projectiles pass through?
     
-    this.active_sprite = this.sprites.static;
-    this.snap_sprite();
-};
-
-Object.prototype.set_angle = function(angle){
-      this.angle = angle;
-      if(this.active_sprite) this.active_sprite.angle = angle;
-};
-
-Object.prototype.position_mod = function(mod){
-    return [this.position[0]+mod[0], this.position[1]+mod[1]];  
-};
-
-Object.prototype.position_px = function(){
-    return [this.position[0] * game.settings.TILE_WIDTH, this.position[1] * game.settings.TILE_WIDTH];  
-};
-
-Object.prototype.draw = function(view){
-    if(this.active_sprite) this.active_sprite.draw(view);
-};
-
-Object.prototype.update = function(deltams){
-    if(this.active_sprite) this.active_sprite.update(deltams);
-};
-
-Object.prototype.teleport = function(position){
-    this.position = position;
-    this.snap_sprite();
-};
-
-Object.prototype.teleport_relative = function(delta_position){
-    this.teleport([this.position[0]+delta_position[0], this.position[1]+delta_position[1]]);
-};
-
-Object.prototype.set_sprite = function(type, snap){
-    if(type=='') type='static';
-    var prev = this.active_sprite;
-    this.active_sprite = this.sprites[type];
-    this.active_sprite.position = prev.position.slice(0);
-    this.active_sprite.angle = prev.angle;
-    this.active_sprite.reset();
-    if(snap) this.snap_sprite();
-};
-
-Object.prototype.snap_sprite = function(){
-    if(this.active_sprite){
-        this.active_sprite.position = this.position_px();
-        this.active_sprite.angle = this.angle;
-    }  
-};
-
-var Creature = exports.Creature = function(options){
+    //METHODS
+    'init':function(world){
+        this.world = world;
+        this._sprites = {};
+        this.set_sprite(this.sprite, true);   
+    },
     
-    if(options.solid === undefined) options.solid = true;
+    'act': controllers.do_nothing,
     
-    Creature.superConstructor.apply(this, [options]);
+    'set_angle':function(angle){
+        this.angle = angle;
+        if(this.active_sprite) this.active_sprite.angle = angle;
+    },
     
-    utils.process_options(this, options, {
-       controller: utils.required,
-       max_health: 100,
-       health: null
-    });
+    'get_position_px': function(){
+        return [this.position[0] * game.settings.TILE_WIDTH, this.position[1] * game.settings.TILE_WIDTH];  
+    },
     
-    this.controller.creature = this;
+    'draw': function(view){
+        if(this.active_sprite) this.active_sprite.draw(view);
+    },
     
-    this.sprites.move = sprite.new_sprite(this.sprite + '_move');
+    'update': function(deltams){
+        if(this.active_sprite) this.active_sprite.update(deltams);
+    },
+
+    'teleport':  function(position){
+        this.position = position;
+        this.snap_sprite();
+    },
     
-    if(this.health == null) this.health = this.max_health;
+    'teleport_relative':  function(delta_position){
+        this.teleport([this.position[0]+delta_position[0], this.position[1]+delta_position[1]]);
+    },
+    
+    'set_sprite': function(type, snap){
+        if(type=='') type='static';
+        var prev = this.active_sprite;
+        if(!this._sprites[type]){
+            this._sprites[type] = sprite.new_sprite(this.sprite_name+'_'+type);
+        }
+        this.active_sprite = this._sprites[type];
+        if(!this.active_sprite) return;
+        this.active_sprite.position = prev? prev.position.slice(0): this.get_position_px();
+        this.active_sprite.angle = prev? prev.angle : this.angle;
+        this.active_sprite.reset();
+        if(snap) this.snap_sprite();
+    },
+    
+    'snap_sprite': function(){
+        if(this.active_sprite){
+            this.active_sprite.position = this.get_position_px();
+            this.active_sprite.angle = this.angle;
+        }  
+    }
 };
 
-gamejs.utils.objects.extend(Creature, Object);
+game.objectmanager.c('object', Object);
 
+var Creature = {
+    'max_health':100,
+    'health':100,
+    'team':'neutral',
+    
+    'act':controllers.roam,
+    '_requires':'object'
+}
 
+game.objectmanager.c('creature', Creature);

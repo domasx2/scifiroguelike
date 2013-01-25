@@ -4,6 +4,10 @@ var constants = require('./constants');
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
 
+exports.mod = function(position, mod){
+    return [position[0]+mod[0], position[1]+mod[1]];  
+};
+
 exports.shift = function(position, direction){
     return [position[0]+constants.MOVE_MOD[direction][0], position[1]+constants.MOVE_MOD[direction][1]];
 };

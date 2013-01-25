@@ -171,34 +171,50 @@ Dungeon.prototype.add_interconnect = function(){
             });
         };
     });
-    console.log(perims);
+
     //search each room for possible interconnect
     var room, k,  mod,  length, g, corridor, room2;
     for(var i=this.children.length-1;i--;i>=0){
         room = this.children[i];
+        //if room has exits available
         if(room.exits.length < room.max_exits){
+            
+            //for every possible exit
             for(var k=0;k<room.perimeter.length;k++){
                 exit = room.perimeter[k];
                 p = room.global_pos(exit[0]);
                 length = -1;
+                
+                //try advancing the tunnel further
                 while(length <= this.max_interconnect_length){
+                    
+                    //check if space is not occupied
                     if(!this.walls.get(p) ||
                        !this.walls.get(utils.shift_left(p, exit[1])) ||
                        !this.walls.get(utils.shift_right(p, exit[1]))) break;
                     
+                    //check if this tile is possible exit for another room
                     hash = p[0]+'_'+p[1];
                     if(perims[hash] && perims[hash][1].id!=room.id){
-                        corridor = new pieces.Corridor({
-                            'length':length,
-                            facing:exit[1]
-                        });
+                        
                         room2=perims[hash][1];
-                        if(this.join(room, corridor.perimeter[0], corridor, exit)){
-                           this.join_exits(room2, perims[hash][0], corridor, corridor.perimeter[corridor.perimeter.length-1]);
-                           return true;
-                        } else{
-                            return false;
-                        }
+                        //if exits do not directly join together, add a corridor inbetween
+                        if(length > -1){
+                            corridor = new pieces.Corridor({
+                                'length':length,
+                                facing:exit[1]
+                            });
+                            
+                            if(this.join(room, corridor.perimeter[0], corridor, exit)){
+                               this.join_exits(room2, perims[hash][0], corridor, corridor.perimeter[corridor.perimeter.length-1]);
+                               return true;
+                            } else{
+                                return false;
+                            }
+                        } else {
+                            //else just join the exits
+                            this.join_exits(room2, perims[hash][0], room, exit);
+                        } 
                         
                     }
                     p=utils.shift(p, exit[1]);

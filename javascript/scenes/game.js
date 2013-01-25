@@ -11,8 +11,8 @@ var GameScene = exports.GameScene = function(options){
        min_corridor_length:2,
        corridor_density: 0.5,
        max_exits_per_room:3,
-       symmetric_rooms: false,
-       interconnects: 2
+       symmetric_rooms: true,
+       interconnects: 5
     });
     gen.generate(15);
 
@@ -21,15 +21,15 @@ var GameScene = exports.GameScene = function(options){
     });
     
     options.world = world;
-    
-    this.protagonist = new engine.Creature({
-        sprite: 'protagonist',
+    this.protagonist = world.spawn('protagonist', {
         position:gen.start_pos,
-        angle: 90,
-        controller: new engine.controllers.PlayerController()
+        angle: 90
     });
     
-    world.spawn(this.protagonist);
+    world.spawn('engineer', {
+        position:engine.utils.mod(gen.start_pos, [1, 0]),
+        angle:0
+    });
     
    // world.spawn(creatures.new('engineer', [5, 3], 0));
     

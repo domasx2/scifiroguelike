@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var utils = require('./utils');
 var events = require('./events');
 var constants = require('./constants');
+var game = require('./game').game;
 
 var World = exports.World = function(options){
     utils.process_options(this, options, {
@@ -25,6 +26,13 @@ World.prototype.update_objects = function(deltams){
     });
 };
 
+World.prototype.get_object_by_id = function(id){
+    for(var i=0;i<this.objects.length;i++){
+        if(this.objects[i].id===id) return this.objects[i];
+    }
+    return null;
+};
+
 World.prototype.get_objects_in_tile = function(position){
     var retv = [];
     this.objects.forEach(function(object){
@@ -34,24 +42,30 @@ World.prototype.get_objects_in_tile = function(position){
     return retv;
 };
 
-World.prototype.process_turn = function(events){
-    var process_queue = false;
-    
-    if(this.current_actor){
-        process_queue = this.current_actor.controller.act(this, events);
+
+World.prototype.shift_turn_queue = function(){
+    if(this.turn_pending_queue.length){ //next actor this turn
+        this.current_actor = this.turn_pending_queue.shift(); 
     } else {
-        process_queue = true;
-    }
-    
-    if(process_queue){
-        if(this.turn_pending_queue.length){ //next actor this turn
+        if(this.turn_queue.length){ //next turn
+            this.turn_pending_queue = this.turn_queue.slice(0);
             this.current_actor = this.turn_pending_queue.shift(); 
-        } else {
-            if(this.turn_queue.length){ //next turn
-                this.turn_pending_queue = this.turn_queue.slice(0);
-                this.current_actor = this.turn_pending_queue.shift(); 
-                this.turn += 1;
-            }
+            this.turn += 1;
+            return true;
+        }
+    }
+    return false;
+};
+
+World.prototype.process_turn = function(events){
+    var process_queue = true;
+    
+    while(process_queue){
+        if(this.current_actor) process_queue = this.current_actor.act(this, events);
+        else process_queue = true;
+        
+        if(process_queue){
+            process_queue = !this.shift_turn_queue();
         }
     }
 };
@@ -62,9 +76,18 @@ World.prototype.update = function(deltams, events){
     this.update_objects(deltams)
 };
 
-World.prototype.spawn = function(object){
-    this.objects.push(object);
-    if(object.controller) this.turn_queue.push(object);
+World.prototype.spawn = function(type, options){
+    var obj = game.objectmanager.e(type, options.id);
+    var key;
+    for(key in options){
+        if(options.hasOwnProperty(key)){
+            obj[key] = options[key];
+        }
+    }
+    obj.init(this);
+    this.objects.push(obj);
+    if(!obj.act.skip) this.turn_queue.push(obj);
+    return obj;
 };
 
 World.prototype.add_event = function(event, new_frame){
@@ -98,10 +121,11 @@ World.prototype.event_move = function(object, direction, no_wait){
     * no_wait - optional. if true, does not wait for this event to finish before initating next turn.
     * useful for AI creatures, so player is not forced to wait excessively
     */
-    if(!this.is_tile_solid(object.position_mod(constants.MOVE_MOD[direction]))){
+    if(!this.is_tile_solid(utils.mod(object.position, constants.MOVE_MOD[direction]))){
         var event = new events.ObjectMoveEvent({
             direction: direction,
-            object: object
+            object: object,
+            owner: object
         });
         
         if(no_wait) this.persistent_events.add(event);
