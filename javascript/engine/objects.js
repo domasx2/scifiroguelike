@@ -11,7 +11,7 @@ var Object = {
     'angle':0,
     'sprite_name':'', //base name for sprite
     'sprite':'static', //currently active sprite
-    'threadable':false,      //can it be stood/waled on?
+    'threadable':true,      //can it be stood/waled on?
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
     
@@ -78,6 +78,7 @@ var Creature = {
     'max_health':100,
     'health':100,
     'team':'neutral',
+    'threadable':false,
     
     'act':controllers.roam,
     '_requires':'object'

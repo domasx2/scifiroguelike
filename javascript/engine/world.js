@@ -121,7 +121,7 @@ World.prototype.event_move = function(object, direction, no_wait){
     * no_wait - optional. if true, does not wait for this event to finish before initating next turn.
     * useful for AI creatures, so player is not forced to wait excessively
     */
-    if(!this.is_tile_solid(utils.mod(object.position, constants.MOVE_MOD[direction]))){
+    if(this.is_tile_threadable(utils.mod(object.position, constants.MOVE_MOD[direction]))){
         var event = new events.ObjectMoveEvent({
             direction: direction,
             object: object,
@@ -135,12 +135,12 @@ World.prototype.event_move = function(object, direction, no_wait){
     return false;
 };
 
-World.prototype.is_tile_solid = function(position){
-   var solid = this.map.is_wall(position);
-   if(!solid){
+World.prototype.is_tile_threadable = function(position){
+   var threadable = !this.map.is_wall(position);
+   if(threadable){
        this.get_objects_in_tile(position).forEach(function(object){
-            if(object.solid) solid = true; 
+           threadable = object.threadable && threadable;
        });
    } 
-   return solid;
+   return threadable;
 };
