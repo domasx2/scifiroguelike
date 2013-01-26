@@ -3,53 +3,79 @@ var utils = require('./utils');
 var events = require('./events');
 var constants = require('./constants');
 var game = require('./game').game;
+var objects = require('./objects');
+var Map = require('./maps').Map;
+
 
 var World = exports.World = function(options){
     utils.process_options(this, options, {
-        map: utils.required
+        map: utils.required,
+        turn: 1
     });
   
-    this.objects = [];
+    this.objects = new objects.Collection();
     this.event_frames = [];
     this.persistent_events = new events.PersistentEventFrame();
-    
-    this.turn_queue = []; //all objects that can act, in sequence of their action
-    this.turn_pending_queue = []; //all objects that have not yet acted this turn
+    this.turn_queue = new objects.Collection(); //all objects that can act, in sequence of their action
+    this.turn_pending_queue = new objects.Collection();; //all objects that have not yet acted this turn
     this.current_actor = null;
-    
-    this.turn = 1; //current turn number
 };
 
+World.load = function(data){
+    var world = new World({
+        turn: data.turn,
+        map: Map.load(data.map)
+    });
+    
+    data.objects.forEach(function(obj){
+        world.spawn(obj.name, obj.properties);
+    });
+    
+    world.turn_queue = world.load_collection(data.turn_queue);
+    world.turn_pending_queue = world.load_collection(data.turn_pending_queue);
+    if(data.current_actor) world.current_actor = world.objects.by_id(data.current_actor);
+    return world;
+};
+
+World.prototype.load_collection = function(obj_ids){
+    var retv = new objects.Collection();
+    obj_ids.forEach(function(id){
+        retv.add(this.objects.by_id(id)); 
+    }, this);
+    return retv;
+};
+
+World.prototype.serialize = function(){
+    var objects = [];
+    this.objects.iter(function(obj){
+        objects.push(obj.serialize()); 
+    });
+    var retv = {
+        'map': this.map.serialize(),
+        'turn': this.turn,
+        'objects':objects,
+        'turn_queue':this.turn_queue.serialize(),
+        'turn_pending_queue':this.turn_pending_queue.serialize(),
+        'current_actor':this.current_actor? this.current_actor.id : null
+        
+    };
+    return retv; 
+};
+
+
 World.prototype.update_objects = function(deltams){
-    this.objects.forEach(function(object){
+    this.objects.iter(function(object){
          object.update(deltams);
     });
 };
 
-World.prototype.get_object_by_id = function(id){
-    for(var i=0;i<this.objects.length;i++){
-        if(this.objects[i].id===id) return this.objects[i];
-    }
-    return null;
-};
-
-World.prototype.get_objects_in_tile = function(position){
-    var retv = [];
-    this.objects.forEach(function(object){
-        if(object.position[0] == position[0] && 
-           object.position[1] == position[1] ) retv.push(object)  
-    });
-    return retv;
-};
-
-
 World.prototype.shift_turn_queue = function(){
-    if(this.turn_pending_queue.length){ //next actor this turn
-        this.current_actor = this.turn_pending_queue.shift(); 
+    if(this.turn_pending_queue.len()){ //next actor this turn
+        this.current_actor = this.turn_pending_queue.pop(); 
     } else {
-        if(this.turn_queue.length){ //next turn
-            this.turn_pending_queue = this.turn_queue.slice(0);
-            this.current_actor = this.turn_pending_queue.shift(); 
+        if(this.turn_queue.len()){ //next turn
+            this.turn_pending_queue = this.turn_queue.clone();
+            this.current_actor = this.turn_pending_queue.pop(); 
             this.turn += 1;
             return true;
         }
@@ -59,15 +85,8 @@ World.prototype.shift_turn_queue = function(){
 
 World.prototype.process_turn = function(events){
     var process_queue = true;
-    
-    while(process_queue){
-        if(this.current_actor) process_queue = this.current_actor.act(this, events);
-        else process_queue = true;
-        
-        if(process_queue){
-            process_queue = !this.shift_turn_queue();
-        }
-    }
+    if(this.current_actor) process_queue = this.current_actor.act(this, events);
+    if(process_queue) process_queue = !this.shift_turn_queue();
 };
 
 World.prototype.update = function(deltams, events){
@@ -85,8 +104,8 @@ World.prototype.spawn = function(type, options){
         }
     }
     obj.init(this);
-    this.objects.push(obj);
-    if(!obj.act.skip) this.turn_queue.push(obj);
+    this.objects.add(obj);
+    if(!obj.act.skip) this.turn_queue.add(obj);
     return obj;
 };
 
@@ -138,7 +157,7 @@ World.prototype.event_move = function(object, direction, no_wait){
 World.prototype.is_tile_threadable = function(position){
    var threadable = !this.map.is_wall(position);
    if(threadable){
-       this.get_objects_in_tile(position).forEach(function(object){
+       this.objects.by_pos(position).forEach(function(object){
            threadable = object.threadable && threadable;
        });
    } 

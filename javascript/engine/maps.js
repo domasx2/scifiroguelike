@@ -31,6 +31,23 @@ var Map = exports.Map = function(options){
      
 };
 
+Map.load = function(data){
+    var map = new Map({
+        size: data.size,
+        tilesheet: data.tilesheet,
+        walls: utils.Array2D.load_bool(data.walls)
+    });
+    return map;
+};
+
+Map.prototype.serialize = function(){
+    return {
+        'size':this.size,
+        'tilesheet':this.options.tilesheet,
+        'walls':this.walls.serialize_bool()  
+    };
+};
+
 Map.prototype.new_surface = function(){
     return new gamejs.Surface([this.size[0]*game.settings.TILE_WIDTH,
                                this.size[1]*game.settings.TILE_WIDTH]);

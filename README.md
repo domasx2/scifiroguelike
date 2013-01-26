@@ -3,7 +3,8 @@ DONE:
 0.02: collisions, dumb camera  
 0.03: detailed turn system; simple AI creature that walks about randomly on its turn;  
 0.04: random map geometry generation  
+0.05: save/load games
 
-NEXT:  
-0.05: entity-component paradigm for objects; serializable game state & saves
-0.06: fog of war  
+NEXT:
+0.06: fog of war    
+0.07: inventory: UI, pick up items?

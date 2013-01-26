@@ -68,9 +68,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          * @author Adrian Gaudebert - adrian@gaudebert.fr
          * @constructor
          */
-        var Entity = function(id) {
+        var Entity = function(id, name) {
             var state = {};
-
+            this.name = name;
             this.id = id;
             this.type = [];
             this.properties = ['id'];
@@ -81,6 +81,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
              * @param obj Component to take attributes and methods from.
              * @return this.
              */
+            
+            this.get_properties = function(){
+                var properties = {};
+                this.properties.forEach(function(property){
+                    properties[property] = this[property];
+                }, this);
+                return properties;
+            }
+            
+            this.serialize = function(){
+                return {
+                    'name':this.name,
+                    'properties':this.get_properties()
+                }
+            }
+            
             this.extend = function(obj) {
                 var target = this,
                     key;
@@ -208,13 +224,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.createEntity = this.e = function(type, id) {
             id = this.UID(id);
             var ent;
-
-            entities[id] = ent = new Entity(id);
- 
+            entities[id] = ent = new Entity(id, type);
             ent.requires.apply(ent, [type]);
-            
             ent.requires(["obj"]);
-
             return ent;
         };
 

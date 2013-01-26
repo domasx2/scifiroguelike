@@ -31,7 +31,7 @@ WorldScene.prototype.draw = function(surface){
     this.view.surface = surface;
     this.view.draw_map_layer_surface(this.world.map.floor_surface);
     this.view.draw_map_layer_surface(this.world.map.wall_surface);
-    this.world.objects.forEach(function(object){
+    this.world.objects.iter(function(object){
         object.draw(this.view);
     }, this);
 };

@@ -17,16 +17,47 @@ gamejs.ready(function() {
     display._context.webkitImageSmoothingEnabled = false;
     
     if(window.mapgendemo) game.scene = new MapGenDemoScene({});
-    else game.scene = new GameScene({});
+    else game.scene = GameScene.initial();
 
     var tick = function(deltams) {
+        var events = gamejs.event.get();
+        handle_events(events);
         if(game.scene){
-            game.scene.update(deltams, gamejs.event.get());
+            game.scene.update(deltams, events);
             display.clear();
             game.scene.draw(display);
         }
     };
-
     gamejs.time.fpsCallback(tick, this, settings.FPS);
-
 });
+
+
+function save(){
+    if(typeof(Storage)!=="undefined") {
+        localStorage.quicksave = JSON.stringify(game.scene.serialize());
+        console.log('saved');
+    }
+    else console.log('No storage support??');
+}
+
+function load(){
+    if((typeof(Storage)!=="undefined")&&localStorage.quicksave){
+        game.scene = GameScene.load(JSON.parse(localStorage.quicksave));
+    }else {
+        console.log('No storage support??');
+    }
+    
+}
+
+function handle_events(events){
+    events.forEach(function(event){
+        if(event.type == gamejs.event.KEY_DOWN){
+            if(event.key == gamejs.event.K_9){
+                save();
+            }  
+            if(event.key == gamejs.event.K_0){
+                load();
+            }  
+        }
+    });
+};

@@ -4,6 +4,67 @@ var sprite = require('./sprite');
 var game = require('./game').game;
 var controllers = require('./controllers');
 
+var Collection = exports.Collection = function(){
+    this.objects = [];  
+    this.objects_by_id = {};
+};
+
+Collection.prototype.add = function(obj){
+    this.objects.push(obj);
+    this.objects_by_id[obj.id] = obj;
+};
+
+Collection.prototype.by_id = function(id){
+    return this.objects_by_id[id];
+};
+
+Collection.prototype.iter = function(cb, context){
+    this.objects.forEach(cb, context);  
+};
+
+Collection.prototype.clone = function(){
+    var retv = new Collection();
+    retv.objects = this.objects.slice(0);
+    retv.objects_by_id = utils.clonedict(this.objects_by_id);
+    return retv;
+};
+
+Collection.prototype.pop = function(){
+    var obj = this.objects[0];
+    this.remove(obj);
+    return obj; 
+};
+
+Collection.prototype.len = function(){
+    return this.objects.length;  
+};
+
+Collection.prototype.by_pos = function(pos){
+    var retv=[];
+    this.iter(function(obj){
+        if((obj.position[0] == pos[0]) && (obj.position[1]==pos[1])) retv.push(obj);
+    });
+    return retv;
+};
+
+Collection.prototype.remove = function(obj){
+    for(var i=0;i<this.objects.length;i++){
+        if(this.objects[i].id == obj.id){
+            this.objects.splice(i, 1);
+            break;
+        }
+    }
+    delete this.objects_by_id[obj.id];
+};
+
+Collection.prototype.serialize = function(){
+    var retv = [];
+    this.iter(function(obj){
+        retv.push(obj.id);
+    }); 
+    return retv;
+};
+
 var Object = {
     
     //PROPERTIES

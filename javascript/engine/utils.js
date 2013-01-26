@@ -106,6 +106,38 @@ var Array2D = exports.Array2D = function(size, val){
     }
 };
 
+Array2D.load_bool = function(data){
+    var retv = new Array2D(data.size, false);
+    var rows = [];
+    var row = [];
+    for(var i=0;i<data.data.length;i++){
+        if(data.data[i] == '|'){
+            rows.push(row);
+            row = [];
+        } else {
+            row.push(data.data[i]=='1' ? true : false);
+        }
+    };
+    retv.rows = rows;
+    return retv;
+};
+
+Array2D.prototype.serialize_bool = function(){
+    var data='';
+    var row;
+    for(var y=0;y<this.rows.length;y++){
+        row = this.rows[y];
+        for(var x=0;x<row.length;x++){
+            data += row[x] ? '1':'0';
+        }
+        if(y<this.rows.length)data +='|';
+    }
+    return {
+        'size': this.size,
+        'data':data
+    }
+};
+
 Array2D.prototype.iter2d = function(callback, context){
       iter2d(this.size, function(pos){
           callback.apply(context, [pos, this.get(pos)]);
@@ -162,6 +194,16 @@ Array2D.prototype.square = function(pos, size, val, fill){
 
 exports.t = function(){
     return (new Date()).getTime(); 
+};
+
+exports.clonedict = function(d){
+    var retv = {};    
+    for(var key in d){
+        if(d.hasOwnProperty(key)){
+            retv[key] = d[key];
+        }
+    }
+    return retv;
 };
 
 //mod js objects
