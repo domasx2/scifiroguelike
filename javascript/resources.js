@@ -1,6 +1,7 @@
 exports.images = ['./public/img/tiles/default.png',
                   './public/img/characters/protagonist.png',
-                  './public/img/characters/engineer.png'];
+                  './public/img/characters/engineer.png',
+                  './public/img/tiles/fogofwar.png'];
                   
       
       
@@ -33,6 +34,17 @@ exports.tilesheets = {
 };           
  
 exports.sprites = {
+    //FOG OF WAR
+    'fogofwar_dark':{
+        'spritesheet_url':'./public/img/tiles/fogofwar.png',
+        'type':'static'
+    },
+    
+    'fogofwar_explored':{
+        'spritesheet_url':'./public/img/tiles/fogofwar.png' ,
+        'type':'static',
+        'offset':[16, 0] 
+    },
     //PROTAGONIST
     'protagonist_static':{
         'type':'static',

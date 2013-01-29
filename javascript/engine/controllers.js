@@ -1,5 +1,6 @@
 var gamejs = require('gamejs');
 var constants = require('./constants');
+var game = require('./game').game;
 var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
 exports.player_move = function(world, events){
@@ -8,17 +9,18 @@ exports.player_move = function(world, events){
  * returns true if successful
  */
     var event;
-    for(var i=0;i<events.length;i++){
-        event = events[i];
-        if(event.type === gamejs.event.KEY_DOWN){
-            var angle = MOVE_KEY_MATRIX[event.key]; 
+    var retv = false;
+    gamejs.utils.objects.keys(MOVE_KEY_MATRIX).some(function(key){
+        if(game.keys_pressed[key]){
+            var angle = MOVE_KEY_MATRIX[key]; 
             if(!(angle==undefined)){
                 this.set_angle(angle)
-                return world.event_move(this, angle);
+                retv = world.event_move(this, angle);
+                return true;
             }
-        }  
-    };
-    return false;
+        } 
+    }, this);
+    return retv;
 };
 
 exports.roam = function(world, events){

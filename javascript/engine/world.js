@@ -84,9 +84,13 @@ World.prototype.shift_turn_queue = function(){
 };
 
 World.prototype.process_turn = function(events){
+    if(!this.turn_queue.len()) return;
     var process_queue = true;
-    if(this.current_actor) process_queue = this.current_actor.act(this, events);
-    if(process_queue) process_queue = !this.shift_turn_queue();
+    while(process_queue){
+        if(this.current_actor) process_queue = this.current_actor.act(this, events);
+        if(process_queue) this.shift_turn_queue();
+        if(this.events_in_progress()) break;
+    }
 };
 
 World.prototype.update = function(deltams, events){
@@ -153,6 +157,15 @@ World.prototype.event_move = function(object, direction, no_wait){
     }
     return false;
 };
+
+World.prototype.is_tile_transparent = function(position){
+    if(!this.map.is_wall(position)){
+        this.objects.by_pos(position).forEach(function(object){
+           if(!object.transparent) return false;
+        });
+    } else return false;
+    return true;
+}
 
 World.prototype.is_tile_threadable = function(position){
    var threadable = !this.map.is_wall(position);

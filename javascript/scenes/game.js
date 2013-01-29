@@ -7,8 +7,6 @@ var GameScene = exports.GameScene = function(options){
         protagonist: null 
     });
     GameScene.superConstructor.apply(this, [options]);
-    
-    if(this.protagonist) this.view.follow = this.protagonist;
 };
 
 GameScene.initial = function (){

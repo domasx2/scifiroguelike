@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var utils = require('./utils');
 var sprite = require('./sprite');
 var game = require('./game').game;
+var Vision = require('./vision').Vision;
 var controllers = require('./controllers');
 
 var Collection = exports.Collection = function(){
@@ -75,12 +76,15 @@ var Object = {
     'threadable':true,      //can it be stood/waled on?
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
+    'vision_range':5, 
     
     //METHODS
     'init':function(world){
         this.world = world;
         this._sprites = {};
-        this.set_sprite(this.sprite, true);   
+        this.set_sprite(this.sprite, true);
+        this.vision = this.vision_range ? (new Vision(this.world, this)) : null;
+        this.vision.update(); 
     },
     
     'act': controllers.do_nothing,
@@ -102,9 +106,19 @@ var Object = {
         if(this.active_sprite) this.active_sprite.update(deltams);
     },
 
+    'can_see': function(pos){
+        if(this.vision) return this.vision.visible.get(pos);
+        return false;
+    },
+
     'teleport':  function(position){
         this.position = position;
         this.snap_sprite();
+        if(this.vision) this.vision.update();
+    },
+    
+    'absolute_position':function(relative_position){
+        return [this.position[0]+relative_position[0], this.position[1]+relative_position[1]];
     },
     
     'teleport_relative':  function(delta_position){
@@ -130,7 +144,23 @@ var Object = {
             this.active_sprite.position = this.get_position_px();
             this.active_sprite.angle = this.angle;
         }  
-    }
+    },
+    
+    'vision_perimeter':function(){
+        var retv = [];
+        if(this.vision_range){
+            for(var mod_x=-1;mod_x<=1;mod_x+2){
+                for(var mod_y=-1;mod_y<=1;mod_y+2){
+                    for(var i=0;i<this.vision_range;i++){
+                        retv.push([i*mod_x, (this.vision_range-i)*mod_y]);
+                    }
+                }
+            }
+        }
+        return retv;
+    },
+    
+    
 };
 
 game.objectmanager.c('object', Object);
@@ -140,9 +170,12 @@ var Creature = {
     'health':100,
     'team':'neutral',
     'threadable':false,
+    'vision_range':5,
     
     'act':controllers.roam,
-    '_requires':'object'
+    '_requires':'object',
+    
+    
 }
 
 game.objectmanager.c('creature', Creature);

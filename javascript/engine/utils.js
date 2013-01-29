@@ -192,6 +192,11 @@ Array2D.prototype.square = function(pos, size, val, fill){
     }
 };
 
+exports.hvec = function(pos){
+    //hash vector
+    return pos[0]+'_'+pos[1];
+};
+
 exports.t = function(){
     return (new Date()).getTime(); 
 };

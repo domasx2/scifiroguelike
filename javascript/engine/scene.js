@@ -12,12 +12,15 @@ var Scene = exports.Scene = function(options){
 var WorldScene = exports.WorldScene = function(options){
     WorldScene.superConstructor.apply(this, [options]);
     utils.process_options(this, options, {
-        'world': world
+        'world': world,
+        'protagonist':null
     });
 
     this.view = new view.View({
         world: this.world
     });
+    
+    if(this.protagonist) this.view.follow = this.protagonist;
 };
 
 gamejs.utils.objects.extend(WorldScene, Scene);
@@ -32,8 +35,9 @@ WorldScene.prototype.draw = function(surface){
     this.view.draw_map_layer_surface(this.world.map.floor_surface);
     this.view.draw_map_layer_surface(this.world.map.wall_surface);
     this.world.objects.iter(function(object){
-        object.draw(this.view);
+        if(!this.protagonist || (this.protagonist.can_see(object.position))) object.draw(this.view);
     }, this);
+    if(this.protagonist&&this.protagonist.vision) this.protagonist.vision.draw(this.view);
 };
 
 

@@ -24,7 +24,7 @@ gamejs.ready(function() {
         handle_events(events);
         if(game.scene){
             game.scene.update(deltams, events);
-            display.clear();
+            display.fill('#000');
             game.scene.draw(display);
         }
     };
@@ -50,6 +50,7 @@ function load(){
 }
 
 function handle_events(events){
+    game.handle_events(events);
     events.forEach(function(event){
         if(event.type == gamejs.event.KEY_DOWN){
             if(event.key == gamejs.event.K_9){

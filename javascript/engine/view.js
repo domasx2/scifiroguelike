@@ -40,6 +40,13 @@ View.prototype.set_offset_y = function(y){
     this.offset[1] = Math.max(0, Math.min(y, this.world.map.size_px[1]*this.zoom-parseInt(this.height/this.zoom)));
 };
 
+View.prototype.get_visible_tiles = function(){
+    return {
+        'pos':[parseInt(this.offset[0]/game.tw), parseInt(this.offset[1]/game.tw)],
+        'size':[parseInt(this.width/game.tw), parseInt(this.height/game.tw)]
+   }
+}
+
 View.prototype.draw_map_layer_surface = function(surface){
     utils.draw(this.surface, surface, [0,0], [parseInt(this.offset[0]/this.zoom), parseInt(this.offset[1]/this.zoom)], this.zoom);
 };
