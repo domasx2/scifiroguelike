@@ -170,7 +170,7 @@ var Creature = {
     'health':100,
     'team':'neutral',
     'threadable':false,
-    'vision_range':5,
+    'vision_range':10,
     
     'act':controllers.roam,
     '_requires':'object',

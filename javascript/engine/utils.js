@@ -84,12 +84,14 @@ exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, 
     var w = Math.max(Math.min(dst_available[0], src_available[0]), 0);
     var h = Math.max(Math.min(dst_available[1], src_available[1]), 0);
     
-    if(!w || !h) return;
+    if(!i(w/zoom) || !i(h/zoom)) return;
 
     var dst_rect = new gamejs.Rect([i(dst_offset[0]), i(dst_offset[1])], [i(w), i(h)]);
     var src_rect = new gamejs.Rect([i(src_offset[0]), i(src_offset[1])], 
                                    [i(w/zoom),      i(h/zoom)]);
+                             
     dst_surface.blit(src_surface, dst_rect, src_rect); 
+
     
                      
 };

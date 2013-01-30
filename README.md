@@ -7,4 +7,5 @@ DONE:
 0.06: fog of war 
 
 NEXT:  
+0.06.1: optimize & improve fogofwar render;
 0.07: inventory: UI, pick up items?

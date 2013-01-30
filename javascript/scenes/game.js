@@ -17,9 +17,9 @@ GameScene.initial = function (){
        corridor_density: 0.5,
        max_exits_per_room:3,
        symmetric_rooms: true,
-       interconnects: 5
+       interconnects: 8
     });
-    gen.generate(15);
+    gen.generate(30);
 
     var world  = new engine.World({
         'map': gen.get_map()

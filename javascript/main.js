@@ -12,10 +12,8 @@ gamejs.ready(function() {
     game.init(settings, resources);
     gamejs.display.setCaption('SciFi roguelike project');
     
-    var display = gamejs.display.setMode([600, 400]);
-    display._context.mozImageSmoothingEnabled = false;
-    display._context.webkitImageSmoothingEnabled = false;
-    
+    var display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
+
     if(window.mapgendemo) game.scene = new MapGenDemoScene({});
     else game.scene = GameScene.initial();
 
