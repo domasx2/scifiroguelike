@@ -9,31 +9,28 @@ var Vision = exports.Vision = function(world, object){
     this.explored = new utils.Array2D(world.map.size);
     this.visible = null;
     this.init_fov();
+    this.surface = null;
+    this.redraw = false;
+    this.made_visible = [];
+    this.prev_visible = [];
 };
 
 Vision.prototype.init_fov = function(){
     this.visible = new utils.Array2D(this.world.map.size);
+    this.prev_visible = this.made_visible;
     this.made_visible = new Array();
+    this.redraw = true;
 };
 
 Vision.prototype.can_see = function(pos){
-    this.visible.set(pos, true);  
-    this.made_visible.push(pos);
+    if(!this.visible.get(pos)){
+        this.visible.set(pos, true);  
+        this.made_visible.push(pos);
+    }
 };
 
 Vision.prototype.postprocess = function(){
-    //remove artifacts, set explored falgs
-    this.made_visible.forEach(function(pos){
-        var ok = false;
-        for(x=-1;x<=1;x++){
-            for(y=-1;y<=1;y++){
-                if(x==0&&y==0) continue;
-                if(this.visible.get([pos[0]+x, pos[1]+y])) ok = true;
-            }
-        } 
-        if(ok) this.explored.set(pos, true);
-        else this.visible.set(pos, false);
-    }, this);
+
 };
 
     
@@ -158,7 +155,7 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
                     if(visible && (!this.visible.get([x-dx, y]) ||
                             (!this.world.is_tile_transparent([x-dx, y]))) &&
                             ((y - dy >= 0) && (y - dy < wsize[1]) &&
-                             ((!this.world.is_tile_transparent([x-dx, y-dy])) ||
+                             ((!this.visible.get([x-dx, y-dy])) ||
                               (!this.world.is_tile_transparent([x-dx, y-dy]))))) visible = false;
                     idx += 1;
                }
@@ -189,19 +186,28 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
 }        
 
 Vision.prototype.draw = function(view){
+    if(this.redraw){
+      if(!this.surface){
+           this.surface = new gamejs.Surface(this.world.map.size_px);
+           this.surface.fill('#000');
+      } 
       var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
-      var sz = view.get_visible_tiles();
-      var ofst, pos;
-      for(var x = sz.pos[0];x<=sz.pos[0]+sz.size[0];x++){
-          for(var y =sz.pos[1];y<sz.pos[1]+sz.size[1];y++){
-              pos = [x, y];
-              if(!this.visible.get(pos)){
-                  if(this.explored.get(pos)) ofst = 16;
-                  else ofst = 0;
-                  view.draw_surface(spritesheet.get_surface(0), [pos[0]*game.tw, pos[1]*game.tw], [ofst, 0], [16, 16]);
-              }
+      
+      this.prev_visible.forEach(function(pos){
+          if(!this.visible.get(pos)){
+              this.surface.blit(spritesheet.get_surface(0), 
+                    new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts),
+                    new gamejs.Rect([game.tw, 0], game.ts));
           }
-      }
+      }, this);
+      
+      this.made_visible.forEach(function(pos){
+           this.surface.clear(new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts)); 
+      }, this);
+
+      this.redraw = false;
+   }
+   view.draw_map_layer_surface(this.surface);
 };
 
 Vision.prototype.update = function(){

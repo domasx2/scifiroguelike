@@ -6,22 +6,51 @@ var random = require('../random');
 var Map = require('../maps').Map;
 var constants = require('../constants');
 
+
+
 var Generator = exports.Generator = function(options){
     utils.process_options(this, options, {
+        size: utils.required,
         seed: null
     });
     
     this.rnd = new random.Generator(this.seed);
     this.start_pos = [0, 0];
+    this.minx=this.size[0];
+    this.maxx=0;
+    this.miny=this.size[1];
+    this.maxy=0;
     Generator.superConstructor.apply(this, [options]);
 };
 
 
 gamejs.utils.objects.extend(Generator, pieces.Piece);
 
+Generator.prototype.add_piece = function(piece, position){
+    pieces.Piece.prototype.add_piece.apply(this, [piece, position]);
+    this.minx = Math.min(this.minx, piece.position[0]);
+    this.maxx = Math.max(this.maxx, piece.position[0]+piece.size[0]);
+    this.miny = Math.min(this.miny, piece.position[1]);
+    this.maxy = Math.max(this.maxy, piece.position[1]+piece.size[1]);
+}
+
 Generator.prototype.reset = function(){
     this.children = [];
     this.walls = new utils.Array2D(this.size, true);   
+};
+
+Generator.prototype.trim = function(){
+    this.size = [this.maxx-this.minx, this.maxy-this.miny];
+    this.children.forEach(function(child){
+        child.position=[child.position[0]-this.minx, child.position[1]-this.miny];
+    }, this);
+    this.start_pos = [this.start_pos[0]-this.minx, this.start_pos[1]-this.miny];
+    this.walls = this.walls.cut([this.minx, this.miny], this.size);
+    this.minx=this.size[0];
+    this.maxx=0;
+    this.miny=this.size[1];
+    this.maxy=0; 
+    
 };
 
 
@@ -249,4 +278,5 @@ Dungeon.prototype.generate = function(no_rooms){
         }
     } 
     for(k=0;k<this.interconnects;k++) this.add_interconnect();
+    this.trim();
 };

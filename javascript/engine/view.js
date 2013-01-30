@@ -49,7 +49,7 @@ View.prototype.get_visible_tiles = function(){
 }
 
 View.prototype.draw_map_layer_surface = function(surface){
-    utils.draw(this.surface, surface, [0,0], [parseInt(this.offset[0]/this.zoom), parseInt(this.offset[1]/this.zoom)], this.zoom);
+    utils.draw(this.surface, surface, [0,0], [this.offset[0]/this.zoom, this.offset[1]/this.zoom], this.zoom);
 };
 
 View.prototype.draw_surface = function(surface, dst_position, src_position, src_size){
@@ -61,10 +61,8 @@ View.prototype.update = function(deltams){
     if(this.follow && this.follow.active_sprite){
         var pos = this.follow.active_sprite.position;
         var cs = this.follow.active_sprite.definition.cell_size
-        this.set_offset_x(parseInt(pos[0]*this.zoom - (this.width)/3)  + (cs[0]*this.zoom)/2);
-        this.set_offset_y(parseInt(pos[1]*this.zoom - (this.height)/3) + (cs[1]*this.zoom)/2);
-        //WHY DO SCREEN DIMENSIONS HAVE TO BE DIVIDED BY 3, NOT 2, TO CENTER???
-        //I DONT KNOW! IM DUMB! WTF MATH!
+        this.set_offset_x(parseInt(pos[0]*this.zoom - this.width/2)  + (cs[0]*this.zoom)/2);
+        this.set_offset_y(parseInt(pos[1]*this.zoom - this.height/2) + (cs[1]*this.zoom)/2);
     }
 };
 
