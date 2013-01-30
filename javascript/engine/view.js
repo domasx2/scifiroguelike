@@ -44,7 +44,7 @@ View.prototype.get_visible_tiles = function(){
     var tw = game.tw*this.zoom;
     return {
         'pos':[parseInt(this.offset[0]/tw), parseInt(this.offset[1]/tw)],
-        'size':[parseInt(this.width/tw)+1, parseInt(this.height/tw)+1]
+        'size':[parseInt(this.width/tw)+2, parseInt(this.height/tw)+2]
    }
 }
 

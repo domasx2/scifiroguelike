@@ -13,11 +13,27 @@ var Vision = exports.Vision = function(world, object){
 
 Vision.prototype.init_fov = function(){
     this.visible = new utils.Array2D(this.world.map.size);
+    this.made_visible = new Array();
 };
 
 Vision.prototype.can_see = function(pos){
-    this.explored.set(pos, true);
     this.visible.set(pos, true);  
+    this.made_visible.push(pos);
+};
+
+Vision.prototype.postprocess = function(){
+    //remove artifacts, set explored falgs
+    this.made_visible.forEach(function(pos){
+        var ok = false;
+        for(x=-1;x<=1;x++){
+            for(y=-1;y<=1;y++){
+                if(x==0&&y==0) continue;
+                if(this.visible.get([pos[0]+x, pos[1]+y])) ok = true;
+            }
+        } 
+        if(ok) this.explored.set(pos, true);
+        else this.visible.set(pos, false);
+    }, this);
 };
 
     
@@ -196,4 +212,5 @@ Vision.prototype.update = function(){
         this.compute_quadrant(this.object.position, this.object.vision_range, 1, -1);
         this.compute_quadrant(this.object.position, this.object.vision_range, -1, 1);
         this.compute_quadrant(this.object.position, this.object.vision_range, -1, -1);
+        this.postprocess();
 }
