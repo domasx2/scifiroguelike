@@ -33,6 +33,7 @@ gamejs.ready(function() {
 function save(){
     if(typeof(Storage)!=="undefined") {
         localStorage.quicksave = JSON.stringify(game.scene.serialize());
+        console.log(localStorage.quicksave);
         console.log('saved');
     }
     else console.log('No storage support??');

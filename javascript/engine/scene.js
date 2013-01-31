@@ -1,6 +1,6 @@
 var gamejs = require('gamejs');
 var utils  = require('./utils');
-var world  = require('./world');
+var World  = require('./world').World;
 var view   = require('./view');
 var events = require('./events');
 
@@ -12,7 +12,7 @@ var Scene = exports.Scene = function(options){
 var WorldScene = exports.WorldScene = function(options){
     WorldScene.superConstructor.apply(this, [options]);
     utils.process_options(this, options, {
-        'world': world,
+        'world': utils.required,
         'protagonist':null
     });
 
@@ -23,11 +23,37 @@ var WorldScene = exports.WorldScene = function(options){
     if(this.protagonist) this.view.follow = this.protagonist;
 };
 
+WorldScene.load = function(data, cls){
+      var world = World.load(data.world);
+      
+      var scene =  new cls({
+            'world': world,
+            'protagonist': data.protagonist ? world.objects.by_id(data.protagonist) : null 
+      });
+      
+      
+      if(scene.protagonist && data.explored){
+          scene.protagonist.vision.load_explored(utils.Array2D.load_bool(data.explored));
+      }
+      
+      return scene;
+};
+
 gamejs.utils.objects.extend(WorldScene, Scene);
 
 WorldScene.prototype.handle_events = function(events){
     
 };
+
+
+WorldScene.prototype.serialize = function(){
+      return {
+          'protagonist': this.protagonist.id,
+          'world':this.world.serialize(),
+          'explored': this.protagonist.vision.explored.serialize_bool()
+      }
+};
+
 
 
 WorldScene.prototype.draw = function(surface){

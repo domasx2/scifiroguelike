@@ -50,6 +50,7 @@ World.prototype.serialize = function(){
     this.objects.iter(function(obj){
         objects.push(obj.serialize()); 
     });
+    
     var retv = {
         'map': this.map.serialize(),
         'turn': this.turn,

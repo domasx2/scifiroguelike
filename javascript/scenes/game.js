@@ -43,21 +43,11 @@ GameScene.initial = function (){
 };
 
 GameScene.load = function(data){
-      var world = engine.World.load(data.world);
-      
-      return new GameScene({
-            'world': world,
-            'protagonist': data.protagonist ? world.objects.by_id(data.protagonist) : null 
-      });
+    return engine.scene.WorldScene.load(data, GameScene); 
 };
     
 gamejs.utils.objects.extend(GameScene, engine.scene.WorldScene);
 
-GameScene.prototype.serialize = function(){
-      return {
-          'protagonist': this.protagonist.id,
-          'world':this.world.serialize()
-      }
-};
+
 
 GameScene.prototype.handle_events = function(events){}

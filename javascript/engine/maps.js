@@ -68,6 +68,7 @@ Map.prototype.draw_walls = function(tilesheet){
                     hash += this.walls.get([p[0]+x, p[1]+y])===false ? '0' : '1';
                 }
             }
+            gamejs.draw.rect(surface, game.settings.BG_COLOR, new gamejs.Rect([p[0]*t, p[1]*t], tile_size));
             ofsts = this.tilesheet.hash2ofst[hash];
             if(ofsts) ofsts.forEach(function(ofst){
                 surface.blit(this.tilesheet.surface, 

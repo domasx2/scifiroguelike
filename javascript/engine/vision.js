@@ -24,7 +24,8 @@ Vision.prototype.init_fov = function(){
 
 Vision.prototype.can_see = function(pos){
     if(!this.visible.get(pos)){
-        this.visible.set(pos, true);  
+        this.visible.set(pos, true);
+        this.explored.set(pos, true);  
         this.made_visible.push(pos);
     }
 };
@@ -184,6 +185,26 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
         if(minAngle == 1.0) done = true;
     }
 }        
+
+Vision.prototype.load_explored = function(explored){
+    this.explored = explored;
+    var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
+    if(!this.surface){
+       this.surface = new gamejs.Surface(this.world.map.size_px);
+       this.surface.fill('#000');
+    } 
+    
+    this.explored.iter2d(function(pos, val){
+        if(val){
+            this.surface.clear(new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts)); 
+            if(!this.visible.get(pos)){
+                this.surface.blit(spritesheet.get_surface(0), 
+                    new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts),
+                    new gamejs.Rect([game.tw, 0], game.ts));
+            }
+        } 
+    }, this);
+}
 
 Vision.prototype.draw = function(view){
     if(this.redraw){
