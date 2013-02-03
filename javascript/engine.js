@@ -26,3 +26,7 @@ exports.View = require('./engine/view').View;
 
 exports.events = require('./engine/events');
 exports.Event = exports.events.Event;
+
+exports.inventory = {
+    
+}

@@ -1,7 +1,11 @@
 exports.images = ['./public/img/tiles/default.png',
                   './public/img/characters/protagonist.png',
                   './public/img/characters/engineer.png',
-                  './public/img/tiles/fogofwar.png'];
+                  './public/img/tiles/fogofwar.png',
+                  
+                  './public/img/items/pistol.png',
+                  './public/img/items/pistol_clip.png',
+                  './public/img/items/medkit.png'];
                   
       
       
@@ -74,6 +78,31 @@ exports.sprites = {
         'duration': 500,
         'loop': true
     },
+    
+    //ITEMS
+    'pistol_static':{
+        'type':'static',
+        'offset':[16, 0],
+        'spritesheet_url':'./public/img/items/pistol.png'
+    },
+    
+    'pistol_inventory':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/pistol.png'
+    },
+    
+    //ITEMS
+    'pistol_clip_static':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/pistol_clip.png'
+    },
+    
+    //ITEMS
+    'medkit':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/medkit.png'
+    },
+    
     
     
 }

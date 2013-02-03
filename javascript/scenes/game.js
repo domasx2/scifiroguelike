@@ -9,7 +9,7 @@ var GameScene = exports.GameScene = function(options){
     GameScene.superConstructor.apply(this, [options]);
 };
 
-GameScene.initial = function (){
+GameScene.initial = function (display){
     var gen = new engine.mapgen.generators.Dungeon({
        size: [100, 100],
        max_corridor_length:4,
@@ -35,7 +35,16 @@ GameScene.initial = function (){
         angle:0
     });
     
+    world.spawn('pistol', {
+        position:engine.utils.mod(gen.start_pos, [0, 1]),
+    });
+    
+    world.spawn('pistol', {
+        position:engine.utils.mod(gen.start_pos, [0, 2]),
+    });
+    
     return new GameScene({
+        display: display,
         world: world,
         protagonist: protagonist
     });

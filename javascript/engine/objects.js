@@ -3,68 +3,10 @@ var utils = require('./utils');
 var sprite = require('./sprite');
 var game = require('./game').game;
 var Vision = require('./vision').Vision;
+var Inventory = require('./inventory/inventory').Inventory; 
 var controllers = require('./controllers');
+var eventify = require('./lib/events').eventify;
 
-var Collection = exports.Collection = function(){
-    this.objects = [];  
-    this.objects_by_id = {};
-};
-
-Collection.prototype.add = function(obj){
-    this.objects.push(obj);
-    this.objects_by_id[obj.id] = obj;
-};
-
-Collection.prototype.by_id = function(id){
-    return this.objects_by_id[id];
-};
-
-Collection.prototype.iter = function(cb, context){
-    this.objects.forEach(cb, context);  
-};
-
-Collection.prototype.clone = function(){
-    var retv = new Collection();
-    retv.objects = this.objects.slice(0);
-    retv.objects_by_id = utils.clonedict(this.objects_by_id);
-    return retv;
-};
-
-Collection.prototype.pop = function(){
-    var obj = this.objects[0];
-    this.remove(obj);
-    return obj; 
-};
-
-Collection.prototype.len = function(){
-    return this.objects.length;  
-};
-
-Collection.prototype.by_pos = function(pos){
-    var retv=[];
-    this.iter(function(obj){
-        if((obj.position[0] == pos[0]) && (obj.position[1]==pos[1])) retv.push(obj);
-    });
-    return retv;
-};
-
-Collection.prototype.remove = function(obj){
-    for(var i=0;i<this.objects.length;i++){
-        if(this.objects[i].id == obj.id){
-            this.objects.splice(i, 1);
-            break;
-        }
-    }
-    delete this.objects_by_id[obj.id];
-};
-
-Collection.prototype.serialize = function(){
-    var retv = [];
-    this.iter(function(obj){
-        retv.push(obj.id);
-    }); 
-    return retv;
-};
 
 var Object = {
     
@@ -76,15 +18,30 @@ var Object = {
     'threadable':true,      //can it be stood/waled on?
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
-    'vision_range':5, 
+    'vision_range':0, 
+    'z':0,
     
     //METHODS
     'init':function(world){
         this.world = world;
+        eventify(this);
         this._sprites = {};
         this.set_sprite(this.sprite, true);
-        this.vision = this.vision_range ? (new Vision(this.world, this)) : null;
-        this.vision.update(); 
+        this.vision = null;
+        if(this.vision_range){
+            this.vision = new Vision(this.world, this);
+            this.vision.update(); 
+        }
+        
+        for(key in this){
+            if(key!='init' && key.search('init')==0){
+                this[key](world);
+            }
+        }
+    },
+    
+    'get_adjacent_items':function(){
+        return this.world.get_adjacent_objects(this.position, 'item');  
     },
     
     'act': controllers.do_nothing,
@@ -104,17 +61,28 @@ var Object = {
     
     'update': function(deltams){
         if(this.active_sprite) this.active_sprite.update(deltams);
+        
+        for(key in this){
+            if(key!='update' && key.search('update')==0){
+                this[key](world);
+            }
+        }
     },
 
     'can_see': function(pos){
         if(this.vision) return this.vision.visible.get(pos);
         return false;
     },
+    
+    'hide': function(hide){
+        this.teleport([-1, -1]);  
+    },
 
     'teleport':  function(position){
         this.position = position;
         this.snap_sprite();
         if(this.vision) this.vision.update();
+        this.fire('teleport', [position]);
     },
     
     'absolute_position':function(relative_position){
@@ -171,11 +139,25 @@ var Creature = {
     'team':'neutral',
     'threadable':false,
     'vision_range':10,
-    
+    'inventory_size':10,
+    'z':1,
     'act':controllers.roam,
-    '_requires':'object',
     
+    'init_inventory':function(world, data){
+        this.inventory = new Inventory(this);
+    },
     
+    'serialize_inventory':function(data){
+        data.inventory = this.inventory.serialize();
+    },
+    
+    'post_load_inventory':function(data){
+        data.inventory.forEach(function(objid){
+            this.inventory.add(this.world.objects.by_id(objid));
+        }, this);
+    },
+    
+    '_requires':'object'  
 }
 
 game.objectmanager.c('creature', Creature);

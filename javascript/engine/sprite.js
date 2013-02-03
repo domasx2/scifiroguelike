@@ -17,6 +17,12 @@ Sprite.prototype.draw = function (view){
     view.draw_surface(this.spritesheet.get_surface(this.angle), this.position, this.offset, this.definition.cell_size)
 };
 
+Sprite.prototype.get_surface = function(){
+      var surface = new gamejs.Surface(this.definition.cell_size);
+      surface.blit(this.spritesheet.get_surface(this.angle), new gamejs.Rect([0, 0], this.definition.cell_size), new gamejs.Rect(this.offset, this.definition.cell_size));
+      return surface;
+};
+
 Sprite.prototype.update = function(deltams){};
 
 Sprite.prototype.reset = function(){};

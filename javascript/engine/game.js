@@ -4,6 +4,7 @@ var ComponentEntityManager = require('./lib/cem').ComponentEntityManager;
 var Game =  function(){
     this.objectmanager = new ComponentEntityManager();
     this.keys_pressed = {};
+    this.settings = require('../settings');
 };
 
 Game.prototype.init = function(settings,  resources){

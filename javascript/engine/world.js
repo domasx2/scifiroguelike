@@ -13,11 +13,11 @@ var World = exports.World = function(options){
         turn: 1
     });
   
-    this.objects = new objects.Collection();
+    this.objects = new utils.Collection();
     this.event_frames = [];
     this.persistent_events = new events.PersistentEventFrame();
-    this.turn_queue = new objects.Collection(); //all objects that can act, in sequence of their action
-    this.turn_pending_queue = new objects.Collection();; //all objects that have not yet acted this turn
+    this.turn_queue = new utils.Collection(); //all objects that can act, in sequence of their action
+    this.turn_pending_queue = new utils.Collection();; //all objects that have not yet acted this turn
     this.current_actor = null;
 };
 
@@ -27,8 +27,21 @@ World.load = function(data){
         map: Map.load(data.map)
     });
     
+    //spawn in all objects
     data.objects.forEach(function(obj){
         world.spawn(obj.name, obj.properties);
+    });
+    
+    
+    //on load actions (actions that might require other objects to be spawned in first, eg inventory load)
+    data.objects.forEach(function(data){
+       props = data.properties;
+       obj = world.objects.by_id(props.id);
+       for(var key in obj){
+           if(key.search('post_load')==0){
+               obj[key](props);
+           }
+       } 
     });
     
     world.turn_queue = world.load_collection(data.turn_queue);
@@ -37,8 +50,19 @@ World.load = function(data){
     return world;
 };
 
-World.prototype.load_collection = function(obj_ids){
-    var retv = new objects.Collection();
+World.prototype.get_adjacent_objects = function(pos, type){
+    var retv = new utils.Collection();
+    constants.ADJACENT.forEach(function(mod){
+        this.objects.by_pos(utils.mod(pos, mod)).forEach(function(obj){
+           if(!type || obj.is_type(type)) retv.add(obj); 
+        });
+    }, this);
+    return retv;
+}
+
+World.prototype.load_collection = function(obj_ids, cls){
+    if(!cls) cls = utils.Collection;
+    var retv = new cls();
     obj_ids.forEach(function(id){
         retv.add(this.objects.by_id(id)); 
     }, this);

@@ -1,5 +1,13 @@
 var gamejs = require('gamejs');
 
+exports.ADJACENT = [
+    [0, 0],
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1]
+];
+
 exports.MOVE_MOD = {  0: [ 0, -1],
                      90: [ 1,  0],
                     180: [ 0,  1],

@@ -10,12 +10,13 @@ var View = exports.View = function(options){
     
     utils.process_options(this, options, {
        world: utils.required,
+       surface: utils.required,
        width: game.settings.DISPLAY_SIZE[0],
        height: game.settings.DISPLAY_SIZE[1],
        offset: [0, 0],
        zoom: game.settings.ZOOM
     });
-    this.surface = null;
+    
     this.follow = null; //object to center view on
 };
 

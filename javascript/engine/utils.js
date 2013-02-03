@@ -1,5 +1,6 @@
 var gamejs = require('gamejs');
 var constants = require('./constants');
+var eventify = require('./lib/events').eventify;
 
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
@@ -96,6 +97,7 @@ exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, 
                      
 };
 
+//todo: optimize this? allow only bool values?
 var Array2D = exports.Array2D = function(size, val){
     this.rows = [];
     this.size = size;
@@ -203,7 +205,7 @@ exports.t = function(){
     return (new Date()).getTime(); 
 };
 
-exports.clonedict = function(d){
+var clonedict = exports.clonedict = function(d){
     var retv = {};    
     for(var key in d){
         if(d.hasOwnProperty(key)){
@@ -213,9 +215,82 @@ exports.clonedict = function(d){
     return retv;
 };
 
+
+//collection of game Objects
+var Collection = exports.Collection = function(){
+    this.objects = [];  
+    this.objects_by_id = {};
+    eventify(this);
+};
+
+Collection.prototype.add = function(obj){
+    this.objects.push(obj);
+    this.objects_by_id[obj.id] = obj;
+    this.fire('add', [obj]);
+};
+
+Collection.prototype.remove = function(obj){
+    for(var i=0;i<this.objects.length;i++){
+        if(this.objects[i].id == obj.id){
+            this.objects.splice(i, 1);
+            break;
+        }
+    }
+    delete this.objects_by_id[obj.id];
+    this.fire('remove', [obj]);
+};
+
+
+Collection.prototype.by_id = function(id){
+    return this.objects_by_id[id];
+};
+
+Collection.prototype.has = function(obj){
+   return this.objects_by_id[obj.id] ? true : false;  
+};
+
+Collection.prototype.iter = function(cb, context){
+    this.objects.forEach(cb, context);  
+};
+
+Collection.prototype.clone = function(){
+    var retv = new Collection();
+    retv.objects = this.objects.slice(0);
+    retv.objects_by_id = clonedict(this.objects_by_id);
+    return retv;
+};
+
+Collection.prototype.pop = function(){
+    var obj = this.objects[0];
+    this.remove(obj);
+    return obj; 
+};
+
+Collection.prototype.len = function(){
+    return this.objects.length;  
+};
+
+Collection.prototype.by_pos = function(pos){
+    var retv=[];
+    this.iter(function(obj){
+        if((obj.position[0] == pos[0]) && (obj.position[1]==pos[1])) retv.push(obj);
+    });
+    return retv;
+};
+
+
+Collection.prototype.serialize = function(){
+    var retv = [];
+    this.iter(function(obj){
+        retv.push(obj.id);
+    }); 
+    return retv;
+};
+
 //mod js objects
 Array.prototype.remove = function(from, to) {
   var rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
+

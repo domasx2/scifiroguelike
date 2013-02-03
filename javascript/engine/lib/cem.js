@@ -82,6 +82,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
              * @return this.
              */
             
+            this.is_type = function(type){
+                for(var i=0;i<this.type.length;i++){
+                    if(this.type[i]==type) return true;
+                }
+                return false;
+            };
+            
             this.get_properties = function(){
                 var properties = {};
                 this.properties.forEach(function(property){
@@ -91,10 +98,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
             
             this.serialize = function(){
-                return {
+                var data = {
                     'name':this.name,
                     'properties':this.get_properties()
                 }
+                
+                for(var key in this){
+                    if(key.search('serialize')==0 && key!='serialize'){
+                        this[key](data.properties);
+                    }
+                }
+                
+                return data;
             }
             
             this.extend = function(obj) {

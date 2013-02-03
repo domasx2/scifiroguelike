@@ -5,6 +5,7 @@ var GameScene  = require('./scenes/game').GameScene;
 var MapGenDemoScene = require('./scenes/mapgen_demo').MapGenDemoScene;
 var resources = require('./resources');
 var settings = require('./settings');
+var items = require('./items');
 
 gamejs.preload(resources.images);
 
@@ -12,10 +13,10 @@ gamejs.ready(function() {
     game.init(settings, resources);
     gamejs.display.setCaption('SciFi roguelike project');
     
-    var display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
+    var display = game.display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
 
-    if(window.mapgendemo) game.scene = new MapGenDemoScene({});
-    else game.scene = GameScene.initial();
+    if(window.mapgendemo) game.scene = new MapGenDemoScene({'display':display});
+    else game.scene = GameScene.initial(display);
 
     var tick = function(deltams) {
         var events = gamejs.event.get();
@@ -23,7 +24,7 @@ gamejs.ready(function() {
         if(game.scene){
             game.scene.update(deltams, events);
             display.fill('#000');
-            game.scene.draw(display);
+            game.scene.draw();
         }
     };
     gamejs.time.fpsCallback(tick, this, settings.FPS);
@@ -41,7 +42,9 @@ function save(){
 
 function load(){
     if((typeof(Storage)!=="undefined")&&localStorage.quicksave){
-        game.scene = GameScene.load(JSON.parse(localStorage.quicksave));
+        var sceneopts = JSON.parse(localStorage.quicksave);
+        sceneopts.display = game.display;
+        game.scene = GameScene.load(sceneopts);
     }else {
         console.log('No storage support??');
     }
