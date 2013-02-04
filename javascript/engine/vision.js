@@ -1,7 +1,7 @@
 var utils = require('./utils');
 var gamejs = require('gamejs');
 var game = require('./game').game;
-
+var mvec = gamejs.utils.vectors.multiply;
 
 var Vision = exports.Vision = function(world, object){
     this.world = world;
@@ -187,19 +187,21 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
 }        
 
 Vision.prototype.load_explored = function(explored){
+    var z = game.settings.ZOOM;
     this.explored = explored;
     var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
     if(!this.surface){
-       this.surface = new gamejs.Surface(this.world.map.size_px);
+       this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
        this.surface.fill('#000');
     } 
-    
+    var drect = null;
     this.explored.iter2d(function(pos, val){
         if(val){
-            this.surface.clear(new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts)); 
+            drect = new gamejs.Rect(mvec(pos,game.tw*z), mvec(game.ts, z));
+            this.surface.clear(drect); 
             if(!this.visible.get(pos)){
                 this.surface.blit(spritesheet.get_surface(0), 
-                    new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts),
+                    drect,
                     new gamejs.Rect([game.tw, 0], game.ts));
             }
         } 
@@ -208,8 +210,9 @@ Vision.prototype.load_explored = function(explored){
 
 Vision.prototype.draw = function(view){
     if(this.redraw){
+      var z = game.settings.ZOOM;
       if(!this.surface){
-           this.surface = new gamejs.Surface(this.world.map.size_px);
+           this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
            this.surface.fill('#000');
       } 
       var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
@@ -217,13 +220,13 @@ Vision.prototype.draw = function(view){
       this.prev_visible.forEach(function(pos){
           if(!this.visible.get(pos)){
               this.surface.blit(spritesheet.get_surface(0), 
-                    new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts),
+                    new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)),
                     new gamejs.Rect([game.tw, 0], game.ts));
           }
       }, this);
       
       this.made_visible.forEach(function(pos){
-           this.surface.clear(new gamejs.Rect([pos[0]*game.tw, pos[1]*game.tw], game.ts)); 
+           this.surface.clear(new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z))); 
       }, this);
 
       this.redraw = false;

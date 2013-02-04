@@ -34,11 +34,11 @@ View.prototype.center_of_map = function(){
 };
 
 View.prototype.set_offset_x = function(x){
-    this.offset[0] = Math.max(0, Math.min(x, this.world.map.size_px[0]*this.zoom-parseInt(this.width/this.zoom)));
+    this.offset = [Math.max(0, Math.min(x, this.world.map.size_px[0]*this.zoom-parseInt(this.width/this.zoom))), this.offset[1]];
 };
 
 View.prototype.set_offset_y = function(y){
-    this.offset[1] = Math.max(0, Math.min(y, this.world.map.size_px[1]*this.zoom-parseInt(this.height/this.zoom)));
+    this.offset = [this.offset[0], Math.max(0, Math.min(y, this.world.map.size_px[1]*this.zoom-parseInt(this.height/this.zoom)))];
 };
 
 View.prototype.get_visible_tiles = function(){
@@ -50,7 +50,7 @@ View.prototype.get_visible_tiles = function(){
 }
 
 View.prototype.draw_map_layer_surface = function(surface){
-    utils.draw(this.surface, surface, [0,0], [this.offset[0]/this.zoom, this.offset[1]/this.zoom], this.zoom);
+    utils.draw(this.surface, surface, [0,0], this.offset, 1);
 };
 
 View.prototype.draw_surface = function(surface, dst_position, src_position, src_size){

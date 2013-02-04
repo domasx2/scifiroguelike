@@ -27,8 +27,10 @@ var Map = exports.Map = function(options){
                                                  
     if(!this.wall_surface) 
         this.wall_surface = this.draw_walls();
-                                                
-     
+        
+    this.floor_surface = zoom_layer(this.floor_surface);
+    this.wall_surface = zoom_layer(this.wall_surface);
+  
 };
 
 Map.load = function(data){
@@ -38,6 +40,14 @@ Map.load = function(data){
         walls: utils.Array2D.load_bool(data.walls)
     });
     return map;
+};
+
+var zoom_layer = exports.zoom_layer = function(layer){
+    var z = game.settings.ZOOM;
+    if(z==1) return layer;
+    var s = new gamejs.Surface(gamejs.utils.vectors.multiply(layer.getSize(), z));
+    s.blit(layer, new gamejs.Rect([0, 0], s.getSize()), new gamejs.Rect([0, 0], layer.getSize()));
+    return s;
 };
 
 Map.prototype.serialize = function(){
