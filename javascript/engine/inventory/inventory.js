@@ -2,16 +2,24 @@ var gamejs = require('gamejs')
 var item = require('./item');
 var utils = require('../utils');
 
-var Inventory  = exports.Inventory = function(object){
-    this.object = object;
+var Inventory  = exports.Inventory = function(owner){
+    this.owner = owner;
     Inventory.superConstructor.apply(this, []);
 };
 
 gamejs.utils.objects.extend(Inventory, utils.Collection);
 
 Inventory.prototype.has_space = function(){
-    return this.object.inventory_size > this.len();
-}
+    return this.owner.inventory_size > this.len();
+};
+
+Inventory.prototype.get_equipped_items = function(){
+    var retv = [];
+    this.iter(function(item){
+        if(item.equipped) retv.push(item);
+    })
+    return retv;
+};
 
 //always contains items on the ground relative to provided object
 var GroundItems = exports.GroundItems = function(relative_to){

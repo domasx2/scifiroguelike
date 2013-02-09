@@ -10,12 +10,12 @@ exports.eventify = function(obj){
         }, this)
     };
     
-    obj.fire = function(event, arguments){
-        if(!arguments) arguments = [];
-        else arguments.splice(0, 0, this);
+    obj.fire = function(event, args){
+        if(!args) args = [this];
+        else args.splice(0, 0, this);
         if(this._callbacks[event]){
             this._callbacks[event].forEach(function(cb){
-                cb[0].apply(cb[1], arguments);
+                cb[0].apply(cb[1], args);
             }, this);
         }
     }

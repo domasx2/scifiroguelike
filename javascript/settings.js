@@ -1,4 +1,4 @@
-exports.DISPLAY_SIZE = [800, 600];
+exports.DISPLAY_SIZE = [$(window).width()-20, $(window).height()-100];
 exports.ZOOM = 2;
 exports.UI_SCALE = 2;
 exports.TILE_WIDTH = 16;

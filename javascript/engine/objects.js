@@ -141,6 +141,8 @@ var Creature = {
     'vision_range':10,
     'inventory_size':10,
     'z':1,
+    '_equipment_slots':['weapon', 'armor', 'helmet'],
+    
     'act':controllers.roam,
     
     'init_inventory':function(world, data){

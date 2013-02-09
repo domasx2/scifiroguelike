@@ -135,7 +135,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     // add a getter and a setter for it
                     if (typeof obj[key] !== "function") {
                         target.set(key, obj[key]);
-                        this.properties.push(key);
+                        if(key[0]!='_')this.properties.push(key);
                         (function(object, property) {
                             // Getter
                             target.__defineGetter__(property, function() {
