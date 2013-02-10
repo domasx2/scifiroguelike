@@ -111,7 +111,6 @@ body{
 	height: 20px;
 	position: relative;
 	background-color: red;
-	float: right;
 }
 
 .character-status .health .filler {
