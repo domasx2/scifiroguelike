@@ -13,6 +13,7 @@ var World = exports.World = function(options){
         turn: 1
     });
   
+    this.scene = null;
     this.objects = new utils.Collection();
     this.event_frames = [];
     this.persistent_events = new events.PersistentEventFrame();
@@ -94,13 +95,21 @@ World.prototype.update_objects = function(deltams){
     });
 };
 
+World.prototype.set_current_actor = function(actor){
+    if(this.current_actor){
+        this.current_actor.fire('end_turn');
+    }
+    this.current_actor = actor;
+    this.current_actor.start_turn();
+}
+
 World.prototype.shift_turn_queue = function(){
     if(this.turn_pending_queue.len()){ //next actor this turn
-        this.current_actor = this.turn_pending_queue.pop(); 
+        this.set_current_actor(this.turn_pending_queue.pop()); 
     } else {
         if(this.turn_queue.len()){ //next turn
             this.turn_pending_queue = this.turn_queue.clone();
-            this.current_actor = this.turn_pending_queue.pop(); 
+            this.set_current_actor(this.turn_pending_queue.pop()); 
             this.turn += 1;
             return true;
         }
@@ -112,7 +121,11 @@ World.prototype.process_turn = function(events){
     if(!this.turn_queue.len()) return;
     var process_queue = true;
     while(process_queue){
-        if(this.current_actor) process_queue = this.current_actor.act(this, events);
+        if(this.current_actor) {
+            var skip = false;
+            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor.act(this, events);
+            process_queue = !this.current_actor.can_act();
+        }
         if(process_queue) this.shift_turn_queue();
         if(this.events_in_progress()) break;
     }
@@ -139,6 +152,7 @@ World.prototype.spawn = function(type, options){
 };
 
 World.prototype.add_event = function(event, new_frame){
+    if(event.finished) return;
     if(this.event_frames.length==0 || new_frame){
         var frame = new events.EventFrame();
         frame.add(event);
@@ -151,7 +165,7 @@ World.prototype.add_event = function(event, new_frame){
 World.prototype.update_events = function(deltams){
     if(this.event_frames.length){
         this.event_frames[0].update(deltams);
-        if(this.event_frames[0].is_finished()){
+        while(this.event_frames.length && this.event_frames[0].is_finished()){
             this.event_frames.shift(0);
         }
     }
@@ -162,26 +176,6 @@ World.prototype.events_in_progress = function(){
     return this.event_frames.length > 0;  
 };
 
-World.prototype.event_move = function(object, direction, no_wait){
-    /*if possible, creates a move event for object and returns true.
-    * if impossible (path blocked), returns false
-    * 
-    * no_wait - optional. if true, does not wait for this event to finish before initating next turn.
-    * useful for AI creatures, so player is not forced to wait excessively
-    */
-    if(this.is_tile_threadable(utils.mod(object.position, constants.MOVE_MOD[direction]))){
-        var event = new events.ObjectMoveEvent({
-            direction: direction,
-            object: object,
-            owner: object
-        });
-        
-        if(no_wait) this.persistent_events.add(event);
-        else this.add_event(event);
-        return true;
-    }
-    return false;
-};
 
 World.prototype.is_tile_transparent = function(position){
     if(!this.map.is_wall(position)){

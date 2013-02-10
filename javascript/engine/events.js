@@ -64,12 +64,13 @@ var Event = exports.Event = function(options){
 Event.prototype.update = function(deltams){
     this.age += deltams;
     if(this.duration && this.age >= this.duration){
-        this.finished=true;
         this.finish();
     }
 };
 
-Event.prototype.finish = function(){};
+Event.prototype.finish = function(){
+    this.finished = true;
+};
 
 
 var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
@@ -92,6 +93,7 @@ var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
 gamejs.utils.objects.extend(ObjectMoveEvent, Event);
 
 ObjectMoveEvent.prototype.finish = function(){
+    Event.prototype.finish.apply(this, []);
     this.object.set_sprite('static', true);
 };
 

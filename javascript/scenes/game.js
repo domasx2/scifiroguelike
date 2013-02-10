@@ -27,7 +27,8 @@ GameScene.initial = function (display){
     
     var protagonist = world.spawn('protagonist', {
         position:gen.start_pos,
-        angle: 90
+        angle: 90,
+        'health': 80
     });
     
     world.spawn('engineer', {

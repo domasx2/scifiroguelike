@@ -89,3 +89,55 @@ body{
 	background: #00beff;
 	color: white;
 }
+
+/*CHARACTER STATUS */
+.character-status {
+	position: fixed;
+	
+}
+
+.character-title {
+	color: white;
+	text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;  
+    display: block;
+}
+
+.character-status .health {
+	width: 100px;
+	height: 20px;
+	position: relative;
+	background-color: red;
+	float: right;
+}
+
+.character-status .health .filler {
+	background-color: green;
+	height: 20px;
+}
+
+.character-status .health label {
+	position: absolute;
+	top: 2px;
+	left: 4px;
+	color: white;
+}
+
+
+.ac {
+	width:10px;
+	height:10px;
+	display: inline-block;
+	margin-right: 2px;
+}
+
+.ac-move {
+	background-color: yellow;
+}
+
+.ac-action {
+	background-color: orange;
+}

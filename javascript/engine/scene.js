@@ -5,6 +5,7 @@ var World  = require('./world').World;
 var view   = require('./view');
 var events = require('./events');
 var ui_container = require('./ui/container');
+var ui_character = require('./ui/character');
 
 var Scene = exports.Scene = function(options){
     utils.process_options(this, options, {
@@ -23,6 +24,8 @@ var WorldScene = exports.WorldScene = function(options){
         'world': utils.required,
         'protagonist':null
     });
+    
+    this.world.scene = this;
 
     this.view = new view.View({
         world: this.world,
@@ -52,6 +55,11 @@ WorldScene.load = function(data, cls){
 
 gamejs.utils.objects.extend(WorldScene, Scene);
 
+WorldScene.prototype.can_see = function(position){
+    if(this.protagonist && this.protagonist.vision) return this.protagonist.vision.visible.get(position);
+    return true;
+}
+
 WorldScene.prototype.set_protagonist = function(protagonist){
     this.protagonist = protagonist;
     this.view.follow = protagonist;
@@ -71,6 +79,11 @@ WorldScene.prototype.init_ui = function(){
            'collection':new inventory.GroundItems(this.protagonist),
            'owner':this.protagonist,
            'position':[10, 120]
+        });
+        
+        this.chracater_status = new ui_character.CharacterStatus({
+            'owner':this.protagonist,
+            'position':[400, 10]
         });
     }
 };

@@ -6,6 +6,8 @@ var Vision = require('./vision').Vision;
 var Inventory = require('./inventory/inventory').Inventory; 
 var controllers = require('./controllers');
 var eventify = require('./lib/events').eventify;
+var constants = require('./constants');
+var events = require('./events');
 
 
 var Object = {
@@ -147,6 +149,67 @@ var Creature = {
     'vision_range':10,
     'inventory_size':10,
     'z':1,
+    
+    'speed_move': 2,
+    'speed_act':1,
+    
+    'moves_left':2,
+    'actions_left':1,
+    'turn_in_progress': false,
+    
+    'can_act': function(){
+        return this.moves_left + this.actions_left;  
+    },
+    
+    'end_turn':function(){
+        this.moves_left = 0;
+        this.actions_left = 0;
+    },
+    
+    'start_turn':function(){
+        this.moves_left = this.speed_move;
+        this.actions_left = this.speed_act;
+        this.fire('start_turn');
+    },
+    
+    'consume_move':function(){
+        if(this.moves_left) this.moves_left--;
+        else this.consume_action();
+        this.fire('consume_move');
+    },
+    
+    'consume_action':function(){
+        if(this.actions_left) this.actions_left --;
+        else console.log('Consuming action but no actions left!', this);
+        this.fire('consume_action');
+    },
+    
+    'move':function(direction){
+        if(!(this.moves_left+this.actions_left)) {
+            console.log('Trying to move but got no moves left!', this);
+        }else{
+            var new_pos = utils.mod(this.position, constants.MOVE_MOD[direction]);
+            var old_pos = this.position;
+            if(this.world.is_tile_threadable(new_pos)){
+                var event = new events.ObjectMoveEvent({
+                    direction: direction,
+                    object: this,
+                    owner: this
+                });
+                
+                this.consume_move();
+                //finish move instantly if invisible
+                if(!this.world.scene.can_see(new_pos) && !this.world.scene.can_see(old_pos)){
+                    event.finish();
+                } 
+                this.world.add_event(event);
+                this.fire('move', [new_pos]);
+                return event;
+            }
+        }
+        return false;
+    },
+    
     '_equipment_slots':['weapon', 'armor', 'helmet'],
     
     'act':controllers.roam,

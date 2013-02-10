@@ -15,21 +15,21 @@ exports.player_move = function(world, events){
             var angle = MOVE_KEY_MATRIX[key]; 
             if(!(angle==undefined)){
                 this.set_angle(angle)
-                retv = world.event_move(this, angle);
-                return true;
+                return this.move(angle);
             }
         } 
     }, this);
-    return retv;
-};
-
-exports.roam = function(world, events){
-    world.event_move(this, Math.floor((Math.random()*4))*90, true);
     return true;
 };
 
+exports.roam = function(world, events){
+    if(!this.move(Math.floor((Math.random()*4))*90)) this.consume_move();
+    return false;
+};
+
 exports.do_nothing = function(world, events){
-    return true;  
+    this.end_turn(); 
+    return true;
 };
 
 exports.do_nothing.skip = true;
