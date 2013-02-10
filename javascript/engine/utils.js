@@ -223,10 +223,18 @@ var Collection = exports.Collection = function(){
     eventify(this);
 };
 
+Collection.prototype.get_by_type = function(type){
+    for(var i=0;i<this.objects.length;i++){
+        if(this.objects[i].is_type(type)) return this.objects[i];
+    }
+    return null;
+};
+
 Collection.prototype.add = function(obj){
     this.objects.push(obj);
     this.objects_by_id[obj.id] = obj;
     this.fire('add', [obj]);
+    obj.on('destroy', this.remove, this);
 };
 
 Collection.prototype.remove = function(obj){
@@ -238,6 +246,7 @@ Collection.prototype.remove = function(obj){
     }
     delete this.objects_by_id[obj.id];
     this.fire('remove', [obj]);
+    obj.off('destroy', this.remove, this);
 };
 
 

@@ -39,7 +39,7 @@ GameScene.initial = function (display){
         position:engine.utils.mod(gen.start_pos, [0, 1]),
     });
     
-    world.spawn('pistol', {
+    world.spawn('pistol_clip', {
         position:engine.utils.mod(gen.start_pos, [0, 2]),
     });
     

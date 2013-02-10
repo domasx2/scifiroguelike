@@ -94,6 +94,12 @@ exports.sprites = {
     //ITEMS
     'pistol_clip_static':{
         'type':'static',
+        'offset':[16, 0],
+        'spritesheet_url':'./public/img/items/pistol_clip.png'
+    },
+    
+    'pistol_clip_inventory':{
+        'type':'static',
         'spritesheet_url':'./public/img/items/pistol_clip.png'
     },
     

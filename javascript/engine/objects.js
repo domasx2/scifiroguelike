@@ -21,6 +21,8 @@ var Object = {
     'vision_range':0, 
     'z':0,
     
+   
+    
     //METHODS
     'init':function(world){
         this.world = world;
@@ -38,6 +40,10 @@ var Object = {
                 this[key](world);
             }
         }
+    },
+    
+    'destroy':function(){
+        this.fire('destroy');  
     },
     
     'get_adjacent_items':function(){

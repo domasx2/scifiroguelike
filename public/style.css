@@ -45,8 +45,25 @@ body{
 .ui-item {
 	display: inline-block;
 	padding: 3px;
+	position: relative;
 }
 
+.ui-item .equip-tag {
+	position: absolute;
+	color: orange;
+	font-size: 12pt;
+	right: 2px;
+	bottom: 2px;
+}
+
+
+.ui-item .ammo-tag {
+	position: absolute;
+	color: red;
+	font-size: 12pt;
+	right: 14px;
+	bottom: 2px;
+}
 
 /*CONTEXT MENU */ 
 .context-menu {

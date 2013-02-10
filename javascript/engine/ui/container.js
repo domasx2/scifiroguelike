@@ -18,6 +18,31 @@ var Item = exports.Item = function(item){
     this.dom.click($.proxy(function(event){
         this.fire('click', [event]);
     }, this));
+    
+     
+    if(this.item.is_type('equippable')){
+        this.equip_tag = $('<div class="equip-tag">E</div>');
+        this.equip_tag.appendTo(this.dom);
+        this.item.on(['equip', 'unequip'], this.update, this);
+    }
+    
+    if(this.item.is_type('usesammo')){
+        this.ammo_tag = $('<div class="ammo-tag"></div>');
+        this.ammo_tag.appendTo(this.dom);
+        this.item.on('reloaded', this.update, this);
+    }
+    this.update();
+};
+
+Item.prototype.update = function(item){
+    if(this.item.is_type('equippable')){
+        if(this.item.equipped) this.equip_tag.show();
+        else this.equip_tag.hide();
+    }
+    
+    if(this.item.is_type('usesammo')){
+        this.ammo_tag.html(this.item.ammo);
+    }
 }
 
 var ItemContainer = exports.ItemContainer = function(options){
