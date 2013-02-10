@@ -31,6 +31,10 @@ Dialog.prototype.hide = function(){
 };
 
 
+Dialog.prototype.destroy = function(){
+    this.dialog.parent().remove();
+}
+
 var ContextMenu = exports.ContextMenu = function(options){
     eventify(this);
     utils.process_options(this, options, {

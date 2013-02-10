@@ -13,6 +13,10 @@ var Scene = exports.Scene = function(options){
     
 };
 
+Scene.prototype.destroy = function(){
+    
+};
+
 var WorldScene = exports.WorldScene = function(options){
     WorldScene.superConstructor.apply(this, [options]);
     utils.process_options(this, options, {
@@ -69,6 +73,11 @@ WorldScene.prototype.init_ui = function(){
            'position':[10, 120]
         });
     }
+};
+
+WorldScene.prototype.destroy = function(){
+    if(this.inventory_ui) this.inventory_ui.destroy();
+    if(this.ground_ui) this.ground_ui.destroy();  
 };
 
 WorldScene.prototype.handle_events = function(events){

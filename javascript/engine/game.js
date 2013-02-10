@@ -20,6 +20,11 @@ Game.prototype.init = function(settings,  resources){
     
 }
 
+Game.prototype.set_scene = function(scene){
+    if(this.scene) this.scene.destroy();
+    this.scene = scene;    
+};
+
 Game.prototype.handle_events = function(events){
     events.forEach(function(event){
         if(event.type == gamejs.event.KEY_DOWN){

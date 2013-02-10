@@ -15,8 +15,8 @@ gamejs.ready(function() {
     
     var display = game.display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
 
-    if(window.mapgendemo) game.scene = new MapGenDemoScene({'display':display});
-    else game.scene = GameScene.initial(display);
+    if(window.mapgendemo) game.set_scene(new MapGenDemoScene({'display':display}));
+    else game.set_scene(GameScene.initial(display));
 
     var tick = function(deltams) {
         var events = gamejs.event.get();
@@ -44,7 +44,7 @@ function load(){
     if((typeof(Storage)!=="undefined")&&localStorage.quicksave){
         var sceneopts = JSON.parse(localStorage.quicksave);
         sceneopts.display = game.display;
-        game.scene = GameScene.load(sceneopts);
+        game.set_scene(GameScene.load(sceneopts));
     }else {
         console.log('No storage support??');
     }

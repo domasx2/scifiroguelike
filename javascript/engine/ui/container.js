@@ -62,6 +62,8 @@ var ItemContainer = exports.ItemContainer = function(options){
 
 gamejs.utils.objects.extend(ItemContainer, base.Dialog);
 
+
+
 ItemContainer.prototype.update_items = function(){
     this.collection.iter(function(item){
         if(!this.items_by_id[item.id]){
