@@ -15,6 +15,7 @@ var Dialog = exports.Dialog = function(options){
         height: 100,
         position: this.position
     });
+    this.dom = this.dialog.parent();
 
     if(!this.close_button){
         this.dialog.parent().find('.ui-dialog-titlebar-close').remove();

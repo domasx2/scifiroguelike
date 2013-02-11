@@ -4,6 +4,7 @@ var utils = require('../utils');
 var game = require('../game').game;
 var sprite = require('../sprite');
 var eventify = require('../lib/events').eventify;
+var uiutils = require('./utils');
 
 var Item = exports.Item = function(item){
     eventify(this);
@@ -51,7 +52,11 @@ var ItemContainer = exports.ItemContainer = function(options){
         'owner':utils.required,
     });
     
+    
+    
     ItemContainer.superConstructor.apply(this, [options]);
+    
+    uiutils.disable_between_turns(this.dom, this.owner);
     
     this.collection.on('add', this.update_items, this);
     this.collection.on('remove', this.update_items, this);

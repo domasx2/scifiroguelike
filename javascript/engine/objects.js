@@ -188,8 +188,8 @@ var Creature = {
         if(!(this.moves_left+this.actions_left)) {
             console.log('Trying to move but got no moves left!', this);
         }else{
+            var old_pos = this.position.slice(0);
             var new_pos = utils.mod(this.position, constants.MOVE_MOD[direction]);
-            var old_pos = this.position;
             if(this.world.is_tile_threadable(new_pos)){
                 var event = new events.ObjectMoveEvent({
                     direction: direction,
@@ -199,7 +199,7 @@ var Creature = {
                 
                 this.consume_move();
                 //finish move instantly if invisible
-                if(!this.world.scene.can_see(new_pos) && !this.world.scene.can_see(old_pos)){
+                if(!(this.world.scene.can_see(new_pos) || this.world.scene.can_see(old_pos))){
                     event.finish();
                 } 
                 this.world.add_event(event);
