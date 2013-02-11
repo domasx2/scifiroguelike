@@ -1,4 +1,5 @@
 var gamejs = require('gamejs');
+var vec = gamejs.utils.vectors;
 var constants = require('./constants');
 var eventify = require('./lib/events').eventify;
 
@@ -19,6 +20,12 @@ exports.shift_left = function(position, direction){
 
 exports.shift_right = function(position, direction){
     return [position[0]+constants.MOVE_MOD_RIGHT[direction][0], position[1]+constants.MOVE_MOD_RIGHT[direction][1]];
+};
+
+exports.direction = function(from, to){
+    var angle = (360+gamejs.utils.math.degrees(vec.angle([0, -1], vec.subtract(to, from)))) % 360;
+    var retv= parseInt(angle / 90) * 90;
+    return retv;
 };
 
 exports.process_options = function(object, options, default_options){

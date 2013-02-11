@@ -58,6 +58,3 @@ GameScene.load = function(data){
     
 gamejs.utils.objects.extend(GameScene, engine.scene.WorldScene);
 
-
-
-GameScene.prototype.handle_events = function(events){}

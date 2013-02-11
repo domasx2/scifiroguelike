@@ -1,7 +1,28 @@
 var utils = require('./utils');
 var gamejs = require('gamejs');
 var game = require('./game').game;
+var constants = require('./constants');
 var mvec = gamejs.utils.vectors.multiply;
+
+var ASMap = function(vision){
+
+    this.adjacent = function(origin) {
+        var retv = [];
+        constants.ADJACENT.forEach(function(mod){
+            var p =utils.mod(origin, mod);
+            if(vision.explored.get(p) && vision.object.world.is_tile_threadable(p)) retv.push(p);
+        }, this);
+        return retv;
+    };
+    
+    this.estimatedDistance = function(pointA, pointB) {
+        return gamejs.utils.vectors.distance(pointA, pointB);
+    };
+
+    this.actualDistance = function(pointA, pointB) {
+        return gamejs.utils.vectors.distance(pointA, pointB);
+    };
+};
 
 var Vision = exports.Vision = function(world, object){
     this.world = world;
@@ -13,6 +34,10 @@ var Vision = exports.Vision = function(world, object){
     this.redraw = false;
     this.made_visible = [];
     this.prev_visible = [];
+};
+
+Vision.prototype.get_path = function(from, to){
+    return gamejs.pathfinding.astar.findRoute(new ASMap(this), from, to, 100);
 };
 
 Vision.prototype.init_fov = function(){

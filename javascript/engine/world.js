@@ -123,7 +123,7 @@ World.prototype.process_turn = function(events){
     while(process_queue){
         if(this.current_actor) {
             var skip = false;
-            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor.act(this, events);
+            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor.controller.act(events);
             process_queue = !this.current_actor.can_act();
         }
         if(process_queue) this.shift_turn_queue();
@@ -147,7 +147,7 @@ World.prototype.spawn = function(type, options){
     }
     obj.init(this);
     this.objects.add(obj);
-    if(!obj.act.skip) this.turn_queue.add(obj);
+    if(obj.controller) this.turn_queue.add(obj);
     return obj;
 };
 

@@ -18,6 +18,10 @@ Scene.prototype.destroy = function(){
     
 };
 
+Scene.prototype.handle_events = function(events){
+    
+};
+
 var WorldScene = exports.WorldScene = function(options){
     WorldScene.superConstructor.apply(this, [options]);
     utils.process_options(this, options, {
@@ -91,10 +95,6 @@ WorldScene.prototype.init_ui = function(){
 WorldScene.prototype.destroy = function(){
     if(this.inventory_ui) this.inventory_ui.destroy();
     if(this.ground_ui) this.ground_ui.destroy();  
-};
-
-WorldScene.prototype.handle_events = function(events){
-    
 };
 
 WorldScene.prototype.serialize = function(){

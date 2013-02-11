@@ -1,4 +1,5 @@
 var gamejs = require('gamejs');
+var vec = gamejs.utils.vectors;
 var utils = require('./utils');
 var game = require('./game').game;
 
@@ -18,6 +19,15 @@ var View = exports.View = function(options){
     });
     
     this.follow = null; //object to center view on
+};
+
+View.prototype.world_pos = function(screen_pos){
+    //translate screen position into world position
+    tile_pos = vec.divide(vec.add(screen_pos, this.offset), game.tw*this.zoom);
+    tile_pos = [parseInt(tile_pos[0]), parseInt(tile_pos[1])];
+    if(tile_pos[0]>=0 && tile_pos[0]<this.world.map.size[0] &&
+       tile_pos[1]>=0 && tile_pos[1]<this.world.map.size[1]) return tile_pos;
+    return null;   
 };
 
 View.prototype.move_offset_x = function(x){

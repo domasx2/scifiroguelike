@@ -21,6 +21,7 @@ var Object = {
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
     'vision_range':0, 
+    'controller': null,
     'z':0,
     
    
@@ -32,6 +33,7 @@ var Object = {
         this._sprites = {};
         this.set_sprite(this.sprite, true);
         this.vision = null;
+        
         if(this.vision_range){
             this.vision = new Vision(this.world, this);
             this.vision.update(); 
@@ -42,6 +44,10 @@ var Object = {
                 this[key](world);
             }
         }
+        
+        if(this.controller){
+            this.controller = new this.controller(this);
+        }
     },
     
     'destroy':function(){
@@ -51,8 +57,6 @@ var Object = {
     'get_adjacent_items':function(){
         return this.world.get_adjacent_objects(this.position, 'item');  
     },
-    
-    'act': controllers.do_nothing,
     
     'set_angle':function(angle){
         this.angle = angle;
@@ -161,6 +165,10 @@ var Creature = {
         return this.moves_left + this.actions_left;  
     },
     
+    'can_move':function(){
+        return this.moves_left || this.actions_left;  
+    },
+    
     'end_turn':function(){
         this.moves_left = 0;
         this.actions_left = 0;
@@ -212,7 +220,7 @@ var Creature = {
     
     '_equipment_slots':['weapon', 'armor', 'helmet'],
     
-    'act':controllers.roam,
+    'controller':controllers.roam,
     
     'init_inventory':function(world, data){
         this.inventory = new Inventory(this);
