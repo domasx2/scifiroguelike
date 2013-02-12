@@ -72,7 +72,6 @@ PlayerController.prototype.mouse_action = function(events){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
                 this.destination = world_pos;
-                console.log(this.destination);
             }
         }
     }, this);
