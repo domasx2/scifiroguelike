@@ -37,6 +37,13 @@ Controller.prototype.proceed = function(){
 
 var PlayerController = exports.PlayerController = function(owner){
     PlayerController.superConstructor.apply(this, [owner]);
+    
+    //cancel move order on new turn if enemies are visible
+    if(this.owner.vision){
+        this.owner.on('start_turn', function(){
+            if(this.owner.vision.enemies_visible()) this.destination=null;
+        }, this);
+    }
 };
 
 gamejs.utils.objects.extend(PlayerController, Controller);

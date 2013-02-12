@@ -55,6 +55,19 @@ Vision.prototype.can_see = function(pos){
     }
 };
 
+Vision.prototype.enemies_visible = function(){
+    //return true if at least one enemy is visible;
+    var objs;
+    for(var i=0;i<this.made_visible;i++){
+        objs = this.world.objects.by_pos(this.made_visible[i]);
+        for(var k=0;k<objs.length;k++){
+            if(this.object.enemies_with(objs[k])) return true;
+        }
+    }
+    return false;
+    
+};
+
 Vision.prototype.postprocess = function(){
 
 };

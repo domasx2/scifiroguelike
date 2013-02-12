@@ -170,11 +170,21 @@ var Creature = {
     },
     
     'end_turn':function(){
+        //call this to end turn
         this.moves_left = 0;
         this.actions_left = 0;
     },
     
+    'enemies_with': function(obj){
+        //is this creature hostile towards obj and vice/versa?
+        //TODO: substantiate.. teams, etc
+        if(obj.id==this.id) return false;
+        if(obj.is_type('creature')) return true;
+        return false;
+    },
+    
     'start_turn':function(){
+        //called by world on creatures turn start
         this.moves_left = this.speed_move;
         this.actions_left = this.speed_act;
         this.fire('start_turn');
