@@ -36,7 +36,18 @@ var Object = {
         
         if(this.vision_range){
             this.vision = new Vision(this.world, this);
-            this.vision.update(); 
+            /*
+             * so we need to suppress objects coming into view events on initial vision calc
+             * and then remove suppression when objects finish spawning in (first turn)
+             * this can propably be done better, but cant figure out now 
+             */
+            this.vision.objects._suppress_events = true;
+            this.vision.update();
+            function desuppress(){
+                this.vision.objects._suppress_events = false;
+                this.off('start_turn', desuppress, this);
+            } 
+            this.on('start_turn', desuppress, this);
         }
         
         for(key in this){
@@ -91,10 +102,12 @@ var Object = {
     },
 
     'teleport':  function(position){
+        var oldpos = this.position;
         this.position = position;
         this.snap_sprite();
         if(this.vision) this.vision.update();
-        this.fire('teleport', [position]);
+        this.fire('teleport', [oldpos, position]);
+        this.world.fire('teleport', [this, oldpos, position])
     },
     
     'absolute_position':function(relative_position){

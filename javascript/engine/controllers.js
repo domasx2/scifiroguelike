@@ -38,10 +38,24 @@ Controller.prototype.proceed = function(){
 var PlayerController = exports.PlayerController = function(owner){
     PlayerController.superConstructor.apply(this, [owner]);
     
-    //cancel move order on new turn if enemies are visible
+    
     if(this.owner.vision){
+        
+        //cancel move order if an enemy comes into view
+        this.owner.vision.objects.on('add', function(objects, obj){
+            if(obj.is_type('creature') && obj.enemies_with(this.owner)){
+                this.destination = null;
+            }
+        }, this);
+        
+        //cancel move order if no starting turn enemies are visible
         this.owner.on('start_turn', function(){
-            if(this.owner.vision.enemies_visible()) this.destination=null;
+            this.owner.vision.objects.objects.some(function(obj){
+                if(obj.is_type('creature') && obj.enemies_with(this.owner)){
+                    this.destination = null;
+                    return true;
+                }
+            }, this);
         }, this);
     }
 };

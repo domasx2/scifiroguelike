@@ -5,6 +5,7 @@ var constants = require('./constants');
 var game = require('./game').game;
 var objects = require('./objects');
 var Map = require('./maps').Map;
+var eventify = require('./lib/events').eventify;
 
 
 var World = exports.World = function(options){
@@ -12,7 +13,7 @@ var World = exports.World = function(options){
         map: utils.required,
         turn: 1
     });
-  
+    eventify(this);
     this.scene = null;
     this.objects = new utils.Collection();
     this.event_frames = [];
@@ -147,6 +148,8 @@ World.prototype.spawn = function(type, options){
     }
     obj.init(this);
     this.objects.add(obj);
+    obj.fire('spawn');
+    this.fire('spawn', [obj]);
     if(obj.controller) this.turn_queue.add(obj);
     return obj;
 };

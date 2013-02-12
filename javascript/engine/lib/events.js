@@ -8,6 +8,8 @@ exports.eventify = function(obj){
         return events;
     };
     
+    obj._suppress_events = false;
+    
     obj.on = function(events, callback, context){
         
         evlist(events).forEach(function(event){
@@ -29,6 +31,8 @@ exports.eventify = function(obj){
     };
     
     obj.fire = function(event, args){
+        //console.log(event, args);
+        if(this._suppress_events) return;
         if(!args) args = [this];
         else args.splice(0, 0, this);
         if(this._callbacks[event]){

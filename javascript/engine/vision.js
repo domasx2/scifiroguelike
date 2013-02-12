@@ -3,6 +3,7 @@ var gamejs = require('gamejs');
 var game = require('./game').game;
 var constants = require('./constants');
 var mvec = gamejs.utils.vectors.multiply;
+var eventify = require('./lib/events').eventify;
 
 var ASMap = function(vision){
 
@@ -25,6 +26,7 @@ var ASMap = function(vision){
 };
 
 var Vision = exports.Vision = function(world, object){
+    eventify(this);
     this.world = world;
     this.object = object;
     this.explored = new utils.Array2D(world.map.size);
@@ -32,8 +34,14 @@ var Vision = exports.Vision = function(world, object){
     this.init_fov();
     this.surface = null;
     this.redraw = false;
+    this.objects = new utils.Collection(); //objects that are visible
     this.made_visible = [];
     this.prev_visible = [];
+    this.world.on(['teleport', 'spawn'], this.object_came_into_view, this);
+};
+
+Vision.prototype.object_came_into_view = function(world, obj){
+    if(this.visible.get(obj.position) && !this.objects.has(obj)) this.objects.add(obj);
 };
 
 Vision.prototype.get_path = function(from, to){
@@ -52,24 +60,20 @@ Vision.prototype.can_see = function(pos){
         this.visible.set(pos, true);
         this.explored.set(pos, true);  
         this.made_visible.push(pos);
+        
+        //add objects that came into view
+        this.world.objects.by_pos(pos).forEach(function(obj){
+            if(!this.objects.has(obj)) this.objects.add(obj);
+        }, this);
     }
-};
-
-Vision.prototype.enemies_visible = function(){
-    //return true if at least one enemy is visible;
-    var objs;
-    for(var i=0;i<this.made_visible.length;i++){
-        objs = this.world.objects.by_pos(this.made_visible[i]);
-        for(var k=0;k<objs.length;k++){
-            if(this.object.enemies_with(objs[k])) return true;
-        }
-    }
-    return false;
-    
 };
 
 Vision.prototype.postprocess = function(){
-
+    
+    //remove objects that are no longer visible
+    this.objects.objects.slice(0).forEach(function(obj){
+        if(!this.visible.get(obj.position)) this.objects.remove(obj); 
+    }, this);
 };
 
     
