@@ -85,10 +85,21 @@ PlayerController.prototype.mouse_action = function(events){
         if(event.type == gamejs.event.MOUSE_DOWN){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
-                this.destination = world_pos;
+                objs = this.owner.world.objects.by_pos(world_pos);
+                if(!objs.length){
+                    this.go_to(world_pos);
+                }
             }
         }
     }, this);
+};
+
+PlayerController.prototype.go_to = function(pos){
+    this.destination = pos;  
+    this.owner.world.spawn_particle('sprite', {
+        sprite_name:'action_move',
+        position_px:utils.pos_px(pos)
+    });
 };
 
 PlayerController.prototype.act = function(events){

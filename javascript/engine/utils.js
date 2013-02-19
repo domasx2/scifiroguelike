@@ -2,27 +2,36 @@ var gamejs = require('gamejs');
 var vec = gamejs.utils.vectors;
 var constants = require('./constants');
 var eventify = require('./lib/events').eventify;
+var game = require('./game').game;
 
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
 
+exports.pos_px = function(world_pos){
+    //world tile position into pixel position
+    return vec.multiply(world_pos, game.tw);
+}
+
 exports.mod = function(position, mod){
-    return [position[0]+mod[0], position[1]+mod[1]];  
+    //i don't know why i have this
+    return vec.add(position, mod);  
 };
 
 exports.shift = function(position, direction){
-    return [position[0]+constants.MOVE_MOD[direction][0], position[1]+constants.MOVE_MOD[direction][1]];
+    //direction is degress (0, 90, 180 or 270). move tile position by 1 in this direction
+    return vec.add(position, constants.MOVE_MOD[direction]);
 };
 
 exports.shift_left = function(position, direction){
-    return [position[0]+constants.MOVE_MOD_LEFT[direction][0], position[1]+constants.MOVE_MOD_LEFT[direction][1]];
+    return vec.add(position, constants.MOVE_MOD_LEFT[direction]);
 };
 
 exports.shift_right = function(position, direction){
-    return [position[0]+constants.MOVE_MOD_RIGHT[direction][0], position[1]+constants.MOVE_MOD_RIGHT[direction][1]];
+    return vec.add(position, constants.MOVE_MOD_RIGHT[direction]);
 };
 
 exports.direction = function(from, to){
+    //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees
     var angle = (360+gamejs.utils.math.degrees(vec.angle([0, -1], vec.subtract(to, from)))) % 360;
     var retv= parseInt(angle / 90) * 90;
     return retv;

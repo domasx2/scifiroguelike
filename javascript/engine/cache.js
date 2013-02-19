@@ -41,6 +41,7 @@ SpriteSheet.prototype.get_surface = function(angle){
 };
 
 SpriteSheet.prototype.prerotate = function(step, size){
+    
     var source = this.surfaces[0];
     var source_size = source.getSize();
     var xlen = source_size[0]/size[0];
@@ -77,12 +78,23 @@ exports.Cache = function(resources){
     gamejs.utils.objects.keys(resources.sprites).forEach(function(sprite_def_key){
         var sprite_def = resources.sprites[sprite_def_key];
         
+        
         //initialize some optional attrs
         if(!sprite_def.offset) sprite_def.offset = [0, 0];
         if(!sprite_def.cell_size) sprite_def.cell_size = [game.settings.TILE_WIDTH, game.settings.TILE_WIDTH];
         
+        //init sheet and prerotate if needed
         var sheet = this.spritesheets[sprite_def.spritesheet_url];
         if(!sheet) throw "Undefined spritesheet for sprite: " + sprite_def_key;
         if(sprite_def.angle_step) sheet.prerotate(sprite_def.angle_step, sprite_def.cell_size);
+        
+        //if animated and frame sequence not defined, calc it
+        if(sprite_def.type == 'animated' && !sprite_def.frame_sequence){
+            sprite_def.frame_sequence = [];
+            for(var i=0; i<sheet.get_surface(0).getSize()[0]/sprite_def.cell_size[0];i++){
+                sprite_def.frame_sequence.push(i);
+            }
+        };
+        
     }, this);
 };

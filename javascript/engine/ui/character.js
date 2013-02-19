@@ -19,9 +19,13 @@ var CharacterStatus = exports.CharacterStatus = function(options){
     this.owner.on('consume_move', this.consume_move, this);
     this.owner.on('consume_action', this.consume_action, this);
     this.update_health();
-    this.refresh_ac();
     this.move_ticks = [];
     this.action_ticks = [];
+    this.refresh_ac();
+};
+
+CharacterStatus.prototype.destroy = function(){
+    this.dom.remove();  
 };
 
 CharacterStatus.prototype.consume_action = function(){

@@ -12,7 +12,10 @@ var events = require('./events');
 
 var Object = {
     
-    //PROPERTIES
+    //PROPERTIES,
+    '_previous_position': null, //this is needed to know when to draw objects that are 
+                                //moving into fog of war/unexplored, and is set by 
+                                //move event
     'position':[0, 0],
     'angle':0,
     'sprite_name':'', //base name for sprite
@@ -75,7 +78,7 @@ var Object = {
     },
     
     'get_position_px': function(){
-        return [this.position[0] * game.settings.TILE_WIDTH, this.position[1] * game.settings.TILE_WIDTH];  
+        return utils.pos_px(this.position);  
     },
     
     'draw': function(view){

@@ -45,6 +45,7 @@ AnimatedSprite.prototype.reset = function(){
 };
 
 AnimatedSprite.prototype.draw = function(view){
+    if(this.finished) return;
     var offset = [this.offset[0]+this.current_frame * this.definition.cell_size[0], this.offset[1]];
     view.draw_surface(this.spritesheet.get_surface(this.angle), this.position, offset, this.definition.cell_size)
 };
@@ -52,11 +53,12 @@ AnimatedSprite.prototype.draw = function(view){
 AnimatedSprite.prototype.update = function(deltams){
     this.age += deltams;
     if(this.age > this.definition.duration){
-        this.fininshed = true;
+        if(!this.loop) this.finished = true;
         this.age = this.age % this.definition.duration;
     }  
-    
-    this.current_frame_index = parseInt(this.age / (this.definition.duration/this.definition.frame_sequence.length));
+    var fs = this.definition.frame_sequence; 
+    this.current_frame_index = parseInt(this.age / (this.definition.duration/fs.length));
+    if(this.current_frame_index == fs.length) this.current_frame_index--;
     this.current_frame = this.definition.frame_sequence[this.current_frame_index];
 };
 

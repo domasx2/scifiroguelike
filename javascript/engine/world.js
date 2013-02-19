@@ -5,6 +5,7 @@ var constants = require('./constants');
 var game = require('./game').game;
 var objects = require('./objects');
 var Map = require('./maps').Map;
+var particle = require('./particle');
 var eventify = require('./lib/events').eventify;
 
 
@@ -17,6 +18,7 @@ var World = exports.World = function(options){
     this.scene = null;
     this.objects = new utils.Collection();
     this.event_frames = [];
+    this.particles = [];
     this.persistent_events = new events.PersistentEventFrame();
     this.turn_queue = new utils.Collection(); //all objects that can act, in sequence of their action
     this.turn_pending_queue = new utils.Collection();; //all objects that have not yet acted this turn
@@ -135,7 +137,8 @@ World.prototype.process_turn = function(events){
 World.prototype.update = function(deltams, events){
     if(!this.events_in_progress()) this.process_turn(events);
     this.update_events(deltams);
-    this.update_objects(deltams)
+    this.update_objects(deltams);
+    this.update_particles(deltams);
 };
 
 World.prototype.spawn = function(type, options){
@@ -197,4 +200,22 @@ World.prototype.is_tile_threadable = function(position){
        });
    } 
    return threadable;
+};
+
+World.prototype.spawn_particle = function(name, options){
+   var cls = particle.particles[name];
+   if(cls){
+       this.particles.push(new cls(options));
+   }  else{
+       console.log('Unknown particle: '+name);
+   }
+};
+
+World.prototype.update_particles = function(deltams){
+    var particles = [];
+    this.particles.forEach(function(p){
+        p.update(deltams);
+        if(!p.is_finished()) particles.push(p); 
+    });
+    this.particles = particles;
 };

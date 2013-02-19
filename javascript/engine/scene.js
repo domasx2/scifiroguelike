@@ -36,6 +36,8 @@ var WorldScene = exports.WorldScene = function(options){
         surface: this.display
     });
     
+    this.ui = [];
+    
     if(this.protagonist) this.set_protagonist(this.protagonist);
     this.init_ui();
 };
@@ -77,6 +79,7 @@ WorldScene.prototype.init_ui = function(){
                 'owner':this.protagonist,
                 'position':[10, 10]
             });
+            this.ui.push(this.inventory_ui);
         }
         
         this.ground_ui = new ui_container.GroundItems({
@@ -84,17 +87,18 @@ WorldScene.prototype.init_ui = function(){
            'owner':this.protagonist,
            'position':[10, 120]
         });
+        this.ui.push(this.ground_ui);
         
-        this.chracater_status = new ui_character.CharacterStatus({
+        this.character_status_ui = new ui_character.CharacterStatus({
             'owner':this.protagonist,
             'position':[400, 10]
         });
+        this.ui.push(this.character_status_ui);
     }
 };
 
 WorldScene.prototype.destroy = function(){
-    if(this.inventory_ui) this.inventory_ui.destroy();
-    if(this.ground_ui) this.ground_ui.destroy();  
+    this.ui.forEach(function(ui){ui.destroy();}); 
 };
 
 WorldScene.prototype.serialize = function(){
@@ -105,18 +109,29 @@ WorldScene.prototype.serialize = function(){
       }
 };
 
+
+
 WorldScene.prototype.draw = function(){
-    this.view.draw_map_layer_surface(this.world.map.floor_surface);
-    this.view.draw_map_layer_surface(this.world.map.wall_surface);
+    
     var draw_order = [];
-    this.world.objects.iter(function(object){
+    
+    function add_drawable(object){
         if(!draw_order[object.z]) draw_order[object.z]=[object];
         else draw_order[object.z].push(object);
-    }, this);
+    };
+    
+    this.view.draw_map_layer_surface(this.world.map.floor_surface);
+    this.view.draw_map_layer_surface(this.world.map.wall_surface);
+    
+    this.world.objects.iter(add_drawable);
+    this.world.particles.forEach(add_drawable);
     
     draw_order.forEach(function(objlist){
         objlist.forEach(function(object){
-            if(!this.protagonist || (this.protagonist.can_see(object.position))) object.draw(this.view);
+            if(!this.protagonist || !object.position 
+                || this.protagonist.can_see(object.position) 
+                || (object._previous_position 
+                    && this.protagonist.can_see(object._previous_position))) object.draw(this.view);
         }, this);
     }, this);
     
