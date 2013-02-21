@@ -10,13 +10,14 @@ exports.eventify = function(obj){
     
     obj._suppress_events = false;
     
-    obj.on = function(events, callback, context){
+    obj.on = function(events, callback, context, once){
         
         evlist(events).forEach(function(event){
             if(!this._callbacks[event]) this._callbacks[event] = [];
-            this._callbacks[event].push([callback, context]);
+            this._callbacks[event].push([callback, context, once]);
         }, this)
     };
+    
     
     obj.off = function(events, callback, context){
         evlist(events).forEach(function(event){
@@ -36,9 +37,12 @@ exports.eventify = function(obj){
         if(!args) args = [this];
         else args.splice(0, 0, this);
         if(this._callbacks[event]){
+            var l = [];
             this._callbacks[event].forEach(function(cb){
                 cb[0].apply(cb[1], args);
+                if(!cb[2]) l.push(cb);
             }, this);
+            this._callbacks[event] = l;
         }
     };
 }

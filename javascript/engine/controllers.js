@@ -85,9 +85,23 @@ PlayerController.prototype.mouse_action = function(events){
         if(event.type == gamejs.event.MOUSE_DOWN){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
-                objs = this.owner.world.objects.by_pos(world_pos);
-                if(!objs.length){
-                    this.go_to(world_pos);
+                var action_taken = false;
+                
+                //see if object is adjacent and we cann apply adjacent action to it
+                var objs = this.owner.world.objects.by_pos(world_pos);
+                objs.some(function(obj){
+                    if(obj.is_adjacent_to(this.owner) && obj.adjacent_player_action){
+                        obj.adjacent_player_action(this.owner);
+                        action_taken = true;
+                        return true;
+                    } 
+                }, this);
+                
+                //failing that, see if we can walk to it
+                if(!action_taken){
+                    if(this.owner.world.is_tile_threadable(world_pos)){
+                        this.go_to(world_pos);
+                    }
                 }
             }
         }
@@ -98,6 +112,7 @@ PlayerController.prototype.go_to = function(pos){
     this.destination = pos;  
     this.owner.world.spawn_particle('sprite', {
         sprite_name:'action_move',
+        z: 0,
         position_px:utils.pos_px(pos)
     });
 };

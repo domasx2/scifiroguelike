@@ -1,5 +1,7 @@
 var gamejs = require('gamejs');
 
+exports.ANGLES = [0, 90, 180, 270];
+
 exports.ADJACENT = [
     [0, 0],
     [-1, 0],
@@ -12,6 +14,11 @@ exports.MOVE_MOD = {  0: [ 0, -1],
                      90: [ 1,  0],
                     180: [ 0,  1],
                     270: [-1,  0]};
+                    
+exports.MOVE_MOD_BACK = {  0: [ 0, 1],
+                         90: [ -1,  0],
+                        180: [ 0,  -1],
+                        270: [1,  0]};
                     
 exports.MOVE_MOD_LEFT = {
       0: [ -1, 0],

@@ -7,7 +7,9 @@ exports.images = ['./public/img/tiles/default.png',
                   './public/img/items/pistol_clip.png',
                   './public/img/items/medkit.png',
                   
-                  './public/img/misc/action_move.png'];
+                  './public/img/misc/action_move.png',
+                  
+                  './public/img/objects/chest.png'];
                   
       
       
@@ -114,6 +116,42 @@ exports.sprites = {
     'action_move':{
         'type':'animated',
         'spritesheet_url':'./public/img/misc/action_move.png',
+        'duration':300
+    },
+    
+    //OBJECTS
+    'chest_full':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/chest.png',
+        'angle_step':90      
+    },
+    
+    'chest_empty':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/chest.png',
+        'angle_step':90,
+        'offset':[64, 0]
+    },
+    
+    'chest_open':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/chest.png',
+        'offset':[48, 0]
+    },
+    
+    'chest_open_anim':{
+        'type':'animated',
+        'spritesheet_url':'./public/img/objects/chest.png',
+        'angle_step':90,
+        'frame_sequence':[1, 2, 3],
+        'duration':300
+    },
+    
+    'chest_close_anim':{
+        'type':'animated',
+        'spritesheet_url':'./public/img/objects/chest.png',
+        'angle_step':90,
+        'frame_sequence':[3, 2, 1],
         'duration':300
     }
     

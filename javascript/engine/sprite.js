@@ -1,8 +1,10 @@
 var gamejs = require('gamejs');
 var utils = require('./utils');
 var game = require('./game').game;
+var eventify = require('./lib/events').eventify;
 
 var Sprite = exports.Sprite = function(options){
+    eventify(this);
     utils.process_options(this, options, {
         definition: utils.required,
         position: [0, 0],
@@ -34,6 +36,7 @@ var AnimatedSprite = exports.AnimatedSprite = function(options){
     this.current_frame = this.definition.frame_sequence[0];
     this.age = 0;
     this.finished = false;
+    this.fire('reset');
     
 };
 
@@ -41,6 +44,7 @@ gamejs.utils.objects.extend(AnimatedSprite, Sprite);
 
 AnimatedSprite.prototype.reset = function(){
     this.age=0;
+    this.finished = false;
     this.update(0);
 };
 
@@ -53,8 +57,14 @@ AnimatedSprite.prototype.draw = function(view){
 AnimatedSprite.prototype.update = function(deltams){
     this.age += deltams;
     if(this.age > this.definition.duration){
-        if(!this.loop) this.finished = true;
         this.age = this.age % this.definition.duration;
+        if(!this.loop) {
+            this.finished = true;
+            this.fire('finish');
+        } else {
+            this.fire('restart');
+        }
+        
     }  
     var fs = this.definition.frame_sequence; 
     this.current_frame_index = parseInt(this.age / (this.definition.duration/fs.length));

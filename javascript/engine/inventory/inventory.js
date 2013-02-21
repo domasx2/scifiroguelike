@@ -33,7 +33,7 @@ var GroundItems = exports.GroundItems = function(relative_to){
 gamejs.utils.objects.extend(GroundItems, utils.Collection);
 
 GroundItems.prototype.update_items = function(){
-    var items = this.relative_to.get_adjacent_items();
+    var items = new utils.Collection(this.relative_to.world.objects.by_pos(this.relative_to.position, 'item'));
     var rem = [];
     this.iter(function(item){
        if(!items.has(item)) rem.push(item); 

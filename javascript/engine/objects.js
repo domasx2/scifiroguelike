@@ -100,6 +100,10 @@ var Object = {
         return false;
     },
     
+    'is_adjacent_to':function(obj){
+        return (Math.abs(obj.position[0]-this.position[0]) == 1) || (Math.abs(obj.position[1] - this.position[1]) == 1);  
+    },
+    
     'hide': function(hide){
         this.teleport([-1, -1]);  
     },
@@ -133,6 +137,7 @@ var Object = {
         this.active_sprite.angle = prev? prev.angle : this.angle;
         this.active_sprite.reset();
         if(snap) this.snap_sprite();
+        return this.active_sprite;
     },
     
     'snap_sprite': function(){
@@ -266,3 +271,64 @@ var Creature = {
 }
 
 game.objectmanager.c('creature', Creature);
+
+
+game.objectmanager.c('chest', {
+    
+    'sprite_name':'chest',
+    'sprite':'full',
+    'threadable':false,
+    'is_open':false,
+    'locked':false,
+    
+    '_requires':'object',
+    
+    
+    'init_content':function(){
+        this.content = new utils.Collection();
+        this.content.on('add', this.set_default_sprite, this);
+        this.set_default_sprite();
+    },
+    
+    'serialize_content':function(data){
+        data.content = this.content.serialize();
+    },
+    
+    'post_load_content':function(data){
+        data.content.forEach(function(objid){
+            this.content.add(this.world.objects.by_id(objid));
+        }, this);
+    },
+    
+    'set_default_sprite':function(){
+        if(!this.is_open){
+            if(this.content.len()) this.set_sprite('full');
+            else this.set_sprite('empty');
+        }else {
+            this.set_sprite('open');
+        }
+    },
+    
+    'open':function(actor){
+        this.set_sprite('open_anim').on('finish', this.set_default_sprite, this, true);
+        this.is_open = true;
+        this.fire('open');
+    },
+    
+    'close':function(actor){
+        this.set_sprite('close_anim').on('finish', this.set_default_sprite, this, true);
+        this.is_open = false;
+        this.fire('close');
+        if(this.opened_by) this.opened_by.off('teleport', this.close, this);
+    },
+    
+    'adjacent_player_action':function(actor){
+        if(!this.is_open){
+            this.open();
+            this.opened_by = actor;
+            actor.on('teleport', this.close, this, true);
+        }else {
+            this.close();
+        }
+    }
+});

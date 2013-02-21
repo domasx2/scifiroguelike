@@ -32,17 +32,18 @@ GameScene.initial = function (display){
     });
     
     world.spawn('engineer', {
-        position:engine.utils.mod(gen.start_pos, [1, 0]),
+        position:engine.utils.mod(gen.start_pos, [2, 0]),
         angle:0
     });
     
-    world.spawn('pistol', {
+    var chest = world.spawn('chest', {
         position:engine.utils.mod(gen.start_pos, [0, 1]),
+        angle: 90
     });
     
-    world.spawn('pistol_clip', {
-        position:engine.utils.mod(gen.start_pos, [0, 2]),
-    });
+    chest.content.add(world.spawn('pistol', {
+        position:[-1, -1],
+    }));
     
     return new GameScene({
         display: display,

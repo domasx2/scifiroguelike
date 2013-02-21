@@ -233,10 +233,15 @@ var clonedict = exports.clonedict = function(d){
 
 
 //collection of game Objects
-var Collection = exports.Collection = function(){
+var Collection = exports.Collection = function(objects){
     this.objects = [];  
     this.objects_by_id = {};
     eventify(this);
+    if(objects){
+        objects.forEach(function(obj){
+            this.add(obj); 
+        }, this);
+    }
 };
 
 Collection.prototype.get_by_type = function(type){
@@ -295,10 +300,11 @@ Collection.prototype.len = function(){
     return this.objects.length;  
 };
 
-Collection.prototype.by_pos = function(pos){
+Collection.prototype.by_pos = function(pos, type){
     var retv=[];
     this.iter(function(obj){
-        if((obj.position[0] == pos[0]) && (obj.position[1]==pos[1])) retv.push(obj);
+        if((obj.position[0] == pos[0]) && (obj.position[1]==pos[1])
+        && (!type || obj.is_type(type))) retv.push(obj);
     });
     return retv;
 };
