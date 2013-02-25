@@ -126,7 +126,7 @@ World.prototype.process_turn = function(events){
     while(process_queue){
         if(this.current_actor) {
             var skip = false;
-            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor.controller.act(events);
+            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor._controller.act(events);
             process_queue = !this.current_actor.can_act();
         }
         if(process_queue) this.shift_turn_queue();
@@ -142,6 +142,7 @@ World.prototype.update = function(deltams, events){
 };
 
 World.prototype.spawn = function(type, options){
+    options = options || {};
     var obj = game.objectmanager.e(type, options.id);
     var key;
     for(key in options){
@@ -153,7 +154,7 @@ World.prototype.spawn = function(type, options){
     this.objects.add(obj);
     obj.fire('spawn');
     this.fire('spawn', [obj]);
-    if(obj.controller) this.turn_queue.add(obj);
+    if(obj._controller) this.turn_queue.add(obj);
     return obj;
 };
 

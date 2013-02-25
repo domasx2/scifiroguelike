@@ -41,9 +41,9 @@ GameScene.initial = function (display){
         angle: 90
     });
     
-    chest.content.add(world.spawn('pistol', {
-        position:[-1, -1],
-    }));
+    chest.content.add(world.spawn('pistol'));
+    chest.content.add(world.spawn('pistol_clip'));
+    chest.content.add(world.spawn('pistol_clip'));
     
     return new GameScene({
         display: display,

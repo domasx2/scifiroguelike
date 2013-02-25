@@ -5,7 +5,7 @@ var game = require('./game').game;
 
 var View = exports.View = function(options){
 /*
- * Implements zooming, scrolling  & render utilities
+ * Implements zooming, scrolling  & render utilities. Is passed to draw methods for anything drawable
  * 
  */
     
@@ -61,6 +61,10 @@ View.prototype.get_visible_tiles = function(){
 
 View.prototype.draw_map_layer_surface = function(surface){
     utils.draw(this.surface, surface, [0,0], this.offset, 1);
+};
+
+View.prototype.screen_position = function(world_position){
+    return vec.subtract(vec.multiply(world_position, this.zoom), this.offset);
 };
 
 View.prototype.draw_surface = function(surface, dst_position, src_position, src_size){

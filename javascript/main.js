@@ -33,7 +33,9 @@ gamejs.ready(function() {
 
 function save(){
     if(typeof(Storage)!=="undefined") {
-        localStorage.quicksave = JSON.stringify(game.scene.serialize());
+        var data = game.scene.serialize();
+        data.version = game.settings.VERSION;
+        localStorage.quicksave = JSON.stringify(data);
         console.log(localStorage.quicksave);
         console.log('saved');
     }

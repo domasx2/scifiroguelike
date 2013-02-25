@@ -9,7 +9,9 @@ game.objectmanager.c('item', {
             obj.inventory.add(this);
             this.hide();
             obj.fire('pick_up_item', [this]);
+            return true;
         }
+        return false;
     },
     
     'drop':function(obj){

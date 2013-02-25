@@ -41,10 +41,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      * @constructor
      */
     function ComponentEntityManager() {
-        var GUID = 0,
-            entities = {},
-            components = {},
-            cemInstance = this;
+        this.GUID = 0;
+        this.entities = new Object();
+        this.components = new Object();
 
         /**
          * Transform a string into a list of selectors.
@@ -68,8 +67,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          * @author Adrian Gaudebert - adrian@gaudebert.fr
          * @constructor
          */
-        var Entity = function(id, name) {
+        var Entity = function(cem, id, name) {
             var state = {};
+            this.cem = cem;
             this.name = name;
             this.id = id;
             this.type = [];
@@ -89,13 +89,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return false;
             };
             
+            this.call_all = function(base, arguments){
+                for(key in this){
+                    if(key!=base && key.search(base)==0){
+                        this[key].apply(this, arguments || []);
+                    }
+                }
+            };
+            
             this.get_properties = function(){
                 var properties = {};
                 this.properties.forEach(function(property){
                     properties[property] = this[property];
                 }, this);
                 return properties;
-            }
+            };
             
             this.serialize = function(){
                 var data = {
@@ -118,16 +126,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
                 if (!obj)
                     return target;
+                    
+                if(obj['_requires'])  target.requires(obj['_requires']);
 
                 for (key in obj) {
-                    if(target.hasOwnProperty(key)) continue;
+                    //if(target.hasOwnProperty(key)) continue;
                     // Avoid recursivity
                     if (obj[key] === target)
                         continue;
 
                     // Specific attributes and methods
                     if (key === "_requires") {
-                        target.requires(obj[key]);
                         continue;
                     }
 
@@ -136,26 +145,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     if (typeof obj[key] !== "function") {
                         target.set(key, obj[key]);
                         if(key[0]!='_')this.properties.push(key);
-                        (function(object, property) {
-                            // Getter
-                            target.__defineGetter__(property, function() {
-                                return object.get(property);
-                            });
-                            // Setter
-                            target.__defineSetter__(property, function(value) {
-                                // If the CEM instance has an emit function,
-                                // notify that an entity was changed.
-                                if (cemInstance.emit instanceof Function) {
-                                    cemInstance.emit('entityChanged', { 'entity': object });
-                                }
-                                object.set(property, value);
-                            });
-                        })(target, key);
                     }
-                    // If a function add it directly to the object
-                    else {
-                        target[key] = obj[key];
-                    }
+                    target[key] = obj[key];
+                    
                 }
 
                 return target;
@@ -170,12 +162,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.requires = function(selector) {
                 var c,
                     comp;
-
                 selector = prepareSelectors(selector);
                 // selector is a list of components
                 for (c in selector) {
+                    
                     if(!selector.hasOwnProperty(c)) continue;
-                    comp = components[selector[c]];
+                    comp = this.cem.components[selector[c]];
                     if (!comp) {
                         throw 'Trying to use unknown component: "' + selector[c] + '"';
                     }
@@ -209,16 +201,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          */
         this.UID = function(id) {
             if(id) {
-                GUID = Math.max(id, GUID);
+                if(!isNaN(id))this.GUID = Math.max(id, this.GUID);
                 return id;
-            } else return ++GUID;
+            } else{
+                return ++this.GUID;
+            } 
         };
 
         /**
          * Add a Component to use in Entities.
          */
         this.addComponent = this.c = function(id, fn) {
-            components[id] = fn;
+            this.components[id] = fn;
             return this;
         };
 
@@ -226,7 +220,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          * Remove an existing Component.
          */
         this.removeComponent = function(id) {
-            delete components[id];
+            delete this.components[id];
             return this;
         };
 
@@ -239,7 +233,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.createEntity = this.e = function(type, id) {
             id = this.UID(id);
             var ent;
-            entities[id] = ent = new Entity(id, type);
+            this.entities[id] = ent = new Entity(this, id, type);
             ent.requires.apply(ent, [type]);
             ent.requires(["obj"]);
             return ent;
@@ -251,7 +245,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          * @param entity The entity to remove.
          */
         this.removeEntity = this.r = function(entity) {
-            delete entities[entity.id];
+            delete this.entities[entity.id];
             return this;
         };
 
@@ -271,7 +265,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
             // First verify if it's a valid id
             if (typeof selector == 'string' || typeof selector == 'number') {
-                e = entities[selector];
+                e = this.entities[selector];
                 if (typeof e !== 'undefined' && e !== null) {
                     return e;
                 }
@@ -284,7 +278,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return null;
             }
 
-            for (i in entities) {
+            for (i in this.entities) {
                 e = entities[i];
                 valid = true;
 
@@ -315,7 +309,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          */
         this.getComponentsList = function() {
             var list = [];
-            for (c in components) {
+            for (c in this.components) {
                 list.push(c);
             }
             return list;

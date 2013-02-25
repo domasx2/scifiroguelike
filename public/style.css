@@ -41,6 +41,17 @@ body{
 	background: #00beff;
 }
 
+.ui-dialog-close-link {
+	display: inline-block;
+	position: absolute;
+	right: .3em;
+	cursor: pointer;
+}
+
+.ui-dialog-close-link:hover {
+	font-size:120%;
+}
+
 /*  UI ITEM*/
 .ui-item {
 	display: inline-block;

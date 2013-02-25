@@ -29,4 +29,8 @@ exports.Event = exports.events.Event;
 
 exports.particle = require('./engine/particle');
 
+require('./engine/ui/base');
+require('./engine/ui/container');
+require('./engine/ui/character');
+
 

@@ -16,7 +16,7 @@ var Object = {
     '_previous_position': null, //this is needed to know when to draw objects that are 
                                 //moving into fog of war/unexplored, and is set by 
                                 //move event
-    'position':[0, 0],
+    'position':[-1, -1],
     'angle':0,
     'sprite_name':'', //base name for sprite
     'sprite':'static', //currently active sprite
@@ -24,10 +24,12 @@ var Object = {
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
     'vision_range':0, 
-    'controller': null,
+    'static':true, //is it visible while in fog of war?
+    '_controller': null,
     'z':0,
     
-   
+    '_name':'Object',
+    '_description':'An object',
     
     //METHODS
     'init':function(world){
@@ -59,8 +61,8 @@ var Object = {
             }
         }
         
-        if(this.controller){
-            this.controller = new this.controller(this);
+        if(this._controller){
+            this._controller = new this._controller(this);
         }
     },
     
@@ -101,7 +103,9 @@ var Object = {
     },
     
     'is_adjacent_to':function(obj){
-        return (Math.abs(obj.position[0]-this.position[0]) == 1) || (Math.abs(obj.position[1] - this.position[1]) == 1);  
+        var dx = Math.abs(obj.position[0]-this.position[0]);
+        var dy = Math.abs(obj.position[1] - this.position[1]);  
+        return (dx == 0 && dy == 1) || (dx==1 && dy==0);
     },
     
     'hide': function(hide){
@@ -171,6 +175,7 @@ var Creature = {
     'health':100,
     'team':'neutral',
     'threadable':false,
+    'static':false,
     'vision_range':10,
     'inventory_size':10,
     'z':1,
@@ -251,7 +256,7 @@ var Creature = {
     
     '_equipment_slots':['weapon', 'armor', 'helmet'],
     
-    'controller':controllers.roam,
+    '_controller':controllers.roam,
     
     'init_inventory':function(world, data){
         this.inventory = new Inventory(this);
@@ -273,6 +278,10 @@ var Creature = {
 game.objectmanager.c('creature', Creature);
 
 
+/*CHEST
+ * base chest object. contains items
+ * 
+ */
 game.objectmanager.c('chest', {
     
     'sprite_name':'chest',
@@ -280,6 +289,9 @@ game.objectmanager.c('chest', {
     'threadable':false,
     'is_open':false,
     'locked':false,
+    
+    '_name':'Chest',
+    '_description':'A chest',
     
     '_requires':'object',
     
@@ -311,21 +323,22 @@ game.objectmanager.c('chest', {
     
     'open':function(actor){
         this.set_sprite('open_anim').on('finish', this.set_default_sprite, this, true);
+        this.opened_by = actor;
         this.is_open = true;
-        this.fire('open');
+        this.fire('open', [actor]);
     },
     
     'close':function(actor){
         this.set_sprite('close_anim').on('finish', this.set_default_sprite, this, true);
         this.is_open = false;
-        this.fire('close');
+        this.fire('close', [this.opened_by]);
         if(this.opened_by) this.opened_by.off('teleport', this.close, this);
+        this.opened_by = null;
     },
     
     'adjacent_player_action':function(actor){
         if(!this.is_open){
-            this.open();
-            this.opened_by = actor;
+            this.open(actor);
             actor.on('teleport', this.close, this, true);
         }else {
             this.close();

@@ -1,10 +1,10 @@
 var gamejs = require('gamejs');
-var base = require('./base');
 var utils = require('../utils');
 var game = require('../game').game;
 var sprite = require('../sprite');
 var eventify = require('../lib/events').eventify;
 var uiutils = require('./utils');
+var game = require('../game').game;
 
 var Item = exports.Item = function(item){
     eventify(this);
@@ -46,90 +46,102 @@ Item.prototype.update = function(item){
     }
 }
 
-var ItemContainer = exports.ItemContainer = function(options){
-    utils.process_options(this, options, {
-        'collection':utils.required,
-        'owner':utils.required,
-    });
+game.uimanager.c('item_container', {
+    '_requires':'dialog',
     
+    'collection':utils.required,
+    'owner':utils.required,
     
+    'init_disable':function(scene){
+        uiutils.disable_between_turns(this.dom, this.owner);
+    },
     
-    ItemContainer.superConstructor.apply(this, [options]);
+    'init_collection':function(scene){
+        this.items_by_id = {};
+        this.collection.on('add', this.update_items, this);
+        this.collection.on('remove', this.update_items, this);
+        this.update_items();
+    },
     
-    uiutils.disable_between_turns(this.dom, this.owner);
+    'update_items':function(){
+        this.collection.iter(function(item){
+            if(!this.items_by_id[item.id]){
+                var idom = new Item(item);
+                idom.on('click', this.click_item, this);
+                this.dialog.append(idom.dom);
+                this.items_by_id[item.id]=idom;
+            }
+        }, this);
+        
+        gamejs.utils.objects.keys(this.items_by_id).forEach(function(item_id){
+            if(!this.collection.by_id(item_id)){
+                this.items_by_id[item_id].dom.remove();
+                delete this.items_by_id[item_id];
+            }
+        }, this);
+    },
     
-    this.collection.on('add', this.update_items, this);
-    this.collection.on('remove', this.update_items, this);
-    
-    this.items_by_id={};
-    this.update_items();
-};
-
-gamejs.utils.objects.extend(ItemContainer, base.Dialog);
-
-
-
-ItemContainer.prototype.update_items = function(){
-    this.collection.iter(function(item){
-        if(!this.items_by_id[item.id]){
-            var idom = new Item(item);
-            idom.on('click', this.click_item, this);
-            this.dialog.append(idom.dom);
-            this.items_by_id[item.id]=idom;
-        }
-    }, this);
-    
-    gamejs.utils.objects.keys(this.items_by_id).forEach(function(item_id){
-        if(!this.collection.by_id(item_id)){
-            this.items_by_id[item_id].dom.remove();
-            delete this.items_by_id[item_id];
-        }
-    }, this);
-};
-
-ItemContainer.prototype.click_item = function(item){
-    
-};
-
-var Inventory = exports.Inventory = function(options){
-    options.title = 'Inventory';
-    options.id='inventory';
-    Inventory.superConstructor.apply(this, [options]);
-};
-
-gamejs.utils.objects.extend(Inventory, ItemContainer);
-
-Inventory.prototype.click_item = function(item, event){
-    var actions = item.item.get_inventory_actions(this.collection);
-    var ctxmenu = new base.ContextMenu({
-        items: actions,
-        position: [event.pageX, event.pageY]
-    });
-    ctxmenu.on('click_item', function(ctxmenu, action){
-        item.item[action](this.owner);
-    }, this);  
-};
-
-
-
-
-var GroundItems = exports.GroundItems = function(options){
-    options.title = 'Ground';
-    options.id='ground-items';
-    GroundItems.superConstructor.apply(this, [options]);
-};
-
-gamejs.utils.objects.extend(GroundItems, ItemContainer);
-
-GroundItems.prototype.update_items = function(){
-    ItemContainer.prototype.update_items.apply(this);
-    if(this.collection.len()){
-        this.show();
-    }  else {
-        this.hide();
+    'click_item':function(item, event){
+        
     }
-};
+});
 
-GroundItems.prototype.click_item = function(item){
-    item.item.pick_up(this.owner);
-};
+
+game.uimanager.c('inventory', {
+   '_requires':'item_container',
+   'title':'Inventory',
+   
+   'click_item':function(item, event){
+        var actions = item.item.get_inventory_actions(this.collection);
+        var ctxmenu = this.scene.spawn_ui('context_menu', {
+            items: actions,
+            position: [event.pageX, event.pageY]
+        });
+        ctxmenu.on('click_item', function(ctxmenu, action){
+            item.item[action](this.owner);
+        }, this);  
+   }
+    
+});
+
+game.uimanager.c('ground_items', {
+    '_requires':'item_container',
+    'title':'Ground',
+    'update_items':function(){
+        game.uimanager.components['item_container'].update_items.apply(this);
+        if(this.collection.len()){
+            this.show();
+        }  else {
+            this.hide();
+        }
+    },
+    
+    'click_item':function(item){
+        item.item.pick_up(this.owner);
+    }
+});
+
+
+game.uimanager.c('chest', {
+   '_requires':'item_container',
+   'title': 'Chest',
+   'chest_object':utils.required,
+   'close_button':true,
+    
+   'init_events':function(){
+       this.owner.on('teleport end_turn', this.destroy, this);
+   },
+   
+   'destroy_events':function(){
+       this.owner.off('teleport end_turn', this.destroy, this);
+   },
+   
+   'click_item':function(item){
+        if(item.item.pick_up(this.owner)){
+            this.collection.remove(item.item);
+            if(!this.collection.len()) this.chest_object.close();
+        } 
+    }
+   
+});
+

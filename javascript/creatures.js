@@ -9,6 +9,6 @@ engine.game.objectmanager.c('engineer', {
 engine.game.objectmanager.c('protagonist', {
     'sprite_name':'protagonist',
     'team':'player',
-    'controller':engine.controllers.PlayerController,
+    '_controller':engine.controllers.PlayerController,
     '_requires':'creature'
 });
