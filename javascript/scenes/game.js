@@ -36,6 +36,10 @@ GameScene.initial = function (display){
         angle:0
     });
     
+    world.spawn('door', {
+        position:engine.utils.mod(gen.start_pos, [2, 1]),
+    });
+    
     var chest = world.spawn('chest', {
         position:engine.utils.mod(gen.start_pos, [0, 1]),
         angle: 90

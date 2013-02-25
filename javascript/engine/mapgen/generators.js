@@ -257,11 +257,15 @@ Dungeon.prototype.add_interconnect = function(){
     return false;  
 };
 
+Dungeon.prototype.initial_room = function(){
+    return this.new_room();
+};
+
 
 Dungeon.prototype.generate = function(no_rooms){    
     //place first room in the middle
     
-    var room = this.new_room();
+    var room = this.initial_room();
     this.add_piece(room, this.center_pos(room));
     this.start_pos = room.global_pos([1, 1]);
     var no_corridors = parseInt(this.corridor_density * no_rooms);

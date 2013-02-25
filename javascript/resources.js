@@ -9,7 +9,8 @@ exports.images = ['./public/img/tiles/default.png',
                   
                   './public/img/misc/action_move.png',
                   
-                  './public/img/objects/chest.png'];
+                  './public/img/objects/chest.png',
+                  './public/img/objects/door.png'];
                   
       
       
@@ -120,6 +121,7 @@ exports.sprites = {
     },
     
     //OBJECTS
+    //chest
     'chest_full':{
         'type':'static',
         'spritesheet_url':'./public/img/objects/chest.png',
@@ -136,6 +138,7 @@ exports.sprites = {
     'chest_open':{
         'type':'static',
         'spritesheet_url':'./public/img/objects/chest.png',
+        'angle_step':90,
         'offset':[48, 0]
     },
     
@@ -153,7 +156,36 @@ exports.sprites = {
         'angle_step':90,
         'frame_sequence':[3, 2, 1],
         'duration':300
-    }
+    },
     
+    //door
+    'door_closed':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/door.png',
+        'angle_step':90,
+    },
+    
+    'door_open':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/door.png',
+        'offset':[112, 0],
+        'angle_step':90,
+    },
+        
+    'door_open_anim':{
+        'type':'animated',
+        'spritesheet_url':'./public/img/objects/door.png',
+        'frame_sequence':[1, 2, 3, 4, 5, 6, 7],
+        'angle_step':90,
+        'duration':200
+    },
+    
+    'door_close_anim':{
+        'type':'animated',
+        'spritesheet_url':'./public/img/objects/door.png',
+        'frame_sequence':[6, 5, 4, 3, 2, 1, 0],
+        'angle_step':90,
+        'duration':200
+    },
     
 }

@@ -7,6 +7,8 @@ DONE:
 0.06: fog of war  
 0.06.1: optimize & improve fogofwar render  
 0.07: inventory: UI, pick up items  
+0.07.1: chest  
   
 NEXT:  
-0.08, 0.09: containers & doors; attack enemies;
+0.07.2: doors  
+0.08: attack enemies;  

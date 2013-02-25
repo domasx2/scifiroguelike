@@ -68,7 +68,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
          * @constructor
          */
         var Entity = function(cem, id, name) {
-            var state = {};
+            this._state = {};
             this.cem = cem;
             this.name = name;
             this.id = id;
@@ -144,6 +144,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     // add a getter and a setter for it
                     if (typeof obj[key] !== "function") {
                         target.set(key, obj[key]);
+                        (function(object, property) {
+                            // Getter
+                            target.__defineGetter__(property, function() {
+                                return object.get(property);
+                            });
+                            // Setter
+                            target.__defineSetter__(property, function(value) {
+                                if(object._on_property_change){
+                                    object._on_property_change(property, value, object.get(value));
+                                }
+                                object.set(property, value);
+                            });
+                        })(target, key);
                         if(key[0]!='_')this.properties.push(key);
                     }
                     target[key] = obj[key];
@@ -184,14 +197,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
              * Get a value from the state of the Entity.
              */
             this.get = function(key) {
-                return state[key];
+                return this._state[key];
             };
 
             /**
              * Set a value to a key in the state of the Entity.
              */
             this.set = function(key, value) {
-                state[key] = value;
+                this._state[key] = value;
                 return this;
             };
         };

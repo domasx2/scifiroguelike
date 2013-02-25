@@ -29,7 +29,7 @@ var Object = {
     'z':0,
     
     '_name':'Object',
-    '_description':'An object',
+    '_description':'This could be anything!',
     
     //METHODS
     'init':function(world){
@@ -65,6 +65,7 @@ var Object = {
             this._controller = new this._controller(this);
         }
     },
+    
     
     'destroy':function(){
         this.fire('destroy');  
@@ -164,6 +165,13 @@ var Object = {
         }
         return retv;
     },
+    
+    '_on_property_change':function(property, new_value, old_value){
+        if(this.fire){
+            this.fire('set_'+property, [new_value, old_value]);
+            this.world.fire('object_set_'+property, [new_value, old_value]); 
+        }
+    }
     
     
 };
@@ -291,7 +299,7 @@ game.objectmanager.c('chest', {
     'locked':false,
     
     '_name':'Chest',
-    '_description':'A chest',
+    '_description':'It surely contains something awesome.',
     
     '_requires':'object',
     
@@ -344,4 +352,52 @@ game.objectmanager.c('chest', {
             this.close();
         }
     }
+});
+
+
+game.objectmanager.c('door', {
+    '_requires':'object',
+   'is_open':false,
+   'threadable':false,
+   'transparent':false,
+   'solid':true,
+   'sprite_name':'door',
+    'sprite':'closed',
+   '_name':'door',
+   '_description':'This is a solid looking door.',
+   
+   'set_default_sprite':function(){
+       this.set_sprite(this.is_open? 'open': 'closed');
+   },
+   
+   'init_sprite':function(){
+       this.set_default_sprite();
+   },
+   
+   'open':function(){
+        this.set_sprite('open_anim').on('finish', this.set_default_sprite, this, true);
+        this.is_open = true;
+        this.transparent = true;
+        this.threadable = true;
+        this.solid = true;
+        this.fire('open');
+    },
+    
+    'close':function(actor){
+        this.set_sprite('close_anim').on('finish', this.set_default_sprite, this, true);
+        this.is_open = false;
+        this.transparent = false;
+        this.threadable = false;
+        this.solid = false;
+        this.fire('close');
+    },
+    
+    'adjacent_player_action':function(actor){
+        if(!this.is_open){
+            this.open();
+        }else {
+            this.close();
+        }
+    }
+    
 });
