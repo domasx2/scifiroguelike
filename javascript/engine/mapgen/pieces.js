@@ -28,6 +28,10 @@ Piece.prototype.local_pos = function(pos){
     return [pos[0]-this.position[0], pos[1]-this.position[1]];
 };
 
+Piece.prototype.get_center_pos = function(){
+    return [parseInt(this.size[0]/2), parseInt(this.size[1]/2)];  
+};
+
 Piece.prototype.perimeter_by_facing = function(facing){
     var retv = [];
     for(var i=0;i<this.perimeter.length;i++){
@@ -80,10 +84,10 @@ Piece.prototype.paste_in = function(piece){
     }
 };
 
-Piece.prototype.add_exit = function(exit){
+Piece.prototype.add_exit = function(exit, room){
       this.walls.set(exit[0], false);
       if(this.parent)this.parent.paste_in(this);
-      this.exits.push(exit);
+      this.exits.push([exit[0], exit[1], room]);
 };
 
 Piece.prototype.center_pos = function(piece){

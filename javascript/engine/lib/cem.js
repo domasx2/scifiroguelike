@@ -151,10 +151,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                             });
                             // Setter
                             target.__defineSetter__(property, function(value) {
+                                object.set(property, value);
                                 if(object._on_property_change){
                                     object._on_property_change(property, value, object.get(value));
                                 }
-                                object.set(property, value);
                             });
                         })(target, key);
                         if(key[0]!='_')this.properties.push(key);

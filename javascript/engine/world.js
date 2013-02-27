@@ -185,12 +185,16 @@ World.prototype.events_in_progress = function(){
 
 
 World.prototype.is_tile_transparent = function(position){
+    transparent = true;
     if(!this.map.is_wall(position)){
-        this.objects.by_pos(position).forEach(function(object){
-           if(!object.transparent) return false;
+        this.objects.by_pos(position).some(function(object){
+           if(!object.transparent){ 
+               transparent = false;
+               return true;
+           }
         });
-    } else return false;
-    return true;
+    } else transparent = false;
+    return transparent;
 }
 
 World.prototype.is_tile_threadable = function(position){

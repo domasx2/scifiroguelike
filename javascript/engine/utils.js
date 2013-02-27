@@ -38,7 +38,7 @@ exports.direction = function(from, to){
 };
 
 exports.process_options = function(object, options, default_options){
-    
+    if(!options) options = {};
     gamejs.utils.objects.keys(default_options).forEach(function(key){
        if(!(options[key] == undefined)){
            object[key] = options[key];
@@ -53,6 +53,18 @@ exports.process_options = function(object, options, default_options){
     object.options = options;
     
 };
+
+exports.instance_of = function(V, F) {
+  var O = F.prototype;
+  V = V.__proto__;
+  while (true) {
+    if (V === null)
+      return false;
+    if (O === V)
+      return true;
+    V = V.__proto__;
+  }
+}
 
 var iter2d = exports.iter2d = function(size, callback, context){
     for(var x=0;x<size[0];x++){

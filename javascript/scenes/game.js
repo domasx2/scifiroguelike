@@ -1,6 +1,7 @@
 var gamejs = require('gamejs');
 var engine = require('../engine');
-var creatures = require('../creatures');
+require('../creatures');
+require('../objects');
 
 var GameScene = exports.GameScene = function(options){
     engine.utils.process_options(this, options, {
@@ -25,29 +26,15 @@ GameScene.initial = function (display){
         'map': gen.get_map()
     });
     
+    var populator = new engine.mapgen.Populator();
+    populator.populate(gen, world);
+
     var protagonist = world.spawn('protagonist', {
         position:gen.start_pos,
         angle: 90,
         'health': 80
     });
     
-    world.spawn('engineer', {
-        position:engine.utils.mod(gen.start_pos, [2, 0]),
-        angle:0
-    });
-    
-    world.spawn('door', {
-        position:engine.utils.mod(gen.start_pos, [2, 1]),
-    });
-    
-    var chest = world.spawn('chest', {
-        position:engine.utils.mod(gen.start_pos, [0, 1]),
-        angle: 90
-    });
-    
-    chest.content.add(world.spawn('pistol'));
-    chest.content.add(world.spawn('pistol_clip'));
-    chest.content.add(world.spawn('pistol_clip'));
     
     return new GameScene({
         display: display,

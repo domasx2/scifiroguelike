@@ -6,7 +6,11 @@ var random = require('../random');
 var Map = require('../maps').Map;
 var constants = require('../constants');
 
-
+/*
+ * Generator is a root piece that produces map geometry
+ * 
+ * 
+ */
 
 var Generator = exports.Generator = function(options){
     utils.process_options(this, options, {
@@ -78,8 +82,8 @@ Generator.prototype.fits = function(piece, position){
 };
 
 Generator.prototype.join_exits = function(piece1, piece1_exit, piece2, piece2_exit){
-      piece1.add_exit(piece1_exit);
-      piece2.add_exit(piece2_exit);
+      piece1.add_exit(piece1_exit, piece2);
+      piece2.add_exit(piece2_exit, piece1);
       
       //find out where the rooms touch and remove from perimeter;
       var rect1 = new gamejs.Rect(piece1.position, piece1.size);
@@ -133,7 +137,9 @@ var Dungeon = exports.Dungeon = function(options){
         corridor_density: 0.5, // corridors per room
         symmetric_rooms: false,
         interconnects: 1, //additional connections to make circular paths. not guaranteed
-        max_interconnect_length:10
+        max_interconnect_length:10,
+        initial_room_size:[3, 3],
+        initial_room_exits:1
     });
     
     this.rooms = [];
@@ -258,7 +264,12 @@ Dungeon.prototype.add_interconnect = function(){
 };
 
 Dungeon.prototype.initial_room = function(){
-    return this.new_room();
+    var room = new pieces.Room({
+        size: this.initial_room_size,
+        max_exits: this.initial_room_exits,
+        symmetric: this.symmetric_rooms
+    })
+    return room;
 };
 
 
@@ -267,7 +278,7 @@ Dungeon.prototype.generate = function(no_rooms){
     
     var room = this.initial_room();
     this.add_piece(room, this.center_pos(room));
-    this.start_pos = room.global_pos([1, 1]);
+    this.start_pos = room.global_pos(room.get_center_pos());
     var no_corridors = parseInt(this.corridor_density * no_rooms);
     var k;
     while(no_corridors||no_rooms){

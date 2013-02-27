@@ -7,6 +7,7 @@ var resources = require('./resources');
 var settings = require('./settings');
 var items = require('./items');
 
+
 gamejs.preload(resources.images);
 
 gamejs.ready(function() {

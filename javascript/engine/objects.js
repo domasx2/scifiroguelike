@@ -169,7 +169,7 @@ var Object = {
     '_on_property_change':function(property, new_value, old_value){
         if(this.fire){
             this.fire('set_'+property, [new_value, old_value]);
-            this.world.fire('object_set_'+property, [new_value, old_value]); 
+            this.world.fire('object_set_'+property, [this, new_value, old_value]); 
         }
     }
     

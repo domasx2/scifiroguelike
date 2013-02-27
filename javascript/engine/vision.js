@@ -38,6 +38,13 @@ var Vision = exports.Vision = function(world, object){
     this.made_visible = [];
     this.prev_visible = [];
     this.world.on(['teleport', 'spawn'], this.object_came_into_view, this);
+    this.world.on(['spawn', 'object_set_transparent'], this.object_transparency_changed, this);
+};
+
+Vision.prototype.object_transparency_changed = function(world, object){
+    if(this.visible && this.visible.get(object.position)){
+        this.update();
+    } 
 };
 
 Vision.prototype.object_came_into_view = function(world, obj){
@@ -56,7 +63,8 @@ Vision.prototype.init_fov = function(){
 };
 
 Vision.prototype.can_see = function(pos){
-    if(!this.visible.get(pos)){
+    var v = this.visible.get(pos)
+    if(!v  && !(v===null)){
         this.visible.set(pos, true);
         this.explored.set(pos, true);  
         this.made_visible.push(pos);

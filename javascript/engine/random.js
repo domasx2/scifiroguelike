@@ -19,3 +19,7 @@ Generator.prototype.choose = function(items){
     //return random item from items list
     return items[this.int(0, items.length-1)];
 };
+
+Generator.prototype.maybe = function(probability){
+    return this.alea.random() <= probability;
+};
