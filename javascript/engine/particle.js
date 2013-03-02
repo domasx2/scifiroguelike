@@ -10,7 +10,7 @@ exports.register_particle = function(name, cls){
 
 var Particle = exports.Particle = function(options){
     utils.process_options(this, options, {
-        z:0
+        z:100
     })
 };
 

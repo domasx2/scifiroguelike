@@ -38,9 +38,7 @@ Controller.prototype.proceed = function(){
 var PlayerController = exports.PlayerController = function(owner){
     PlayerController.superConstructor.apply(this, [owner]);
     
-    
     if(this.owner.vision){
-        
         //cancel move order if an enemy comes into view
         this.owner.vision.objects.on('add', function(objects, obj){
             if(obj.is_type('creature') && obj.enemies_with(this.owner)){
@@ -87,7 +85,7 @@ PlayerController.prototype.mouse_action = function(events){
             if(world_pos){
                 var action_taken = false;
                 
-                //see if object is adjacent and we cann apply adjacent action to it
+                //see if object is adjacent and we can apply adjacent action to it
                 var objs = this.owner.world.objects.by_pos(world_pos);
                 objs.some(function(obj){
                     if(obj.is_adjacent_to(this.owner) && obj.adjacent_player_action){

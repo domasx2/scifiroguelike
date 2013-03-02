@@ -175,10 +175,12 @@ WorldScene.prototype.serialize = function(){
 WorldScene.prototype.draw = function(){
     
     var draw_order = [];
+    var protagonist = this.protagonist;
     
     function add_drawable(object){
-        if(!draw_order[object.z]) draw_order[object.z]=[object];
-        else draw_order[object.z].push(object);
+        var z = object.get_z ? object.get_z(protagonist) : object.z;
+        if(!draw_order[z]) draw_order[z]=[object];
+        else draw_order[z].push(object);
     };
     
     this.view.draw_map_layer_surface(this.world.map.floor_surface);
@@ -186,17 +188,16 @@ WorldScene.prototype.draw = function(){
     
     this.world.objects.iter(add_drawable);
     this.world.particles.forEach(add_drawable);
-    
+    if(protagonist && protagonist.vision) add_drawable(protagonist.vision);
+
     draw_order.forEach(function(objlist){
         objlist.forEach(function(object){
-            if(object.static || (!this.protagonist || !object.position 
-                || this.protagonist.can_see(object.position) 
-                || (object._previous_position 
-                    && this.protagonist.can_see(object._previous_position)))) object.draw(this.view);
+            if(object.static || (!protagonist || !object.position 
+                || protagonist.can_see(object))) object.draw(this.view);
         }, this);
     }, this);
     
-    if(this.protagonist&&this.protagonist.vision) this.protagonist.vision.draw(this.view);
+    
 };
 
 

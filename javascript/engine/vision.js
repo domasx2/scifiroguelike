@@ -27,6 +27,7 @@ var ASMap = function(vision){
 
 var Vision = exports.Vision = function(world, object){
     eventify(this);
+    this.z = 50;
     this.world = world;
     this.object = object;
     this.explored = new utils.Array2D(world.map.size);
@@ -42,7 +43,7 @@ var Vision = exports.Vision = function(world, object){
 };
 
 Vision.prototype.object_transparency_changed = function(world, object){
-    if(this.visible && this.visible.get(object.position)){
+    if(this.visible && this.object.can_see(object)){
         this.update();
     } 
 };
@@ -62,17 +63,21 @@ Vision.prototype.init_fov = function(){
     this.redraw = true;
 };
 
-Vision.prototype.can_see = function(pos){
+Vision.prototype.can_see = function(pos, relative_to){
     var v = this.visible.get(pos)
     if(!v  && !(v===null)){
-        this.visible.set(pos, true);
-        this.explored.set(pos, true);  
-        this.made_visible.push(pos);
-        
-        //add objects that came into view
-        this.world.objects.by_pos(pos).forEach(function(obj){
-            if(!this.objects.has(obj)) this.objects.add(obj);
-        }, this);
+        var objs = this.world.objects.by_pos(pos);
+        if(!objs.some(function(obj){
+            if(!obj.transparent && obj.transparency_block(relative_to))return true;
+        }, this)){
+            this.visible.set(pos, true);
+            this.explored.set(pos, true);  
+            this.made_visible.push(pos);
+            
+            objs.forEach(function(obj){
+                if(!this.objects.has(obj)) this.objects.add(obj);
+            }, this);
+        }
     }
 };
 
@@ -145,7 +150,7 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
                }
             }
             if(visible){
-                this.can_see(pos);
+                this.can_see(pos, position);
                 done = false;
                 //if the cell is opaque, block the adjacent slopes
                 if(!this.world.is_tile_transparent(pos)){
@@ -212,7 +217,7 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
                }
             }
             if(visible){
-                this.can_see(pos);
+                this.can_see(pos, position);
                 done = false;
                 //if the cell is opaque, block the adjacent slopes
                 if(!this.world.is_tile_transparent(pos)){
@@ -286,7 +291,7 @@ Vision.prototype.draw = function(view){
 
 Vision.prototype.update = function(){
         this.init_fov();
-        this.can_see(this.object.position);
+        this.can_see(this.object.position, this.object.position);
         //compute the 4 quadrants of the map
         this.compute_quadrant(this.object.position, this.object.vision_range, 1, 1);
         this.compute_quadrant(this.object.position, this.object.vision_range, 1, -1);

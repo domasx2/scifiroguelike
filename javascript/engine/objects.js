@@ -26,7 +26,7 @@ var Object = {
     'vision_range':0, 
     'static':true, //is it visible while in fog of war?
     '_controller': null,
-    'z':0,
+    'z':10,
     
     '_name':'Object',
     '_description':'This could be anything!',
@@ -66,6 +66,14 @@ var Object = {
         }
     },
     
+    //used by dragons for obscure magic rituals
+    'transparency_block':function(looking_from){
+         return false;  
+    },
+    
+    'get_z':function(scene){
+        return this.z;
+    },
     
     'destroy':function(){
         this.fire('destroy');  
@@ -98,9 +106,16 @@ var Object = {
         }
     },
 
-    'can_see': function(pos){
-        if(this.vision) return this.vision.visible.get(pos);
-        return false;
+    'can_see': function(pos_or_obj){
+        var retv =false;
+        if(this.vision){
+            if(pos_or_obj.position){
+                retv = this.vision.visible.get(pos_or_obj.position);
+                if(!retv && pos_or_obj._previous_position) retv = this.vision.visible.get(pos_or_obj._previous_position);
+            }
+            else retv = this.vision.visible.get(pos_or_obj);
+        }
+        return retv;
     },
     
     'is_adjacent_to':function(obj){
@@ -186,7 +201,7 @@ var Creature = {
     'static':false,
     'vision_range':10,
     'inventory_size':10,
-    'z':1,
+    'z':20,
     
     'speed_move': 2,
     'speed_act':1,
@@ -366,6 +381,11 @@ game.objectmanager.c('door', {
    '_name':'door',
    '_description':'This is a solid looking door.',
    
+   'get_z':function(protagonist){
+       if(protagonist && protagonist.can_see(this)) return 100;
+       return this.z;
+    },
+   
    'set_default_sprite':function(){
        this.set_sprite(this.is_open? 'open': 'closed');
    },
@@ -373,6 +393,24 @@ game.objectmanager.c('door', {
    'init_sprite':function(){
        this.set_default_sprite();
    },
+   
+   'init_prev_position':function(){
+       this._previous_position = utils.mod(this.position, constants.MOVE_MOD_BACK[this.angle]);
+   },
+   
+   'transparency_block':function(looking_from){
+        //block vision if looking to the tile from door perspective
+        if(this.angle == 0){
+            if(looking_from[1]>this.position[1]) return true;
+        }else if (this.angle==180){
+            if(looking_from[1]<this.position[1]) return true;
+        } else if(this.angle==90){
+            if(looking_from[0]<this.position[0]) return true;
+        } else if(this.angle==270){
+            if(looking_from[0]>this.position[0]) return true;
+        }
+        return false;
+    },
    
    'open':function(){
         this.set_sprite('open_anim').on('finish', this.set_default_sprite, this, true);
