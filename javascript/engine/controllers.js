@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var constants = require('./constants');
 var game = require('./game').game;
 var utils = require('./utils');
+var actions = require('./actions');
 var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
 
@@ -71,6 +72,16 @@ PlayerController.prototype.keyboard_move = function(events){
                 if(moved){
                     this.path = false;
                     return moved;
+                }else {
+                    var pos = utils.mod(this.owner.position, constants.MOVE_MOD[angle]);
+                    var actions = this.collect_actions(pos);
+                    if(actions.length==1){
+                        if(actions[0].condition(this.owner)){
+                            actions[0].do(this.owner);
+                            return true;
+                       
+                        }
+                    }
                 }
             }
         } 
@@ -78,28 +89,33 @@ PlayerController.prototype.keyboard_move = function(events){
     return moved;
 };
 
+PlayerController.prototype.collect_actions = function(world_pos){
+    var retv= [];
+    var move_action = new actions.BoundAction({"position":world_pos}, actions.move);
+    if(move_action.condition(this.owner)) retv.push(move_action);
+   
+    var objs = this.owner.world.objects.by_pos(world_pos);
+    objs.forEach(function(obj){
+        obj.iter_prefixed('action_', function(action){
+            if(action.condition(this.owner)) retv.push(action);
+        }, this);   
+    }, this);
+    return retv;
+};
+
+
 PlayerController.prototype.mouse_action = function(events){
     events.forEach(function(event){
         if(event.type == gamejs.event.MOUSE_DOWN){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
-                var action_taken = false;
-                
-                //see if object is adjacent and we can apply adjacent action to it
-                var objs = this.owner.world.objects.by_pos(world_pos);
-                objs.some(function(obj){
-                    if(obj.is_adjacent_to(this.owner) && obj.adjacent_player_action){
-                        obj.adjacent_player_action(this.owner);
-                        action_taken = true;
-                        return true;
-                    } 
-                }, this);
-                
-                //failing that, see if we can walk to it
-                if(!action_taken){
-                    if(this.owner.world.is_tile_threadable(world_pos)){
-                        this.go_to(world_pos);
-                    }
+                var actions = this.collect_actions(world_pos);
+                if(actions.length==1){
+                    actions[0].do(this.owner);
+                } else if(actions.length>1) {
+                    this.owner.world.scene.spawn_action_context_menu(event.pos, actions);
+                } else {
+                    //console.log('no actions available.');
                 }
             }
         }

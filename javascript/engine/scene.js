@@ -101,6 +101,27 @@ WorldScene.prototype.init_chest = function(chest){
    }, this);
 };
 
+WorldScene.prototype.spawn_action_context_menu = function(screen_pos, actions){
+    var items = [];
+    actions.forEach(function(action){
+        items.push({
+            'label':action.name(this.protagonist),
+            'action':action
+        });
+    });
+    var ctxmenu = this.spawn_ui('context_menu', {
+        'position':screen_pos,
+        'items':items
+    });
+    
+    ctxmenu.on('click_item', function(ctxmenu, action){
+        if(action.condition(this.protagonist)) action.do(this.protagonist);
+        else console.log('action no longer available', action);
+    }, this)
+    
+}
+
+
 WorldScene.prototype.can_see = function(position){
     if(this.protagonist && this.protagonist.vision) return this.protagonist.vision.visible.get(position);
     return true;

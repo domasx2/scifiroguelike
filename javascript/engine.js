@@ -9,6 +9,7 @@ exports.Map = exports.maps.Map;
 exports.World = require('./engine/world').World;
 
 exports.objects = require('./engine/objects');
+exports.actions = require('./engine/actions');
 
 exports.scene = require('./engine/scene');
 

@@ -89,6 +89,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return false;
             };
             
+            this.iter_prefixed = function(base, callback, context){
+                for(key in this){
+                    if(key!=base && key.search(base)==0){
+                        callback.apply(context, [this[key]]);
+                    }
+                }
+            };
+            
             this.call_all = function(base, arguments){
                 for(key in this){
                     if(key!=base && key.search(base)==0){
@@ -157,7 +165,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                                 }
                             });
                         })(target, key);
-                        if(key[0]!='_')this.properties.push(key);
+                        if(key[0]!='_' && (!key._NOT_A_PROPERTY)) this.properties.push(key);
                     }
                     target[key] = obj[key];
                     

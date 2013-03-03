@@ -8,6 +8,7 @@ var controllers = require('./controllers');
 var eventify = require('./lib/events').eventify;
 var constants = require('./constants');
 var events = require('./events');
+var actions = require('./actions');
 
 
 var Object = {
@@ -55,10 +56,15 @@ var Object = {
             this.on('start_turn', desuppress, this);
         }
         
+        var val;
         for(key in this){
+            val = this[key];
             if(key!='init' && key.search('init')==0){
                 this[key](world);
             }
+            
+            //convert actions to bound action
+            if(val && utils.instance_of(val, actions.Action)) this[key] = new actions.BoundAction(this, val);
         }
         
         if(this._controller){
@@ -104,6 +110,18 @@ var Object = {
                 this[key](world);
             }
         }
+    },
+    
+    'has_explored':function(pos_or_obj){
+        var retv =false;
+        if(this.vision){
+            if(pos_or_obj.position){
+                retv = this.vision.explored.get(pos_or_obj.position);
+                if(!retv && pos_or_obj._previous_position) retv = this.vision.explored.get(pos_or_obj._previous_position);
+            }
+            else retv = this.vision.explored.get(pos_or_obj);
+        }
+        return retv;
     },
 
     'can_see': function(pos_or_obj){
@@ -167,20 +185,6 @@ var Object = {
         }  
     },
     
-    'vision_perimeter':function(){
-        var retv = [];
-        if(this.vision_range){
-            for(var mod_x=-1;mod_x<=1;mod_x+2){
-                for(var mod_y=-1;mod_y<=1;mod_y+2){
-                    for(var i=0;i<this.vision_range;i++){
-                        retv.push([i*mod_x, (this.vision_range-i)*mod_y]);
-                    }
-                }
-            }
-        }
-        return retv;
-    },
-    
     '_on_property_change':function(property, new_value, old_value){
         if(this.fire){
             this.fire('set_'+property, [new_value, old_value]);
@@ -193,9 +197,13 @@ var Object = {
 
 game.objectmanager.c('object', Object);
 
+
+game.objectmanager.c('alive', {
+   'max_health':100,
+   'health':100,
+});
+
 var Creature = {
-    'max_health':100,
-    'health':100,
     'team':'neutral',
     'threadable':false,
     'static':false,
@@ -295,7 +303,7 @@ var Creature = {
         }, this);
     },
     
-    '_requires':'object'  
+    '_requires':'object alive'  
 }
 
 game.objectmanager.c('creature', Creature);
@@ -349,6 +357,7 @@ game.objectmanager.c('chest', {
         this.opened_by = actor;
         this.is_open = true;
         this.fire('open', [actor]);
+        actor.on('teleport', this.close, this, true);
     },
     
     'close':function(actor){
@@ -359,14 +368,7 @@ game.objectmanager.c('chest', {
         this.opened_by = null;
     },
     
-    'adjacent_player_action':function(actor){
-        if(!this.is_open){
-            this.open(actor);
-            actor.on('teleport', this.close, this, true);
-        }else {
-            this.close();
-        }
-    }
+    'action_openclose':actions.openclose
 });
 
 
@@ -412,7 +414,7 @@ game.objectmanager.c('door', {
         return false;
     },
    
-   'open':function(){
+   'open':function(actor){
         this.set_sprite('open_anim').on('finish', this.set_default_sprite, this, true);
         this.is_open = true;
         this.transparent = true;
@@ -430,12 +432,5 @@ game.objectmanager.c('door', {
         this.fire('close');
     },
     
-    'adjacent_player_action':function(actor){
-        if(!this.is_open){
-            this.open();
-        }else {
-            this.close();
-        }
-    }
-    
+    'action_openclose':actions.openclose
 });

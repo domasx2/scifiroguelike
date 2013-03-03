@@ -87,12 +87,12 @@ game.uimanager.c('context_menu', {
         this.position_dom();
         var ul = this.dom.find('ul');
         this.items.forEach(function(item){
-        var li = $('<li>'+item.label+'</li>');
-        ul.append(li);
-        li.click($.proxy(function(action, event){
-                this.fire('click_item', [action]);
-                this.destroy();
-            }, this, item.action));
+            var li = $('<li>'+item.label+'</li>');
+            ul.append(li);
+            li.click($.proxy(function(action, event){
+                    this.fire('click_item', [action]);
+                    this.destroy();
+                }, this, item.action));
         }, this);
     
         this.dom.mouseleave($.proxy(this.destroy, this));
