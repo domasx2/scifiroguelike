@@ -201,6 +201,7 @@ game.objectmanager.c('object', Object);
 game.objectmanager.c('alive', {
    'max_health':100,
    'health':100,
+   'alive':true
 });
 
 var Creature = {

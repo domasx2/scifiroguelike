@@ -34,6 +34,7 @@ var Action = exports.Action = function (options){
 }
 
 var BoundAction = exports.BoundAction = function(obj, action){
+    this._NOT_A_PROPERTY = true;
     this.obj = obj;
     this.action = action;
     

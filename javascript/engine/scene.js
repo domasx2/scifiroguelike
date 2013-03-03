@@ -191,8 +191,6 @@ WorldScene.prototype.serialize = function(){
       }
 };
 
-
-
 WorldScene.prototype.draw = function(){
     
     var draw_order = [];
@@ -217,8 +215,6 @@ WorldScene.prototype.draw = function(){
                 || protagonist.can_see(object))) object.draw(this.view);
         }, this);
     }, this);
-    
-    
 };
 
 

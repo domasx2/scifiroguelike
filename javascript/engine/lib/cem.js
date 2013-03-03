@@ -165,7 +165,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                                 }
                             });
                         })(target, key);
-                        if(key[0]!='_' && (!key._NOT_A_PROPERTY)) this.properties.push(key);
+                        if(key[0]!='_' && (!obj[key]._NOT_A_PROPERTY)) this.properties.push(key);
                     }
                     target[key] = obj[key];
                     
