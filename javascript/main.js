@@ -5,7 +5,9 @@ var GameScene  = require('./scenes/game').GameScene;
 var MapGenDemoScene = require('./scenes/mapgen_demo').MapGenDemoScene;
 var resources = require('./resources');
 var settings = require('./settings');
-var items = require('./items');
+require('./objects/items');
+require('./objects/objects');
+require('./objects/creatures');
 
 
 gamejs.preload(resources.images);

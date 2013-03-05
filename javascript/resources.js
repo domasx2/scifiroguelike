@@ -186,6 +186,41 @@ exports.sprites = {
         'frame_sequence':[6, 5, 4, 3, 2, 1, 0],
         'angle_step':90,
         'duration':200
-    },
-    
+    },   
+}
+
+exports.levels = {
+    'penitentiary':{
+        'generator':{
+            'type':'Dungeon',
+            'options':{
+               size: [100, 100],
+               max_corridor_length:4,
+               min_corridor_length:2,
+               corridor_density: 0.5,
+               max_exits_per_room:3,
+               symmetric_rooms: true,
+               interconnects: 8
+            },
+            'rooms':30
+        },
+        'populator':{
+            'type':'Level',
+            'options':{
+                single_exit_door_density:1,
+                multi_exit_door_density:0.4,
+                enemies:10,
+                enemy_types:[],
+                door_type:'rdoor',
+                chest_type:'rchest',
+                loot:{items:{pistol:1,
+                             pistol_clip:4},
+                      quantities:{
+                          1:5,
+                          2:2,
+                          3:1
+                      }} //type, propability
+            }
+        }
+    }
 }

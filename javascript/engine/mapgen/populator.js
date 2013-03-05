@@ -17,14 +17,21 @@ var Populator = exports.Populator = function Populator(options){
         'multi_exit_door_density':0.4,
         'enemies':10,
         'enemy_types':[],
-        'loot':{} //type, propability
-        
+        'door_type':'door',
+        'chest_type':'chest',
+        'loot':{'items':{},
+                'quantities':{}} //type, propability
     });
     this.exits_processed = {};
 };
 
-Populator.prototype.door_type = 'door';
-Populator.prototype.chest_type = 'chest';
+
+Populator.prototype.fill_chest = function(generator, chest){
+    var qty = generator.rnd.choose_probmap(this.loot.quantities);
+    for(var i=0;i<qty;i++){
+        chest.content.add(chest.world.spawn(generator.rnd.choose_probmap(this.loot.items)));
+    }
+};
 
 
 Populator.prototype.populate = function(generator, world){
@@ -51,7 +58,8 @@ Populator.prototype._populate_room = function(generator, room, world){
 
 
 Populator.prototype.populate_room = function(generator, room, world){
-    
+    var perim = room.get_inner_perimeter();
+    console.log(room, perim);
 };
 
 Populator.prototype._populate_corridor = function(genrator, corridor, world){

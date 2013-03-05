@@ -1,7 +1,6 @@
 var gamejs = require('gamejs');
 var engine = require('../engine');
-require('../creatures');
-require('../objects');
+var levels = require('../levels/level');
 
 var GameScene = exports.GameScene = function(options){
     engine.utils.process_options(this, options, {
@@ -10,36 +9,30 @@ var GameScene = exports.GameScene = function(options){
     GameScene.superConstructor.apply(this, [options]);
 };
 
-GameScene.initial = function (display){
-    var gen = new engine.mapgen.generators.Dungeon({
-       size: [100, 100],
-       max_corridor_length:4,
-       min_corridor_length:2,
-       corridor_density: 0.5,
-       max_exits_per_room:3,
-       symmetric_rooms: true,
-       interconnects: 8
-    });
-    gen.generate(30);
-
+GameScene.create_level = function(name){
+    var lvlopts = engine.game.resources.levels[name];
+    var gen = new engine.mapgen.generators[lvlopts.generator.type](lvlopts.generator.options);
+    gen.generate(lvlopts.generator.rooms);
     var world  = new engine.World({
         'map': gen.get_map()
     });
-    
-    var populator = new engine.mapgen.Populator();
+    var populator = new levels[lvlopts.populator.type](lvlopts.populator.options);
     populator.populate(gen, world);
 
     var protagonist = world.spawn('protagonist', {
-        position:gen.start_pos,
-        angle: 90,
-        'health': 80
+        position:gen.start_pos
     });
     
+    return [world, protagonist];
+};
+
+GameScene.initial = function (display){
+    var lvl = GameScene.create_level('penitentiary');
     
     return new GameScene({
         display: display,
-        world: world,
-        protagonist: protagonist
+        world: lvl[0],
+        protagonist: lvl[1]
     });
     
 };

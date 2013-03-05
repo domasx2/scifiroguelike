@@ -23,3 +23,25 @@ Generator.prototype.choose = function(items){
 Generator.prototype.maybe = function(probability){
     return this.alea.random() <= probability;
 };
+
+
+Generator.prototype.choose_probmap = function(probmap){
+    /*
+     * probmap is map item:propability:
+     * 
+     * {
+     *     'item':1,
+     *     'item2':3
+     * }
+     * 
+     * chooses a single item.
+     */
+    var key;
+    var tot=0;
+    for(key in probmap) tot += probmap[key];   
+    var rnd = this.alea.random()*tot;
+    for(key in probmap){
+        rnd -= probmap[key];
+        if(rnd<=0) return key;
+    }
+}

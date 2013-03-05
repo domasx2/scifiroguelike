@@ -1,4 +1,5 @@
 var Action = exports.Action = function (options){
+    //this is were object interaction action is implemented
     this._NOT_A_PROPERTY = true;
     
     this.condition = function(actor){
@@ -34,6 +35,7 @@ var Action = exports.Action = function (options){
 }
 
 var BoundAction = exports.BoundAction = function(obj, action){
+    //binds action to an object, for convenience.
     this._NOT_A_PROPERTY = true;
     this.obj = obj;
     this.action = action;
@@ -57,7 +59,7 @@ var action = exports.action = function(options){
 
 exports.openclose = action({
         'condition':function(actor){
-            return actor.is_adjacent_to(this);
+            return actor.is_adjacent_to(this) && !this.locked;
         },
         'name':function(actor){
             if(!this.is_open) return 'open '+this._name;

@@ -1,6 +1,6 @@
 var utils = require('../utils');
 var gamejs = require('gamejs');
-
+var constants = require('../constants');
 
 var next_piece_id = 0;
 
@@ -17,6 +17,31 @@ var Piece = exports.Piece = function(options){
     this.exits = [];
     this.children = [];
 };
+
+Piece.prototype.is_exit = function(pos){
+    for(var i=0;i<this.exits.length;i++){
+        if(this.exits[0][0]==pos[0] && this.exits[0][1]==pos[1]) return true;
+    }
+    return false;
+};
+
+
+Piece.prototype.get_inner_perimeter = function(){
+    var retv=[];
+    var haswall, exit_adjacent;
+    this.walls.iter2d(function(pos, wall){
+        if(!wall && !this.is_exit(pos)){
+            haswall = false;
+            exit_adjacent =false;
+            utils.iter_adjacent(pos, function(p){
+                if(!haswall && this.walls.get(p)) haswall = true;
+                if(!exit_adjacent && this.is_exit(p)) exit_adjacent = true;
+            }, this);
+           if(haswall && !exit_adjacent)  retv.push(pos);
+        }
+    }, this);  
+    return retv;  
+}
 
 Piece.prototype.global_pos = function(pos){
     //translate local position to parent position

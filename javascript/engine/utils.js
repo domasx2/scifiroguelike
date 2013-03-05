@@ -7,6 +7,7 @@ var game = require('./game').game;
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
 
+
 exports.pos_px = function(world_pos){
     //world tile position into pixel position
     return vec.multiply(world_pos, game.tw);
@@ -17,9 +18,13 @@ exports.mod = function(position, mod){
     return vec.add(position, mod);  
 };
 
-exports.shift = function(position, direction){
+var shift = exports.shift = function(position, direction){
     //direction is degress (0, 90, 180 or 270). move tile position by 1 in this direction
     return vec.add(position, constants.MOVE_MOD[direction]);
+};
+
+exports.shift_back = function(position, direction){
+    return vec.add(position, constants.MOVE_MOD_BACK[direction]);
 };
 
 exports.shift_left = function(position, direction){
@@ -35,6 +40,12 @@ exports.direction = function(from, to){
     var angle = (360+gamejs.utils.math.degrees(vec.angle([0, -1], vec.subtract(to, from)))) % 360;
     var retv= parseInt(angle / 90) * 90;
     return retv;
+};
+
+exports.iter_adjacent = function(pos, callback, context){
+    constants.ANGLES.forEach(function(angle){
+         callback.apply(context, [shift(pos, angle)]);
+    });
 };
 
 exports.process_options = function(object, options, default_options){
@@ -231,6 +242,15 @@ exports.hvec = function(pos){
 
 exports.t = function(){
     return (new Date()).getTime(); 
+};
+
+exports.align_obj_to_wall = function(obj){
+    constants.ANGLES.some(function(angle){
+        if(obj.world.map.is_wall(exports.shift_back(obj.position, angle))){
+            obj.set_angle(angle);
+            return true;
+        } 
+    });  
 };
 
 var clonedict = exports.clonedict = function(d){
