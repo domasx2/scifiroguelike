@@ -22,6 +22,8 @@ gamejs.ready(function() {
     else game.set_scene(GameScene.initial(display));
 
     var tick = function(deltams) {
+        if(deltams>100) console.log(deltams);
+        deltams=20;
         var events = gamejs.event.get();
         handle_events(events);
         if(game.scene){

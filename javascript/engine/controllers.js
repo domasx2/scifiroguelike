@@ -28,7 +28,6 @@ Controller.prototype.proceed = function(){
             }
             if(npos) moved = this.owner.move(utils.direction(this.owner.position, npos));
         }
-        
     }
     if(!moved){
         this.destination = null;

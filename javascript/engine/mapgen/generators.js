@@ -100,7 +100,7 @@ Generator.prototype.join = function(piece1, piece2_exit, piece2, piece1_exit){
       if(!piece1_exit) piece1_exit = this.rnd.choose(piece1.perimeter_by_facing(constants.INVERSE[piece2_exit[1]]));
 
       //piece 2 exit global position
-      var piece2_exit_pos = piece1.global_pos(piece1_exit[0]);
+      var piece2_exit_pos = piece1.parent_pos(piece1_exit[0]);
       
       //piece 2 position
       var piece2_pos = [piece2_exit_pos[0]-piece2_exit[0][0], 
@@ -129,22 +129,40 @@ var Dungeon = exports.Dungeon = function(options){
     
     utils.process_options(this, options, {
         size: utils.required,
-        min_room_size:[2, 2],
-        max_room_size:[6, 6],
+        rooms:{
+            initial:{
+                min_size:[3, 3],
+                max_size:[3, 3],
+                max_exits:1
+            },
+            any:{
+                min_size:[2, 2],
+                max_size:[5, 5],
+                max_exits:4
+            }
+        },
         max_corridor_length:6,
         min_corridor_length:2,
-        max_exits_per_room: 4,
         corridor_density: 0.5, // corridors per room
         symmetric_rooms: false,
         interconnects: 1, //additional connections to make circular paths. not guaranteed
         max_interconnect_length:10,
-        initial_room_size:[3, 3],
-        initial_room_exits:1
+        room_count:30
     });
+    
+    this.room_tags = [];
+    
+    gamejs.utils.objects.keys(this.options.rooms).forEach(function(key){
+         if(key!='any') this.room_tags.push(key);
+    }, this);
+    
+    for(var i=this.room_tags.length;i<=this.room_count;i++){
+        this.room_tags.push('any');
+    }
     
     this.rooms = [];
     this.corridors = [];
-    
+    this.generate();
 };
 
 gamejs.utils.objects.extend(Dungeon, Generator);
@@ -158,7 +176,6 @@ Dungeon.prototype.add_room = function(room, exit){
     var ok = false;
     var i = 0;
     while(!ok){
-        
         choices = this.valid_choices(this.children);
         if(choices){
             var old_room = this.rnd.choose(choices);
@@ -175,13 +192,7 @@ Dungeon.prototype.add_room = function(room, exit){
     
 };
 
-Dungeon.prototype.new_room = function(){
-    return new pieces.Room({
-        size: this.rnd.vec(this.min_room_size, this.max_room_size),
-        max_exits: this.max_exits_per_room,
-        symmetric: this.symmetric_rooms
-    })
-};
+
 
 Dungeon.prototype.new_corridor = function(){
     return new pieces.Corridor({
@@ -200,7 +211,7 @@ Dungeon.prototype.add_interconnect = function(){
     this.children.forEach(function(child){
         if(child.exits.length < child.max_exits){
             child.perimeter.forEach(function(exit){
-                 p = child.global_pos(exit[0]);
+                 p = child.parent_pos(exit[0]);
                  hash = p[0]+'_'+p[1];
                  perims[hash]=[exit, child];
             });
@@ -217,7 +228,7 @@ Dungeon.prototype.add_interconnect = function(){
             //for every possible exit
             for(var k=0;k<room.perimeter.length;k++){
                 exit = room.perimeter[k];
-                p = room.global_pos(exit[0]);
+                p = room.parent_pos(exit[0]);
                 length = -1;
                 
                 //try advancing the tunnel further
@@ -263,22 +274,28 @@ Dungeon.prototype.add_interconnect = function(){
     return false;  
 };
 
-Dungeon.prototype.initial_room = function(){
+
+
+Dungeon.prototype.new_room = function(){
+    var key = this.rnd.choose(this.room_tags, true);
+    var opts = this.options.rooms[key];
     var room = new pieces.Room({
-        size: this.initial_room_size,
-        max_exits: this.initial_room_exits,
-        symmetric: this.symmetric_rooms
-    })
+        size: this.rnd.vec(opts.min_size, opts.max_size),
+        max_exits: opts.max_exits,
+        symmetric: this.symmetric_rooms,
+        tag: key
+    });
+    if(key=='initial') this.initial_room = room;
     return room;
 };
 
-
 Dungeon.prototype.generate = function(no_rooms){    
     //place first room in the middle
+    var no_rooms = this.options.room_count;
     
-    var room = this.initial_room();
+    var room = this.new_room();
     this.add_piece(room, this.center_pos(room));
-    this.start_pos = room.global_pos(room.get_center_pos());
+    
     var no_corridors = parseInt(this.corridor_density * no_rooms);
     var k;
     while(no_corridors||no_rooms){
@@ -294,4 +311,7 @@ Dungeon.prototype.generate = function(no_rooms){
     } 
     for(k=0;k<this.interconnects;k++) this.add_interconnect();
     this.trim();
+    if(this.initial_room) this.start_pos = this.initial_room.global_pos(this.initial_room.get_center_pos());
 };
+
+game.generators['dungeon'] = Dungeon;

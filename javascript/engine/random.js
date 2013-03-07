@@ -15,9 +15,12 @@ Generator.prototype.vec = function(min, max){
     return [this.int(min[0], max[0]), this.int(min[1], max[1])];
 };
 
-Generator.prototype.choose = function(items){
+Generator.prototype.choose = function(items, remove){
     //return random item from items list
-    return items[this.int(0, items.length-1)];
+    var i =this.int(0, items.length-1);
+    var item = items[i];
+    if(remove) items.remove(i);
+    return item;
 };
 
 Generator.prototype.maybe = function(probability){

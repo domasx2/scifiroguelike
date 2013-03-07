@@ -7,6 +7,9 @@ var game = require('./game').game;
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
 
+exports.cmp = function(vec1, vec2){
+    return vec1[0]==vec2[0] && vec1[1]==vec2[1];  
+};
 
 exports.pos_px = function(world_pos){
     //world tile position into pixel position

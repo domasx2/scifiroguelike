@@ -334,6 +334,10 @@ game.objectmanager.c('chest', {
         this.set_default_sprite();
     },
     
+    'init_align':function(){
+        utils.align_obj_to_wall(this);  
+    },
+    
     'serialize_content':function(data){
         data.content = this.content.serialize();
     },

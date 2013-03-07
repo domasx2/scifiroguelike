@@ -4,12 +4,14 @@ var constants = require('../constants');
 
 var next_piece_id = 0;
 
+
 var Piece = exports.Piece = function(options){
     utils.process_options(this, options, {
         size: utils.required,
         position: [0, 0],
         parent: null,
-        max_exits: 10
+        max_exits: 10,
+        tag:''
     });
     this.id = next_piece_id ++;
     this.walls = new utils.Array2D(this.size, true);  
@@ -25,6 +27,14 @@ Piece.prototype.is_exit = function(pos){
     return false;
 };
 
+
+Piece.prototype.get_non_wall_tiles = function(){
+    var retv = [];
+    this.walls.iter2d(function(p, is_wall){
+        if(!is_wall) retv.push(p);
+    });  
+    return retv;
+};
 
 Piece.prototype.get_inner_perimeter = function(){
     var retv=[];
@@ -43,9 +53,15 @@ Piece.prototype.get_inner_perimeter = function(){
     return retv;  
 }
 
+Piece.prototype.parent_pos = function(pos){
+    return [this.position[0]+pos[0], this.position[1]+pos[1]];
+};
+
 Piece.prototype.global_pos = function(pos){
     //translate local position to parent position
-    return [this.position[0]+pos[0], this.position[1]+pos[1]];
+    pos= this.parent_pos(pos);
+    if(this.parent) pos = this.parent.global_pos(pos);
+    return pos;
 };
 
 Piece.prototype.local_pos = function(pos){

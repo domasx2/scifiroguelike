@@ -58,10 +58,11 @@ AnimatedSprite.prototype.update = function(deltams){
     this.age += deltams;
     if(this.age > this.definition.duration){
         this.age = this.age % this.definition.duration;
-        if(!this.loop) {
+        if(!this.definition.loop) {
             this.finished = true;
             this.fire('finish');
         } else {
+            this.reset();
             this.fire('restart');
         }
         

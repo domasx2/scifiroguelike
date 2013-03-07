@@ -6,6 +6,8 @@ var Game =  function(){
     this.uimanager = new ComponentEntityManager();
     this.keys_pressed = {};
     this.settings = require('../settings');
+    this.generators = {};
+    this.populators = {};
 };
 
 Game.prototype.init = function(settings,  resources){

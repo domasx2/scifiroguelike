@@ -1,6 +1,6 @@
 var gamejs = require('gamejs');
 var engine = require('../engine');
-var levels = require('../levels/level');
+var levels = require('../levels');
 
 var GameScene = exports.GameScene = function(options){
     engine.utils.process_options(this, options, {
@@ -10,19 +10,17 @@ var GameScene = exports.GameScene = function(options){
 };
 
 GameScene.create_level = function(name){
-    var lvlopts = engine.game.resources.levels[name];
-    var gen = new engine.mapgen.generators[lvlopts.generator.type](lvlopts.generator.options);
-    gen.generate(lvlopts.generator.rooms);
+    var lvlopts = levels[name];
+    console.log(engine.game.generators, engine.game.populators);
+    var gen = new engine.game.generators[lvlopts.generator.type](lvlopts.generator.options);
     var world  = new engine.World({
         'map': gen.get_map()
     });
-    var populator = new levels[lvlopts.populator.type](lvlopts.populator.options);
-    populator.populate(gen, world);
-
+    var populator = new engine.game.populators[lvlopts.populator.type](lvlopts.populator.options);
     var protagonist = world.spawn('protagonist', {
         position:gen.start_pos
     });
-    
+    populator.populate(gen, world);
     return [world, protagonist];
 };
 

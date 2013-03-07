@@ -1,6 +1,7 @@
 exports.images = ['./public/img/tiles/default.png',
                   './public/img/characters/protagonist.png',
                   './public/img/characters/engineer.png',
+                  './public/img/characters/crawler.png',
                   './public/img/tiles/fogofwar.png',
                   
                   './public/img/items/pistol.png',
@@ -80,8 +81,33 @@ exports.sprites = {
         'angle_step':90,
         'spritesheet_url':'./public/img/characters/engineer.png',
         'frame_sequence':[0, 1, 0, 2],
-        'duration': 500,
+        'duration': 400,
         'loop': true
+    },
+    
+    //CRAWLER
+    'crawler_static':{
+        'type':'static',
+        'angle_step':90,
+        'spritesheet_url':'./public/img/characters/crawler.png'
+    },
+    
+    'crawler_move':{
+        'spritesheet_url':'./public/img/characters/crawler.png',
+        'type':'animated',
+        'angle_step':90,
+        'duration':400,
+        'loop':true,
+        'frame_sequence':[0, 1, 2, 1, 0, 3, 4, 3, 0]
+    },
+    
+    'crawler_attack':{
+        'spritesheet_url':'./public/img/characters/crawler.png',
+        'type':'animated',
+        'angle_step':90,
+        'duration':300,
+        'loop':true,
+        'frame_sequence':[0, 5, 6, 0]
     },
     
     //ITEMS
@@ -187,40 +213,4 @@ exports.sprites = {
         'angle_step':90,
         'duration':200
     },   
-}
-
-exports.levels = {
-    'penitentiary':{
-        'generator':{
-            'type':'Dungeon',
-            'options':{
-               size: [100, 100],
-               max_corridor_length:4,
-               min_corridor_length:2,
-               corridor_density: 0.5,
-               max_exits_per_room:3,
-               symmetric_rooms: true,
-               interconnects: 8
-            },
-            'rooms':30
-        },
-        'populator':{
-            'type':'Level',
-            'options':{
-                single_exit_door_density:1,
-                multi_exit_door_density:0.4,
-                enemies:10,
-                enemy_types:[],
-                door_type:'rdoor',
-                chest_type:'rchest',
-                loot:{items:{pistol:1,
-                             pistol_clip:4},
-                      quantities:{
-                          1:5,
-                          2:2,
-                          3:1
-                      }} //type, propability
-            }
-        }
-    }
 }

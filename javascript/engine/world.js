@@ -9,6 +9,39 @@ var particle = require('./particle');
 var eventify = require('./lib/events').eventify;
 
 
+var WMap = exports.WMap = function(world, ignore_doors, solid_positions){
+    //helper for astar calculation
+    this.world = world;
+    this.ignore_doors = ignore_doors;
+    this.solid_positions;
+    
+    this.adjacent = function(origin) {
+        var retv = [];
+        constants.ADJACENT.forEach(function(mod){
+            var p = utils.mod(origin, mod);
+            if(this.world.map.is_wall(p)) return;
+            if(!this.world.objects.by_pos(p).some(function(obj){
+                if(!obj.threadable && !(this.ignore_doors && obj.is_type('door'))) return true;
+                if(this.solid_positions){
+                    for(var i=0;i<this.solid_positions.length;i++){
+                        if(utils.cmp(this.solid_positions[i], p)) return true;
+                    }   
+                }
+            }, this)) retv.push(p);
+        }, this);
+        return retv;
+    };
+    
+    this.estimatedDistance = function(pointA, pointB) {
+        return gamejs.utils.vectors.distance(pointA, pointB);
+    };
+
+    this.actualDistance = function(pointA, pointB) {
+        return gamejs.utils.vectors.distance(pointA, pointB);
+    };
+};
+
+
 var World = exports.World = function(options){
     utils.process_options(this, options, {
         map: utils.required,
@@ -126,10 +159,14 @@ World.prototype.process_turn = function(events){
     while(process_queue){
         if(this.current_actor) {
             var skip = false;
-            while(!skip && !this.events_in_progress() && this.current_actor.can_act()) skip = this.current_actor._controller.act(events);
+            while(!skip && !this.events_in_progress() && this.current_actor.can_act()){
+                skip = this.current_actor._controller.act(events);
+                this.update_events(0);
+            } 
             process_queue = !this.current_actor.can_act();
         }
         if(process_queue) this.shift_turn_queue();
+        this.update_events(0);
         if(this.events_in_progress()) break;
     }
 };
@@ -196,6 +233,14 @@ World.prototype.is_tile_transparent = function(position){
     } else transparent = false;
     return transparent;
 }
+
+World.prototype.get_route = function(from, to, ignore_doors, solid_positions){
+    /*
+     * ignore_doors - if true, subclasses of door will not be counted as solid
+     * solid_positions - an optional list of extra positions to be considered as unpassable
+     */
+     return gamejs.pathfinding.astar.findRoute(new WMap(this, ignore_doors, solid_positions), from, to, 100);
+};
 
 World.prototype.is_tile_threadable = function(position){
    var threadable = !this.map.is_wall(position);

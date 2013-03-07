@@ -88,6 +88,7 @@ var ObjectMoveEvent = exports.ObjectMoveEvent = function(options){
     this.pos = this.object.active_sprite.position.slice(0);
     this.object._previous_position = this.object.position;
     this.object.teleport_relative([MOVE_MOD[this.direction][0], MOVE_MOD[this.direction][1]]);
+    if(this.object.is_type('protagonist')) console.log(this);
 };
 
 gamejs.utils.objects.extend(ObjectMoveEvent, Event);
