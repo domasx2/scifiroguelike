@@ -9,6 +9,8 @@ engine.game.objectmanager.c('engineer', {
 engine.game.objectmanager.c('protagonist', {
     'sprite_name':'protagonist',
     'team':'player',
+    'vision_range':8,
+    'auto_vision': true,
     '_controller':engine.controllers.PlayerController,
     '_requires':'creature'
 });

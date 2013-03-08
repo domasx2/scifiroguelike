@@ -43,12 +43,14 @@ var Vision = exports.Vision = function(world, object){
 };
 
 Vision.prototype.object_transparency_changed = function(world, object){
+    if(!this.object.auto_vision) return;
     if(this.visible && this.object.can_see(object)){
         this.update();
     } 
 };
 
 Vision.prototype.object_came_into_view = function(world, obj){
+    if(!this.object.auto_vision) return;
     if(this.visible.get(obj.position) && !this.objects.has(obj)) this.objects.add(obj);
 };
 

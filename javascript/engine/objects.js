@@ -24,7 +24,6 @@ var Object = {
     'threadable':true,      //can it be stood/waled on?
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
-    'vision_range':0, 
     'static':true, //is it visible while in fog of war?
     '_controller': null,
     'z':10,
@@ -38,23 +37,7 @@ var Object = {
         eventify(this);
         this._sprites = {};
         this.set_sprite(this.sprite, true);
-        this.vision = null;
         
-        if(this.vision_range){
-            this.vision = new Vision(this.world, this);
-            /*
-             * so we need to suppress objects coming into view events on initial vision calc
-             * and then remove suppression when objects finish spawning in (first turn)
-             * this can propably be done better, but cant figure out now 
-             */
-            this.vision.objects._suppress_events = true;
-            this.vision.update();
-            function desuppress(){
-                this.vision.objects._suppress_events = false;
-                this.off('start_turn', desuppress, this);
-            } 
-            this.on('start_turn', desuppress, this);
-        }
         
         var val;
         for(key in this){
@@ -150,7 +133,6 @@ var Object = {
         var oldpos = this.position;
         this.position = position;
         this.snap_sprite();
-        if(this.vision) this.vision.update();
         this.fire('teleport', [oldpos, position]);
         this.world.fire('teleport', [this, oldpos, position])
     },
@@ -204,11 +186,41 @@ game.objectmanager.c('alive', {
    'alive':true
 });
 
+game.objectmanager.c('vision', {
+    'vision_range':10,
+    'auto_vision':false, //recalculate vision automatically when changes are detected?
+    
+    'init_vision':function(world){
+        this.vision = null;
+        
+       
+        this.vision = new Vision(this.world, this);
+        /*
+         * so we need to suppress objects coming into view events on initial vision calc
+         * and then remove suppression when objects finish spawning in (first turn)
+         * this can propably be done better, but cant figure out now 
+         */
+        this.vision.objects._suppress_events = true;
+        this.vision.update();
+        function desuppress(){
+            this.vision.objects._suppress_events = false;
+            this.off('start_turn', desuppress, this);
+        } 
+        this.on('start_turn', desuppress, this);
+        
+        this.on('teleport', function(){
+            if(this.auto_vision) this.vision.update();
+        }, this);
+  
+    }
+    
+});
+
 var Creature = {
     'team':'neutral',
     'threadable':false,
     'static':false,
-    'vision_range':10,
+    
     'inventory_size':10,
     'z':20,
     
@@ -304,7 +316,7 @@ var Creature = {
         }, this);
     },
     
-    '_requires':'object alive'  
+    '_requires':'object alive vision'  
 }
 
 game.objectmanager.c('creature', Creature);
