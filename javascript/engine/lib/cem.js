@@ -82,6 +82,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
              * @return this.
              */
             
+            this.main_type = function(){
+                return this.type[0];  
+            },
+            
             this.is_type = function(type){
                 for(var i=0;i<this.type.length;i++){
                     if(this.type[i]==type) return true;
@@ -92,7 +96,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.iter_prefixed = function(base, callback, context){
                 for(key in this){
                     if(key!=base && key.search(base)==0){
-                        callback.apply(context, [this[key]]);
+                        callback.apply(context, [this[key], key]);
                     }
                 }
             };

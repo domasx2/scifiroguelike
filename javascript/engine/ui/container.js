@@ -27,10 +27,10 @@ var Item = exports.Item = function(item){
         this.item.on(['equip', 'unequip'], this.update, this);
     }
     
-    if(this.item.is_type('usesammo')){
+    if(this.item.get_ammo){
         this.ammo_tag = $('<div class="ammo-tag"></div>');
         this.ammo_tag.appendTo(this.dom);
-        this.item.on('reloaded', this.update, this);
+        this.item.on(['reloaded', 'unload'], this.update, this);
     }
     this.update();
 };
@@ -41,8 +41,8 @@ Item.prototype.update = function(item){
         else this.equip_tag.hide();
     }
     
-    if(this.item.is_type('usesammo')){
-        this.ammo_tag.html(this.item.ammo);
+    if(this.item.get_ammo){
+        this.ammo_tag.html(this.item.get_ammo());
     }
 }
 
@@ -92,13 +92,14 @@ game.uimanager.c('inventory', {
    'title':'Inventory',
    
    'click_item':function(item, event){
-        var actions = item.item.get_inventory_actions(this.collection);
+        var actions = item.item.get_available_actions('inventory_action', this.owner);
         var ctxmenu = this.scene.spawn_ui('context_menu', {
-            items: actions,
+            items: uiutils.bound_actions_to_menu_items(actions, this.owner),
             position: [event.pageX, event.pageY]
         });
         ctxmenu.on('click_item', function(ctxmenu, action){
-            item.item[action](this.owner);
+            if(action.condition(this.owner)) action.do(this.owner);
+            else console.log('action no longer available', action);
         }, this);  
    }
     

@@ -8,6 +8,7 @@ var view   = require('./view');
 var events = require('./events');
 var ui_container = require('./ui/container');
 var ui_character = require('./ui/character');
+var ui_utils = require('./ui/utils');
 
 var Scene = exports.Scene = function(options){
     utils.process_options(this, options, {
@@ -102,16 +103,9 @@ WorldScene.prototype.init_chest = function(chest){
 };
 
 WorldScene.prototype.spawn_action_context_menu = function(screen_pos, actions){
-    var items = [];
-    actions.forEach(function(action){
-        items.push({
-            'label':action.name(this.protagonist),
-            'action':action
-        });
-    });
     var ctxmenu = this.spawn_ui('context_menu', {
         'position':screen_pos,
-        'items':items
+        'items':ui_utils.bound_actions_to_menu_items(actions, this.protagonist)
     });
     
     ctxmenu.on('click_item', function(ctxmenu, action){
@@ -192,7 +186,6 @@ WorldScene.prototype.serialize = function(){
 };
 
 WorldScene.prototype.draw = function(){
-    
     var draw_order = [];
     var protagonist = this.protagonist;
     

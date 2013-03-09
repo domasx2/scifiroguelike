@@ -95,9 +95,7 @@ PlayerController.prototype.collect_actions = function(world_pos){
    
     var objs = this.owner.world.objects.by_pos(world_pos);
     objs.forEach(function(obj){
-        obj.iter_prefixed('action_', function(action){
-            if(action.condition(this.owner)) retv.push(action);
-        }, this);   
+        retv.push.apply(retv, obj.get_available_actions('action', this.owner)); 
     }, this);
     return retv;
 };

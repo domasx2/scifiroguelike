@@ -68,6 +68,18 @@ var Object = {
         this.fire('destroy');  
     },
     
+    'get_available_actions':function(prefix, actor){
+        var retv=[];
+        this.iter_prefixed(prefix+'_', function(action){
+            if(action.condition(actor)) retv.push(action)
+        }, this);  
+        
+        this.iter_prefixed('get_extra_'+prefix, function(action, key){
+            retv.push.apply(retv, action.apply(this, [actor]));
+        }, this);  
+        return retv;
+    },
+    
     'get_adjacent_items':function(){
         return this.world.get_adjacent_objects(this.position, 'item');  
     },

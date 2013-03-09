@@ -10,3 +10,14 @@ exports.disable_between_turns = function(dom, owner){
         dom.unblock();
     });
 }
+
+exports.bound_actions_to_menu_items = function(actions, actor){
+    var items = [];
+    actions.forEach(function(action){
+        items.push({
+            'label':action.name(actor),
+            'action':action
+        });
+    });
+    return items;
+};

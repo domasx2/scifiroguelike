@@ -36,7 +36,8 @@ exports.penitentiary={
                             type:'rchest',
                             content:[
                                 {type:'pistol'},
-                                {type:'pistol_clip'}
+                                {type:'pistol_clip_lov'},
+                                {type:'pistol_clip_incendiary'}
                             ]
                         }
                     ],
@@ -51,11 +52,11 @@ exports.penitentiary={
                             },
                             content:[
                                   {
-                                      type:'pistol_clip',
+                                      type:'pistol_clip_lov',
                                       prob:1
                                   },
                                   {
-                                      type:'pistol_clip',
+                                      type:'pistol_clip_lov',
                                       prob:0.3
                                   }
                             ]
@@ -68,7 +69,7 @@ exports.penitentiary={
                             },
                             content:[
                                   {
-                                      type:'pistol_clip',
+                                      type:'pistol_clip_lov',
                                       prob:0.8
                                   }
                             ]

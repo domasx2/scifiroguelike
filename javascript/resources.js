@@ -6,6 +6,8 @@ exports.images = ['./public/img/tiles/default.png',
                   
                   './public/img/items/pistol.png',
                   './public/img/items/pistol_clip.png',
+                  './public/img/items/pistol_clip_lov.png',
+                  './public/img/items/pistol_clip_incendiary.png',
                   './public/img/items/medkit.png',
                   
                   './public/img/misc/action_move.png',
@@ -131,6 +133,28 @@ exports.sprites = {
     'pistol_clip_inventory':{
         'type':'static',
         'spritesheet_url':'./public/img/items/pistol_clip.png'
+    },
+    
+    'pistol_clip_lov_static':{
+        'type':'static',
+        'offset':[16, 0],
+        'spritesheet_url':'./public/img/items/pistol_clip_lov.png'
+    },
+    
+    'pistol_clip_lov_inventory':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/pistol_clip_lov.png'
+    },
+    
+    'pistol_clip_incendiary_static':{
+        'type':'static',
+        'offset':[16, 0],
+        'spritesheet_url':'./public/img/items/pistol_clip_incendiary.png'
+    },
+    
+    'pistol_clip_incendiary_inventory':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/pistol_clip_incendiary.png'
     },
     
     'medkit':{

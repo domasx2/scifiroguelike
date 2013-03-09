@@ -2,6 +2,8 @@ var Action = exports.Action = function (options){
     //this is were object interaction action is implemented
     this._NOT_A_PROPERTY = true;
     
+    this.data = null;
+    
     this.condition = function(actor){
         return true;
     }
@@ -15,20 +17,19 @@ var Action = exports.Action = function (options){
     }
     
     this._condition = function (owner, actor){
-        return this.condition.apply(owner, [actor]);
+        return this.condition.apply(owner, [actor, this.data]);
     }
     
     this._do = function(owner, actor){
-        return this.do.apply(owner, [actor]);
+        return this.do.apply(owner, [actor, this.data]);
     }
     
     this._name = function(owner, actor){
         if(typeof this.name !== "function") return this.name;
-        else return this.name.apply(owner, [actor]);
+        else return this.name.apply(owner, [actor, this.data]);
     }
     
-    for(key in options){
-        if(!this.hasOwnProperty(key)) console.log('!! unknown action parameter '+key);
+    for(key in options){;
         this[key] = options[key];
     }
 
@@ -55,6 +56,10 @@ var BoundAction = exports.BoundAction = function(obj, action){
 
 var action = exports.action = function(options){
     return new Action(options);
+};
+
+exports.bound_action = function(obj, options){
+    return new BoundAction(obj, action(options));
 };
 
 exports.openclose = action({
