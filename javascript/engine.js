@@ -8,8 +8,7 @@ exports.Map = exports.maps.Map;
 
 exports.World = require('./engine/world').World;
 
-exports.objects = require('./engine/objects');
-exports.actions = require('./engine/actions');
+exports.actions = require('./engine/objects/actions');
 
 exports.scene = require('./engine/scene');
 
@@ -29,6 +28,9 @@ exports.events = require('./engine/events');
 exports.Event = exports.events.Event;
 
 exports.particle = require('./engine/particle');
+
+require('./engine/objects/objects');
+require('./engine/objects/items');
 
 require('./engine/ui/base');
 require('./engine/ui/container');

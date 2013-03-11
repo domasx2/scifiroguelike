@@ -1,13 +1,13 @@
 var gamejs = require('gamejs');
-var utils = require('./utils');
-var sprite = require('./sprite');
-var game = require('./game').game;
-var Vision = require('./vision').Vision;
-var Inventory = require('./inventory/inventory').Inventory; 
-var controllers = require('./controllers');
-var eventify = require('./lib/events').eventify;
-var constants = require('./constants');
-var events = require('./events');
+var utils = require('../utils');
+var sprite = require('../sprite');
+var game = require('../game').game;
+var Vision = require('../vision').Vision;
+var Inventory = require('../inventory/inventory').Inventory; 
+var controllers = require('../controllers');
+var eventify = require('../lib/events').eventify;
+var constants = require('../constants');
+var events = require('../events');
 var actions = require('./actions');
 
 

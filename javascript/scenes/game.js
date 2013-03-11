@@ -11,7 +11,6 @@ var GameScene = exports.GameScene = function(options){
 
 GameScene.create_level = function(name){
     var lvlopts = levels[name];
-    console.log(engine.game.generators, engine.game.populators);
     var gen = new engine.game.generators[lvlopts.generator.type](lvlopts.generator.options);
     var world  = new engine.World({
         'map': gen.get_map()

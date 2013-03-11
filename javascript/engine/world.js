@@ -3,7 +3,6 @@ var utils = require('./utils');
 var events = require('./events');
 var constants = require('./constants');
 var game = require('./game').game;
-var objects = require('./objects');
 var Map = require('./maps').Map;
 var particle = require('./particle');
 var eventify = require('./lib/events').eventify;

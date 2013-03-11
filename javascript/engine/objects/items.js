@@ -1,6 +1,5 @@
-var objects = require('../objects');
 var game = require('../game').game;
-var actions = require('../actions');
+var actions = require('./actions');
 
 game.objectmanager.c('item', {
     '_requires': 'object',

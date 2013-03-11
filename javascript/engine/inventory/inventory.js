@@ -1,7 +1,5 @@
 var gamejs = require('gamejs')
-var item = require('./item');
 var utils = require('../utils');
-var actions = require('../actions');
 
 var Inventory  = exports.Inventory = function(owner){
     this.owner = owner;

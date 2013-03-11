@@ -2,7 +2,7 @@ var gamejs = require('gamejs');
 var constants = require('./constants');
 var game = require('./game').game;
 var utils = require('./utils');
-var actions = require('./actions');
+var actions = require('./objects/actions');
 var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
 
