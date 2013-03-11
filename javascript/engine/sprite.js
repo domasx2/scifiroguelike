@@ -7,6 +7,7 @@ var Sprite = exports.Sprite = function(options){
     eventify(this);
     utils.process_options(this, options, {
         definition: utils.required,
+        name: utils.required,
         position: [0, 0],
         angle: 0
     });
@@ -76,6 +77,7 @@ AnimatedSprite.prototype.update = function(deltams){
 exports.new_sprite = function(name, options){
     if(!options) options = new Object();
     var definition = game.sprite_defs[name];
+    options.name = name;
     if(!definition){
         console.log('Undefined sprite: '+ name);
         return null;

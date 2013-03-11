@@ -12,6 +12,15 @@ Inventory.prototype.has_space = function(){
     return this.owner.inventory_size > this.len();
 };
 
+Inventory.prototype.get_equipped_item = function(slot){
+    var item;
+    for(var i=0;i<this.objects.length;i++){
+        item = this.objects[i];
+        if(item.equipped && item._slot == slot) return item;
+    }
+    return null;
+}
+
 Inventory.prototype.get_equipped_items = function(){
     var retv = [];
     this.iter(function(item){

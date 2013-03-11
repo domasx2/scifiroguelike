@@ -24,6 +24,13 @@ engine.game.objectmanager.c('pistol', {
     'sprite_name':'pistol',
     '_slot': 'weapon',
     'clip_type': 'pistol_clip',
-    '_requires': 'item equippable usesammo'
+    '_requires': 'ranged_weapon usesammo'
+});
+
+engine.game.objectmanager.c('wrench', {
+    'sprite_name':'wrench',
+    'base_damage':6,
+    '_slot':'weapon',
+    '_requires':'melee_weapon'
 });
 

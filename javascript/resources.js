@@ -10,7 +10,12 @@ exports.images = ['./public/img/tiles/default.png',
                   './public/img/items/pistol_clip_incendiary.png',
                   './public/img/items/medkit.png',
                   
+                   './public/img/items/wrench.png',
+                  
                   './public/img/misc/action_move.png',
+                  './public/img/misc/bloodstain.png',
+                  './public/img/misc/blood_hit.png',
+                  './public/img/misc/bullet.png',
                   
                   './public/img/objects/chest.png',
                   './public/img/objects/door.png'];
@@ -43,7 +48,13 @@ exports.tilesheets = {
                     'x0x 011 x0x':[4, 3]
                 }
            }
-};           
+};       
+
+var bloodstain = {
+    'spritesheet_url':'./public/img/misc/bloodstain.png',
+    'angle_step':90,
+    'type':'static'
+}    
  
 exports.sprites = {
     //FOG OF WAR
@@ -69,6 +80,26 @@ exports.sprites = {
         'spritesheet_url':'./public/img/characters/protagonist.png',
         'frame_sequence':[0, 1, 0, 2],
         'duration': 400,
+        'loop': true
+    },
+    
+    'protagonist_dead':bloodstain,
+    
+    'protagonist_attack_melee':{
+        'type':'animated',
+        'angle_step':90,
+        'spritesheet_url':'./public/img/characters/protagonist.png',
+        'frame_sequence':[4, 5, 4],
+        'duration': 200,
+        'loop': true
+    },
+    
+    'protagonist_attack_ranged':{
+        'type':'animated',
+        'angle_step':90,
+        'spritesheet_url':'./public/img/characters/protagonist.png',
+        'frame_sequence':[3],
+        'duration': 200,
         'loop': true
     },
     
@@ -103,7 +134,7 @@ exports.sprites = {
         'frame_sequence':[0, 1, 2, 1, 0, 3, 4, 3, 0]
     },
     
-    'crawler_attack':{
+    'crawler_attack_melee':{
         'spritesheet_url':'./public/img/characters/crawler.png',
         'type':'animated',
         'angle_step':90,
@@ -112,7 +143,20 @@ exports.sprites = {
         'frame_sequence':[0, 5, 6, 0]
     },
     
+    'crawler_dead':bloodstain,
+    
     //ITEMS
+    'wrench_static':{
+        'type':'static',
+        'offset':[16, 0],
+        'spritesheet_url':'./public/img/items/wrench.png'
+    },
+    
+    'wrench_inventory':{
+        'type':'static',
+        'spritesheet_url':'./public/img/items/wrench.png'
+    },
+    
     'pistol_static':{
         'type':'static',
         'offset':[16, 0],
@@ -168,6 +212,19 @@ exports.sprites = {
         'type':'animated',
         'spritesheet_url':'./public/img/misc/action_move.png',
         'duration':300
+    },
+    
+    'blood_hit':{
+        'type':'animated',
+        'spritesheet_url':'./public/img/misc/blood_hit.png',
+        'duration':300
+    },
+    
+    'bullet':{
+        'type':'static',
+        'spritesheet_url':'./public/img/misc/bullet.png',
+        'angle_step':10,
+        'cell_size':[1, 2]  
     },
     
     //OBJECTS

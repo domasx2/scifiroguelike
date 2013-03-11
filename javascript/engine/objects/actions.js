@@ -64,7 +64,17 @@ exports.bound_action = function(obj, options){
 
 exports.openclose = action({
         'condition':function(actor){
-            return actor.is_adjacent_to(this) && !this.locked;
+            var retv = actor.is_adjacent_to(this) && !this.locked;
+            if(!retv) return;
+            
+            //see if any solid is stuck here
+            this.world.objects.by_pos(this.position).some(function(obj){
+                if((!obj.threadable || obj.solid) && obj.id!=this.id) {
+                    retv = false;
+                    return true;
+                }
+            }, this);
+            return retv;
         },
         'name':function(actor){
             if(!this.is_open) return 'open '+this._name;
@@ -74,6 +84,17 @@ exports.openclose = action({
              if(!this.is_open)this.open(actor);
              else this.close(actor);
         }
+});
+
+exports.attack = action({
+   'condition':function(actor){
+       console.log('cond!');
+       return actor.id!=this.id && actor.can_attack(this.position) && this.alive;
+   },
+   'name':'attack',
+   'do':function(actor){
+       return actor.attack(this.position);
+   }
 });
 
 exports.move = action({

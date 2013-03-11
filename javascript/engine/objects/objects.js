@@ -64,6 +64,14 @@ var Object = {
         return this.z;
     },
     
+    'get_distance_to_pos':function(pos){
+        return gamejs.utils.vectors.distance(this.position, pos);  
+    },
+    
+    'get_distance_to':function(obj){
+        return this.get_distance_to_pos(obj.position);
+    },
+    
     'destroy':function(){
         this.fire('destroy');  
     },
@@ -131,10 +139,14 @@ var Object = {
         return retv;
     },
     
+    'is_adjacent_to_pos':function(pos){
+        var dx = Math.abs(pos[0]-this.position[0]);
+        var dy = Math.abs(pos[1] - this.position[1]);  
+        return (dx == 0 && dy == 1) || (dx==1 && dy==0);  
+    },
+    
     'is_adjacent_to':function(obj){
-        var dx = Math.abs(obj.position[0]-this.position[0]);
-        var dy = Math.abs(obj.position[1] - this.position[1]);  
-        return (dx == 0 && dy == 1) || (dx==1 && dy==0);
+       return this.is_adjacent_to_pos(obj.position);
     },
     
     'hide': function(hide){
@@ -179,6 +191,14 @@ var Object = {
         }  
     },
     
+    'serialize_sprite':function(data){
+        data.sprite = this.active_sprite.name.replace(this.sprite_name+'_', '');
+    },
+    
+    'post_load_sprite':function(data){
+        if(data.sprite) this.set_sprite(data.sprite);  
+    },
+    
     '_on_property_change':function(property, new_value, old_value){
         if(this.fire){
             this.fire('set_'+property, [new_value, old_value]);
@@ -195,7 +215,44 @@ game.objectmanager.c('object', Object);
 game.objectmanager.c('alive', {
    'max_health':100,
    'health':100,
-   'alive':true
+   'alive':true,
+   
+   'die':function(damage){
+       this.alive = false;
+       this.set_sprite('dead');
+       this.threadable = true;
+       this.transparent = true;
+       this.solid = false;
+       this.z=0;
+       this.fire('die', [damage]);  
+       console.log(this._name+' died!');
+   },
+   
+   'heal':function(healed_by, amount){
+       this.health = Math.min(this.max_health, this.health+amount);
+       this.fire('heal', [healed_by, amount]);
+   },
+   
+   'take_damage':function(damage){
+       damage.amount = Math.min(this.health, damage.amount);
+       this.health -= damage.amount;
+       console.log(this._name+' took '+damage.amount+' '+damage.type+' damage! Health remaining: '+this.health );
+       this.fire('take_damage', [damage]);
+       if(this.health === 0) this.die(damage);
+   },
+   
+   'hit':function(damage){
+       //before processing (reduction, etc)
+       
+       this.fire('hit', [damage]);
+       if(damage.amount>0){
+            this.take_damage(damage); 
+       }
+       this.world.spawn_particle('sprite', {
+           'sprite_name':'blood_hit',
+           'position_px':this.get_position_px()
+       });
+   }
 });
 
 game.objectmanager.c('vision', {
@@ -244,7 +301,7 @@ var Creature = {
     'turn_in_progress': false,
     
     'can_act': function(){
-        return this.moves_left + this.actions_left;  
+        return this.alive  && (this.moves_left + this.actions_left);  
     },
     
     'can_move':function(){
@@ -284,6 +341,22 @@ var Creature = {
         this.fire('consume_action');
     },
     
+    'can_attack':function(position){
+        if(this.actions_left){
+            var weapon = this.inventory.get_equipped_item('weapon');
+            if(weapon){
+                return weapon.can_attack(this, position);          
+            }
+        }
+        return false;
+    },
+    
+    'attack':function(position){
+        this.consume_action();
+        var weapon = this.inventory.get_equipped_item('weapon');
+        weapon.attack(this, position);
+    },
+    
     'move':function(direction){
         if(!(this.moves_left+this.actions_left)) {
             console.log('Trying to move but got no moves left!', this);
@@ -313,6 +386,8 @@ var Creature = {
     '_equipment_slots':['weapon', 'armor', 'helmet'],
     
     '_controller':controllers.roam,
+    
+    'action_attack':actions.attack,
     
     'init_inventory':function(world, data){
         this.inventory = new Inventory(this);

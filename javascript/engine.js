@@ -31,6 +31,7 @@ exports.particle = require('./engine/particle');
 
 require('./engine/objects/objects');
 require('./engine/objects/items');
+require('./engine/objects/weapons');
 
 require('./engine/ui/base');
 require('./engine/ui/container');

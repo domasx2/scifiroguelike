@@ -17,7 +17,11 @@ engine.game.objectmanager.c('protagonist', {
 
 engine.game.objectmanager.c('crawler', {
    'sprite_name':'crawler',
+   'health':20,
+   'max_health':20,
    'team':'xeno',
+   '_name':'Cralwer',
+   '_description':'A bat-like creature with glowing red eyes',
    '_controller':engine.controllers.roam,
    '_requires':'creature'
 });

@@ -171,6 +171,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                         })(target, key);
                         if(key[0]!='_' && (!obj[key]._NOT_A_PROPERTY)) this.properties.push(key);
                     }
+                    if(key=='_event') console.log('omg!', obj[key]);
                     target[key] = obj[key];
                     
                 }

@@ -49,7 +49,7 @@ var PlayerController = exports.PlayerController = function(owner){
         //cancel move order if no starting turn enemies are visible
         this.owner.on('start_turn', function(){
             this.owner.vision.objects.objects.some(function(obj){
-                if(obj.is_type('creature') && obj.enemies_with(this.owner)){
+                if(obj.is_type('creature') && obj.enemies_with(this.owner) && obj.alive){
                     this.destination = null;
                     return true;
                 }
