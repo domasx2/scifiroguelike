@@ -3,6 +3,9 @@ var objutils = require('./utils');
 var utils = require('../utils');
 var actions = require('./actions');
 var events = require('../events');
+var random = require('../random');
+var gamejs = require('gamejs');
+var vec = gamejs.utils.vectors;
 
 game.objectmanager.c('clip', {
     'ammo':10,
@@ -19,9 +22,12 @@ game.objectmanager.c('usesammo', {
      'clip_type':'clip', //object type for clip
      '_clip':null,
      
+     'ammo_per_shot':1,
+     
      'can_attack_usesammo':function(owner, pos){
-        return this.get_ammo();  
+        return this.get_ammo()>=this.ammo_per_shot;  
      },
+     
      
      'get_extra_inventory_action_load':function(actor){
          //create a bound action for each type of available clip
@@ -100,14 +106,21 @@ game.objectmanager.c('usesammo', {
          
          var retv = Math.min(count, this._clip.ammo);
          this._clip.ammo -= retv;
-         if(!this._clip.ammo <=0){
+         if(this._clip.ammo <=0){
              this._clip.destroy();
              this.fire('unloaded', [this._clip]);
              this._clip = null;
              this.fire('empty');  
          }
+         this.fire('use_ammo', [retv]);
          return retv;
      },
+
+    'init_use_ammo_on_shoot':function(){
+        this.on(['swing', 'shoot'], function(){
+            this.use_ammo(this.ammo_per_shot);      
+        }, this);
+    },
 
      'load_clip': function(clip, actor){
          //why am I ashamed of this defensive programming? 
@@ -144,20 +157,22 @@ game.objectmanager.c('weapon', {
     'max_accuracy':0.95,
     'min_accuracy':0.01,
     'base_damage':1,
+    'shots':1,
+    'hits_per_shot':1,
+    'fire_rate':60,
     'damage_type':'kinetic',
     '_event':null,
     
-    //returns hit chance for wield of weapon attacking given position.
-    //make sure position is validated beforehand
-    'calc_hit_chance':function(owner, position){
+    //returns hit chance of owner attacking position with this weapon
+    'calc_hit_chance':function(owner, object){
         var acc =  this.base_accuracy;
         this.iter_prefixed('calc_hit_chance', function(fn){
-            acc = fn.apply(this, [owner, position, acc]);
+            acc = fn.apply(this, [owner, object, acc]);
         }, this);
         return Math.max(Math.min(acc, this.max_accuracy), this.min_accuracy);
     },
     
-    //calc damage this weapon does
+    //get damage this weapon does
     'calc_damage':function(owner, object){
         return new objutils.Damage({
             'amount':this.base_damage,
@@ -176,19 +191,18 @@ game.objectmanager.c('weapon', {
     //can this weapon, wielded by owner, be used to attack pos?
     //action points have to be validated externally!
     // this only validates conditions related to weapon itself, eg range
-    'can_attack':function(owner, pos){
+    'can_attack':function(owner, object){
         var can = true;
         this.iter_prefixed('can_attack', function(fn){
-            if(!fn.apply(this, [owner, pos])) can = false;
+            if(!fn.apply(this, [owner, object])) can = false;
         }, this);
         return can;
     },
     
-    'attack':function(owner, position){
-        if(this.is_type('usesammo')) this.use_ammo(1);
+    'attack':function(owner, object){
         var event = new this._event({
             'owner':owner,
-            'position':position,
+            'target':object,
             'weapon':this
         });
         this.world.add_event(event);
@@ -200,31 +214,88 @@ game.objectmanager.c('weapon', {
 game.objectmanager.c('melee_weapon', {
     '_requires':'weapon',
     '_event': events.MeleeAttackEvent,
-    'can_attack_melee':function(owner, pos){
-        return owner.is_adjacent_to_pos(pos);
+    'can_attack_melee':function(owner, object){
+        return owner.is_adjacent_to(object);
+    },
+    
+    'swing':function(owner, target){
+        if(this.can_attack(owner, target)){
+               var chance = this.calc_hit_chance(owner, target);
+               var c = random.generator.random();
+               if(c<=chance){
+                   console.log('hit!');
+                   this.hit(owner, target);
+               }else {
+                   console.log('miss!');
+               }
+               this.fire('swing', [owner, target]);
+        } else {
+            console.log('Swinging, but can no longer attack!', owner, target)
+        }
     }
 });
 
 
 game.objectmanager.c('ranged_weapon', {
    '_requires':'weapon',
-   'shots':1,
-   'max_spread':2,
+   '_event':events.RangedAttackEvent,
+   '_particle_type':'projectile',
+   '_particle_opts':{
+        'sprite_name':'bullet',
+        'velocity':10
+   },
+   'spread':2,
    'effective_range':5,
    'max_range':10,
-   'fire_rate':30, //ms
    
-   'can_attack_ranged':function(owner, pos){
-       //TODO: limit range
-       return owner.can_see(pos);
+   'calc_spread':function(){
+       return this.spread;
    },
    
-   'calc_hit_chance_ranged_falloff':function(owner, positon, acc){
-       var dist = owner.get_distance_to_pos(position);
+   'spawn_particle':function(owner, target_position){
+          var opts = {
+              pos_px_from:owner.get_center_position_px(),
+              pos_px_to:utils.pos_px(target_position)
+          };
+          for(var key in this._particle_opts){
+              opts[key] = this._particle_opts[key];
+          }
+          return this.world.spawn_particle(this._particle_type, opts);
+   },
+   
+   'can_attack_ranged':function(owner, object){
+       return owner.can_see(object.position) && vec.distance(owner.position, object.position)<=this.max_range;
+   },
+   
+   'calc_hit_chance_ranged_falloff':function(owner, object, acc){
+       var dist = owner.get_distance_to(object);
        if(dist<=this.effective_range){
            return acc - 0.25 * (dist/this.effective_range);
        }else {
            return acc - 0.9 * (dist/this.max_range);
+       }
+   },
+   
+   'shoot':function(owner, target){
+       if(this.can_attack(owner, target)){
+           for(var i=0;i<this.hits_per_shot;i++) {
+               var dir = utils.direction_raw(owner.position, vec.add(target.position, [0.5, 0.5]));
+               var spread = this.calc_spread();
+               var rspread = random.generator.float(-spread, spread) 
+               var target_pos = vec.add(owner.position,  vec.rotate([0, -vec.distance(owner.position, target.position)], gamejs.utils.math.radians(dir+rspread)));
+               var particle = this.spawn_particle(owner, target_pos);
+               var event = new events.ProjectileEvent({
+                  'weapon':this,
+                  'owner':owner,
+                  'target_pos':target_pos,
+                  'target':target ,
+                  'particle':particle
+               });
+               this.world.add_event(event);
+           }
+           this.fire('shoot', [owner, target, event]);
+       }else{
+           console.log('shooting, but!');
        }
    }
 });

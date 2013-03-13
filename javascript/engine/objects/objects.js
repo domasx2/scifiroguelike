@@ -1,4 +1,5 @@
 var gamejs = require('gamejs');
+var vec = gamejs.utils.vectors;
 var utils = require('../utils');
 var sprite = require('../sprite');
 var game = require('../game').game;
@@ -99,6 +100,10 @@ var Object = {
     
     'get_position_px': function(){
         return utils.pos_px(this.position);  
+    },
+    
+    'get_center_position_px':function(){
+        return vec.add(this.get_position_px(), vec.divide(game.ts, 2));  
     },
     
     'draw': function(view){
@@ -341,20 +346,20 @@ var Creature = {
         this.fire('consume_action');
     },
     
-    'can_attack':function(position){
+    'can_attack':function(object){
         if(this.actions_left){
             var weapon = this.inventory.get_equipped_item('weapon');
             if(weapon){
-                return weapon.can_attack(this, position);          
+                return weapon.can_attack(this, object);          
             }
         }
         return false;
     },
     
-    'attack':function(position){
+    'attack':function(object){
         this.consume_action();
         var weapon = this.inventory.get_equipped_item('weapon');
-        weapon.attack(this, position);
+        weapon.attack(this, object);
     },
     
     'move':function(direction){

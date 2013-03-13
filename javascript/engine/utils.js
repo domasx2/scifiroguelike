@@ -38,11 +38,14 @@ exports.shift_right = function(position, direction){
     return vec.add(position, constants.MOVE_MOD_RIGHT[direction]);
 };
 
+var direction_raw = exports.direction_raw = function(from, to){
+    return (360+gamejs.utils.math.degrees(vec.angle([0, -1], vec.subtract(to, from)))) % 360;
+}
+
+
 exports.direction = function(from, to){
-    //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees
-    var angle = (360+gamejs.utils.math.degrees(vec.angle([0, -1], vec.subtract(to, from)))) % 360;
-    var retv= parseInt(angle / 90) * 90;
-    return retv;
+    //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees 
+    return  parseInt(direction_raw(from, to) / 90) * 90;
 };
 
 exports.iter_adjacent = function(pos, callback, context){

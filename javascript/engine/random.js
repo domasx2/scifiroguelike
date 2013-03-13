@@ -9,6 +9,10 @@ Generator.prototype.random = function(){
     return this.alea.random();
 };
 
+Generator.prototype.float = function(min, max){
+    return min+this.alea.random() * (max-min);
+}
+
 Generator.prototype.int = function(min, max){
     return min + parseInt(this.alea.random() * (max-min+1));  
 };

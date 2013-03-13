@@ -35,7 +35,9 @@ exports.penitentiary={
                         {
                             type:'rchest',
                             content:[
-                                {type:'wrench'}
+                                {type:'wrench'},
+                                {type:'pistol'},
+                                {type:'pistol_clip_lov'}
                             ]
                         }
                     ],

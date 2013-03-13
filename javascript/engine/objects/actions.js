@@ -88,12 +88,11 @@ exports.openclose = action({
 
 exports.attack = action({
    'condition':function(actor){
-       console.log('cond!');
-       return actor.id!=this.id && actor.can_attack(this.position) && this.alive;
+       return actor.id!=this.id && actor.can_attack(this) && this.alive;
    },
    'name':'attack',
    'do':function(actor){
-       return actor.attack(this.position);
+       return actor.attack(this);
    }
 });
 

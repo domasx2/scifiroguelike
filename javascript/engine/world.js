@@ -253,11 +253,14 @@ World.prototype.is_tile_threadable = function(position){
 
 World.prototype.spawn_particle = function(name, options){
    var cls = particle.particles[name];
+   var p = null;
    if(cls){
-       this.particles.push(new cls(options));
+       p = new cls(options);
+       this.particles.push(p);
    }  else{
        console.log('Unknown particle: '+name);
    }
+   return p;
 };
 
 World.prototype.update_particles = function(deltams){

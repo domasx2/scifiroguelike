@@ -2,8 +2,8 @@ var engine = require('../engine');
 
 engine.game.objectmanager.c('pistol_clip',{
    'sprite_name':'pistol_clip',
-   'ammo':7,
-   'capacity':7,
+   'ammo':8,
+   'capacity':8,
    'ammo_type':'pistol ammo',
    '_requires':'clip' 
 });
@@ -24,7 +24,9 @@ engine.game.objectmanager.c('pistol', {
     'sprite_name':'pistol',
     '_slot': 'weapon',
     'clip_type': 'pistol_clip',
-    '_requires': 'ranged_weapon usesammo'
+    '_requires': 'ranged_weapon usesammo',
+    'hits_per_shot':1,
+    'spread':3
 });
 
 engine.game.objectmanager.c('wrench', {

@@ -107,57 +107,87 @@ ObjectMoveEvent.prototype.update = function(deltams){
     Event.prototype.update.apply(this, [deltams]);     
 };
 
+var RangedAttackEvent = exports.RangedAttackEvent = function(options){
+    utils.process_options(this, options, {
+        'weapon':utils.required,
+        'target':utils.required
+    });
+    RangedAttackEvent.superConstructor.apply(this, [options]);
+    this.owner.set_angle(utils.direction(this.owner.position, this.target.position));
+    this.owner.set_sprite('attack_ranged');
+    this.init_shot_mark = this.owner.active_sprite.definition.duration / 2;
+    this.duration = this.owner.active_sprite.definition.duration+((this.weapon.shots-1)*this.weapon.fire_rate);
+    console.log('event duration', this.duration, this.init_shot_mark);
+    this.shots_fired = 0;
+};
+
+gamejs.utils.objects.extend(RangedAttackEvent, Event);
+
+RangedAttackEvent.prototype.finish = function(){
+    this.owner.set_sprite('static');
+    Event.prototype.finish.apply(this, []);  
+};
+
+RangedAttackEvent.prototype.update = function(deltams){
+    var shot = 0
+    if(this.age-this.init_shot_mark > 0){
+        shot += 1+parseInt(Math.max(this.age - this.init_shot_mark, 0) / this.weapon.fire_rate);
+        shot =Math.min(shot, this.weapon.shots);
+    }
+    while(this.shots_fired <shot){
+        this.shots_fired +=1;
+        this.weapon.shoot(this.owner, this.target);
+    }
+    Event.prototype.update.apply(this, [deltams]);
+};
+
+var ProjectileEvent = exports.ProjectileEvent = function(options){
+    utils.process_options(this, options, {
+        'weapon':utils.required,
+        'target_pos':utils.required,
+        'target':null,
+        'particle':utils.required
+    });
+    
+    options.duration = parseInt((this.particle.length / this.particle.velocity_px) * 1000);
+};
+
+gamejs.utils.objects.extend(ProjectileEvent, Event);
+
+ProjectileEvent.prototype.finish = function(){
+      if(this.target) this.weapon.hit(this.owner, this.target);
+      Event.prototype.finish.apply(this, []);
+};
+
+ProjectileEvent.prototype.update = function(deltams){
+    if(this.particle.is_finished()) this.finish();
+};
 
 var MeleeAttackEvent = exports.MeleeAttackEvent = function(options){
     utils.process_options(this, options, {
        'weapon': utils.required,
-       'position': utils.required
+       'target': utils.required
     });
     MeleeAttackEvent.superConstructor.apply(this, [options]);
     
-    this.target = null;
-    var objs = this.owner.world.objects.by_pos(this.position);
-    var obj;
-    for(var i=0;i<objs.length;i++){
-        obj = objs[i];
-        if(obj.is_type('alive') && obj.alive){
-            this.target = obj;
-            break;
-        } 
-    }
-    this.have_hit = false;
-    this.owner.set_angle(utils.direction(this.owner.position, this.position));
+    this.owner.set_angle(utils.direction(this.owner.position, this.target.position));
     this.owner.set_sprite('attack_melee');
     this.duration = this.owner.active_sprite.definition.duration;
+    this.have_swung = false;
 };
 
 gamejs.utils.objects.extend(MeleeAttackEvent, Event);
 
-MeleeAttackEvent.prototype.hit = function(){
-    this.have_hit = true;
-    if(this.weapon.can_attack(this.owner, this.position) && this.target){
-           var chance = this.weapon.calc_hit_chance(this.owner, this.position);
-           var c = random.generator.random();
-           console.log('roll '+c+' for '+chance);
-           if(c<=chance){
-               console.log('hit!');
-               this.weapon.hit(this.owner, this.target);
-           }else {
-               console.log('miss!');
-           }
-    } else {
-        console.log('Swinging, but can no longer attack!', this.owner, this.target)
-    }
-};
-
 MeleeAttackEvent.prototype.finish = function(){
-    if(!this.have_hit) this.hit();
     this.owner.set_sprite('static');
     Event.prototype.finish.apply(this, []);
     
-}
+};
 
 MeleeAttackEvent.prototype.update = function(deltams){
-  if(!this.have_hit && this.age > this.duration/2)this.hit();
+  if(!this.have_swung && this.age > this.duration/2){
+      this.have_swung = true;
+      this.weapon.swing(this.owner, this.target);
+  } 
   Event.prototype.update.apply(this, [deltams]);
 };

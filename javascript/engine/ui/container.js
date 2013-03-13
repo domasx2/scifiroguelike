@@ -30,7 +30,7 @@ var Item = exports.Item = function(item){
     if(this.item.get_ammo){
         this.ammo_tag = $('<div class="ammo-tag"></div>');
         this.ammo_tag.appendTo(this.dom);
-        this.item.on(['reloaded', 'unload'], this.update, this);
+        this.item.on(['reloaded', 'unload', 'use_ammo'], this.update, this);
     }
     this.update();
 };

@@ -41,7 +41,7 @@ var PlayerController = exports.PlayerController = function(owner){
     if(this.owner.vision){
         //cancel move order if an enemy comes into view
         this.owner.vision.objects.on('add', function(objects, obj){
-            if(obj.is_type('creature') && obj.enemies_with(this.owner)){
+            if(obj.is_type('creature') && obj.enemies_with(this.owner) && obj.alive){
                 this.destination = null;
             }
         }, this);
