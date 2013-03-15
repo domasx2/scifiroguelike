@@ -21,7 +21,7 @@ exports.mod = function(position, mod){
     return vec.add(position, mod);  
 };
 
-var shift = exports.shift = function(position, direction){
+var  shift = exports.shift = function(position, direction){
     //direction is degress (0, 90, 180 or 270). move tile position by 1 in this direction
     return vec.add(position, constants.MOVE_MOD[direction]);
 };
@@ -45,7 +45,7 @@ var direction_raw = exports.direction_raw = function(from, to){
 
 exports.direction = function(from, to){
     //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees 
-    return  parseInt(direction_raw(from, to) / 90) * 90;
+   return Math.round(direction_raw(from, to) /90) * 90;
 };
 
 exports.iter_adjacent = function(pos, callback, context){

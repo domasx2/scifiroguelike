@@ -117,7 +117,6 @@ var RangedAttackEvent = exports.RangedAttackEvent = function(options){
     this.owner.set_sprite('attack_ranged');
     this.init_shot_mark = this.owner.active_sprite.definition.duration / 2;
     this.duration = this.owner.active_sprite.definition.duration+((this.weapon.shots-1)*this.weapon.fire_rate);
-    console.log('event duration', this.duration, this.init_shot_mark);
     this.shots_fired = 0;
 };
 
@@ -155,7 +154,7 @@ var ProjectileEvent = exports.ProjectileEvent = function(options){
 gamejs.utils.objects.extend(ProjectileEvent, Event);
 
 ProjectileEvent.prototype.finish = function(){
-      if(this.target) this.weapon.hit(this.owner, this.target);
+      if(this.target) this.weapon.hit(this.owner, this.target, this.particle.sprite.position);
       Event.prototype.finish.apply(this, []);
 };
 

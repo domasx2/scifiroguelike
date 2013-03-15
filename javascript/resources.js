@@ -224,7 +224,7 @@ exports.sprites = {
         'type':'static',
         'spritesheet_url':'./public/img/misc/bullet.png',
         'angle_step':10,
-        'cell_size':[1, 2]  
+        'cell_size':[3, 3]  
     },
     
     //OBJECTS

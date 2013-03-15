@@ -246,7 +246,7 @@ game.objectmanager.c('alive', {
        if(this.health === 0) this.die(damage);
    },
    
-   'hit':function(damage){
+   'hit':function(damage, position_px){
        //before processing (reduction, etc)
        
        this.fire('hit', [damage]);
@@ -255,7 +255,8 @@ game.objectmanager.c('alive', {
        }
        this.world.spawn_particle('sprite', {
            'sprite_name':'blood_hit',
-           'position_px':this.get_position_px()
+           'position_px':position_px || this.get_center_position_px(),
+           'pos_center':true
        });
    }
 });

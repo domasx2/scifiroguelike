@@ -27,13 +27,15 @@ var SpriteParticle = exports.SpriteParticle = function(options){
     utils.process_options(this, options, {
         sprite_name:utils.required,
         position_px:utils.required,
-        angle: 0
-    })
+        angle: 0,
+        pos_center:false
+    });
     
     SpriteParticle.superConstructor.apply(this, [options]);
     this.sprite = sprite.new_sprite(this.sprite_name, {
         position: this.position_px,
-        angle: this.angle
+        angle: this.angle,
+        pos_center: this.pos_center
     });
     
 };
@@ -59,14 +61,13 @@ var ProjectileParticle = exports.ProjectileParticle = function(options){
     utils.process_options(this, options, {
         'pos_px_from':utils.required,
         'pos_px_to':utils.required,
-        'velocity':10 //tiles per second
+        'velocity':10 //tiles per second,
     });
     options.position_px = options.pos_px_from;
     ProjectileParticle.superConstructor.apply(this, [options]);
     
     this.velocity_px = this.velocity * game.tw;
     this.length = vec.distance(this.pos_px_from, this.pos_px_to);
-    console.log('particle', this.velocity_px, this.length);
 };
 
 gamejs.utils.objects.extend(ProjectileParticle, SpriteParticle);

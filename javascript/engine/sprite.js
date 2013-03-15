@@ -1,4 +1,5 @@
 var gamejs = require('gamejs');
+var vec = gamejs.utils.vectors;
 var utils = require('./utils');
 var game = require('./game').game;
 var eventify = require('./lib/events').eventify;
@@ -9,15 +10,21 @@ var Sprite = exports.Sprite = function(options){
         definition: utils.required,
         name: utils.required,
         position: [0, 0],
-        angle: 0
+        angle: 0,
+        pos_center:false //if fales, position is top left corner. if true, position is center
     });
    
     this.spritesheet = game.cache.spritesheets[this.definition.spritesheet_url];
     this.offset = this.definition.offset || [0, 0];
 };
 
+Sprite.prototype.get_position = function(){
+    if(this.pos_center) return vec.subtract(this.position, vec.divide(this.definition.cell_size, 2));
+    else return this.position;
+},
+
 Sprite.prototype.draw = function (view){
-    view.draw_surface(this.spritesheet.get_surface(this.angle), this.position, this.offset, this.definition.cell_size)
+    view.draw_surface(this.spritesheet.get_surface(this.angle), this.get_position(), this.offset, this.definition.cell_size)
 };
 
 Sprite.prototype.get_surface = function(){
@@ -52,7 +59,7 @@ AnimatedSprite.prototype.reset = function(){
 AnimatedSprite.prototype.draw = function(view){
     if(this.finished) return;
     var offset = [this.offset[0]+this.current_frame * this.definition.cell_size[0], this.offset[1]];
-    view.draw_surface(this.spritesheet.get_surface(this.angle), this.position, offset, this.definition.cell_size)
+    view.draw_surface(this.spritesheet.get_surface(this.angle), this.get_position(), offset, this.definition.cell_size)
 };
 
 AnimatedSprite.prototype.update = function(deltams){

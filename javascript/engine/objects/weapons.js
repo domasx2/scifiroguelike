@@ -183,8 +183,8 @@ game.objectmanager.c('weapon', {
     },
     
     //call this when this weapon wielded by owner hits object
-    'hit':function(owner, object){
-        object.hit(this.calc_damage(owner, object));
+    'hit':function(owner, object, position_px){
+        object.hit(this.calc_damage(owner, object), position_px);
         this.fire('hit', [owner, object]);
     },
     
@@ -255,7 +255,8 @@ game.objectmanager.c('ranged_weapon', {
    'spawn_particle':function(owner, target_position){
           var opts = {
               pos_px_from:owner.get_center_position_px(),
-              pos_px_to:utils.pos_px(target_position)
+              pos_px_to:utils.pos_px(target_position),
+              angle:parseInt(utils.direction_raw(owner.position, target_position))
           };
           for(var key in this._particle_opts){
               opts[key] = this._particle_opts[key];
@@ -279,10 +280,11 @@ game.objectmanager.c('ranged_weapon', {
    'shoot':function(owner, target){
        if(this.can_attack(owner, target)){
            for(var i=0;i<this.hits_per_shot;i++) {
-               var dir = utils.direction_raw(owner.position, vec.add(target.position, [0.5, 0.5]));
+               var tp = vec.add(target.position, [0.5, 0.5])
+               var dir = utils.direction_raw(owner.position, tp);
                var spread = this.calc_spread();
                var rspread = random.generator.float(-spread, spread) 
-               var target_pos = vec.add(owner.position,  vec.rotate([0, -vec.distance(owner.position, target.position)], gamejs.utils.math.radians(dir+rspread)));
+               var target_pos = vec.add(owner.position,  vec.rotate([0, -vec.distance(owner.position, tp)], gamejs.utils.math.radians(dir+rspread)));
                var particle = this.spawn_particle(owner, target_pos);
                var event = new events.ProjectileEvent({
                   'weapon':this,

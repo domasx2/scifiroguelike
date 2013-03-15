@@ -33,15 +33,23 @@ var TileSheet = function(def){
 var SpriteSheet = function(url){
     this.url = url;
     this.surfaces = {0:gamejs.image.load(url)}; 
+    this.min_angle_step = 0;
 };
 
 SpriteSheet.prototype.get_surface = function(angle){
     if(this.surfaces[angle]) return this.surfaces[angle];
-    throw 'Spritesheet '+this.url+' not prerotated for angle '+angle;
+    else {
+        if(this.min_angle_step){
+            return this.surfaces[Math.round(angle/this.min_angle_step) * this.min_angle_step];
+        }else {
+            throw 'Spritesheet '+this.url+' not prerotated for angle '+angle;
+        }
+    }
+    
 };
 
 SpriteSheet.prototype.prerotate = function(step, size){
-    
+    this.min_angle_step = Math.min(this.min_angle_step || 360, step);
     var source = this.surfaces[0];
     var source_size = source.getSize();
     var xlen = source_size[0]/size[0];

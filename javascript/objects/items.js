@@ -25,6 +25,7 @@ engine.game.objectmanager.c('pistol', {
     '_slot': 'weapon',
     'clip_type': 'pistol_clip',
     '_requires': 'ranged_weapon usesammo',
+    'shots':5,
     'hits_per_shot':1,
     'spread':3
 });
