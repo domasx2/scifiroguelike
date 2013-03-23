@@ -16,7 +16,19 @@ Controller.prototype.act = function(events){
     return true;
 };
 
+Controller.prototype.cancel_destination = function(){
+    this.destination = null;
+};
+
+Controller.prototype.act_on_destination = function(pos){
+    return false;
+};
+
 Controller.prototype.proceed = function(){
+    //proceed towards destination.
+    //if next tile is empty, move into it
+    //if next tile is not empty but also the destination, act on it
+    //else unable to proceed, cancel destination
     var moved = false;
     if(this.destination && (this.owner.can_move())){
         var path = this.owner.vision.get_path(this.owner.position, this.destination);
@@ -26,11 +38,14 @@ Controller.prototype.proceed = function(){
                 npos = path.point;
                 path = path.from;
             }
-            if(npos) moved = this.owner.move(utils.direction(this.owner.position, npos));
+            if(npos){
+                if(utils.cmp(npos, this.destination)) moved = this.act_on_destination(npos);
+                if(!moved) moved = this.owner.move(utils.direction(this.owner.position, npos));
+            } 
         }
     }
     if(!moved){
-        this.destination = null;
+        this.cancel_destination();
     }
     return moved;
 };
@@ -42,7 +57,7 @@ var PlayerController = exports.PlayerController = function(owner){
         //cancel move order if an enemy comes into view
         this.owner.vision.objects.on('add', function(objects, obj){
             if(obj.is_type('creature') && obj.enemies_with(this.owner) && obj.alive){
-                this.destination = null;
+                this.cancel_destination();
             }
         }, this);
         
@@ -50,7 +65,7 @@ var PlayerController = exports.PlayerController = function(owner){
         this.owner.on('start_turn', function(){
             this.owner.vision.objects.objects.some(function(obj){
                 if(obj.is_type('creature') && obj.enemies_with(this.owner) && obj.alive){
-                    this.destination = null;
+                    this.cancel_destination();
                     return true;
                 }
             }, this);
@@ -59,6 +74,26 @@ var PlayerController = exports.PlayerController = function(owner){
 };
 
 gamejs.utils.objects.extend(PlayerController, Controller);
+
+PlayerController.prototype.act_on_destination = function(pos){
+    if(utils.cmp(pos, this.destination)){
+        var actions = this.collect_actions(pos);
+        if(actions.length){
+            if(actions.length==1){
+                actions[0].do(this.owner);
+                console.log('did action');
+            } else {
+                this.owner.world.scene.spawn_action_context_menu(
+                    this.owner.world.scene.view.screen_position(utils.pos_px(pos)), 
+                    actions);
+            }
+            console.log('canceled destination');
+            this.cancel_destination();
+            return true;
+        }
+    }
+    return false;
+};
 
 PlayerController.prototype.keyboard_move = function(events){
     var moved = false;
@@ -90,9 +125,6 @@ PlayerController.prototype.keyboard_move = function(events){
 
 PlayerController.prototype.collect_actions = function(world_pos){
     var retv= [];
-    var move_action = new actions.BoundAction({"position":world_pos}, actions.move);
-    if(move_action.condition(this.owner)) retv.push(move_action);
-   
     var objs = this.owner.world.objects.by_pos(world_pos);
     objs.forEach(function(obj){
         retv.push.apply(retv, obj.get_available_actions('action', this.owner)); 
@@ -106,13 +138,19 @@ PlayerController.prototype.mouse_action = function(events){
         if(event.type == gamejs.event.MOUSE_DOWN){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
-                var actions = this.collect_actions(world_pos);
-                if(actions.length==1){
-                    actions[0].do(this.owner);
-                } else if(actions.length>1) {
-                    this.owner.world.scene.spawn_action_context_menu(event.pos, actions);
-                } else {
-                    //console.log('no actions available.');
+                var _actions = this.collect_actions(world_pos);
+                if(_actions.length==1){
+                    _actions[0].do(this.owner);
+                }else{
+                    var move_action = new actions.BoundAction({"position":world_pos}, actions.move);
+                    if(move_action.condition(this.owner)) _actions.push(move_action);
+                    if(_actions.length==1){
+                        _actions[0].do(this.owner);
+                    }else if(_actions.length>1) {
+                        this.owner.world.scene.spawn_action_context_menu(event.pos, _actions);
+                    } else {
+                        //console.log('no actions available.');
+                    }
                 }
             }
         }
@@ -124,7 +162,7 @@ PlayerController.prototype.go_to = function(pos){
     this.owner.world.spawn_particle('sprite', {
         sprite_name:'action_move',
         z: 0,
-        position_px:utils.pos_px(pos)
+        position:pos
     });
 };
 

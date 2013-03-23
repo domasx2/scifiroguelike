@@ -107,6 +107,13 @@ ObjectMoveEvent.prototype.update = function(deltams){
     Event.prototype.update.apply(this, [deltams]);     
 };
 
+/********************
+RANGED ATTACK EVENT
+*/
+
+
+
+
 var RangedAttackEvent = exports.RangedAttackEvent = function(options){
     utils.process_options(this, options, {
         'weapon':utils.required,
@@ -140,27 +147,9 @@ RangedAttackEvent.prototype.update = function(deltams){
     Event.prototype.update.apply(this, [deltams]);
 };
 
-var ProjectileEvent = exports.ProjectileEvent = function(options){
-    utils.process_options(this, options, {
-        'weapon':utils.required,
-        'target_pos':utils.required,
-        'target':null,
-        'particle':utils.required
-    });
-    
-    options.duration = parseInt((this.particle.length / this.particle.velocity_px) * 1000);
-};
-
-gamejs.utils.objects.extend(ProjectileEvent, Event);
-
-ProjectileEvent.prototype.finish = function(){
-      if(this.target) this.weapon.hit(this.owner, this.target, this.particle.sprite.position);
-      Event.prototype.finish.apply(this, []);
-};
-
-ProjectileEvent.prototype.update = function(deltams){
-    if(this.particle.is_finished()) this.finish();
-};
+/***************************************
+*MELEE ATTACK EVENT
+*/
 
 var MeleeAttackEvent = exports.MeleeAttackEvent = function(options){
     utils.process_options(this, options, {
@@ -189,4 +178,30 @@ MeleeAttackEvent.prototype.update = function(deltams){
       this.weapon.swing(this.owner, this.target);
   } 
   Event.prototype.update.apply(this, [deltams]);
+};
+
+/**************************************
+*PROJECTILE EVENT
+*/
+
+var ProjectileEvent = exports.ProjectileEvent = function(options){
+    utils.process_options(this, options, {
+        'weapon':utils.required,
+        'target_pos':utils.required,
+        'target':null,
+        'particle':utils.required
+    });
+    
+    options.duration = parseInt((this.particle.length / this.particle.velocity_px) * 1000);
+};
+
+gamejs.utils.objects.extend(ProjectileEvent, Event);
+
+ProjectileEvent.prototype.finish = function(){
+      if(this.target) this.weapon.hit(this.owner, this.target, this.particle.position);
+      Event.prototype.finish.apply(this, []);
+};
+
+ProjectileEvent.prototype.update = function(deltams){
+    if(this.particle.is_finished()) this.finish();
 };

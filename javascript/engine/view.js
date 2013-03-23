@@ -57,7 +57,13 @@ View.prototype.get_visible_tiles = function(){
         'pos':[parseInt(this.offset[0]/tw), parseInt(this.offset[1]/tw)],
         'size':[parseInt(this.width/tw)+2, parseInt(this.height/tw)+2]
    }
-}
+};
+
+View.prototype.draw_rect = function(rect, color, width){
+    rect =  new gamejs.Rect(vec.subtract(vec.multiply([rect.left, rect.top], this.zoom), this.offset),
+                            vec.multiply([rect.width, rect.height], this.zoom));
+    gamejs.draw.rect(this.surface, color, rect, width);
+};
 
 View.prototype.draw_map_layer_surface = function(surface){
     utils.draw(this.surface, surface, [0,0], this.offset, 1);

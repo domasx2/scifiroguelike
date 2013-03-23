@@ -102,8 +102,12 @@ var Object = {
         return utils.pos_px(this.position);  
     },
     
+    'get_center_position':function(){
+        return vec.add(this.position, [0.5, 0.5]);  
+    },
+    
     'get_center_position_px':function(){
-        return vec.add(this.get_position_px(), vec.divide(game.ts, 2));  
+        return utils.pos_px(this.get_center_position());  
     },
     
     'draw': function(view){
@@ -136,10 +140,10 @@ var Object = {
         var retv =false;
         if(this.vision){
             if(pos_or_obj.position){
-                retv = this.vision.visible.get(pos_or_obj.position);
-                if(!retv && pos_or_obj._previous_position) retv = this.vision.visible.get(pos_or_obj._previous_position);
+                retv = this.vision.visible.get(utils.round_vec(pos_or_obj.position));
+                if(!retv && pos_or_obj._previous_position) retv = this.vision.visible.get(utils.round_vec(pos_or_obj._previous_position));
             }
-            else retv = this.vision.visible.get(pos_or_obj);
+            else retv = this.vision.visible.get(utils.round_vec(pos_or_obj));
         }
         return retv;
     },
@@ -221,6 +225,11 @@ game.objectmanager.c('alive', {
    'max_health':100,
    'health':100,
    'alive':true,
+
+   '_particle_type':'splatter',
+   '_particle_opts':{
+
+   },
    
    'die':function(damage){
        this.alive = false;
@@ -246,18 +255,22 @@ game.objectmanager.c('alive', {
        if(this.health === 0) this.die(damage);
    },
    
-   'hit':function(damage, position_px){
+   'hit':function(damage, position){
        //before processing (reduction, etc)
        
        this.fire('hit', [damage]);
        if(damage.amount>0){
             this.take_damage(damage); 
        }
-       this.world.spawn_particle('sprite', {
-           'sprite_name':'blood_hit',
-           'position_px':position_px || this.get_center_position_px(),
-           'pos_center':true
-       });
+       this.spawn_hit_particle(position || this.get_center_position());
+   },
+
+   'spawn_hit_particle':function(position){
+        var opts = {
+            'position':position
+        }
+        utils.extend(opts, this._particle_opts);
+        this.world.spawn_particle(this._particle_type, opts);
    }
 });
 

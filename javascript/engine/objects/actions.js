@@ -98,7 +98,7 @@ exports.attack = action({
 
 exports.move = action({
    'condition':function (actor){
-       return actor.can_move() && actor.has_explored(this.position) && actor.world.is_tile_threadable(this.position);
+       return actor.can_move() && actor.has_explored(this.position) && !actor.world.map.is_wall(this.position);
    },
    'name':'go to',
    'do':function(actor){

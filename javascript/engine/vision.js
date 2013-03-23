@@ -5,13 +5,19 @@ var constants = require('./constants');
 var mvec = gamejs.utils.vectors.multiply;
 var eventify = require('./lib/events').eventify;
 
-var ASMap = function(vision){
+var ASMap = function(vision, target){
+    /*
+    a map object for astar pathfinding.
+    target - optional. if specified, it being solid does not count as obstruction
+    */
 
     this.adjacent = function(origin) {
         var retv = [];
         constants.ADJACENT.forEach(function(mod){
             var p =utils.mod(origin, mod);
-            if(vision.explored.get(p) && vision.object.world.is_tile_threadable(p)) retv.push(p);
+            if(vision.explored.get(p) 
+                && ((target && utils.cmp(p, target)) 
+                     || vision.object.world.is_tile_threadable(p))) retv.push(p);
         }, this);
         return retv;
     };
@@ -55,7 +61,7 @@ Vision.prototype.object_came_into_view = function(world, obj){
 };
 
 Vision.prototype.get_path = function(from, to){
-    return gamejs.pathfinding.astar.findRoute(new ASMap(this), from, to, 100);
+    return gamejs.pathfinding.astar.findRoute(new ASMap(this, to), from, to, 100);
 };
 
 Vision.prototype.init_fov = function(){

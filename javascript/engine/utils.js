@@ -7,13 +7,17 @@ var game = require('./game').game;
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
 
+var round_vec = exports.round_vec = function(vec){
+    return [parseInt(vec[0]), parseInt(vec[1])];
+};
+
 exports.cmp = function(vec1, vec2){
     return vec1[0]==vec2[0] && vec1[1]==vec2[1];  
 };
 
 exports.pos_px = function(world_pos){
     //world tile position into pixel position
-    return vec.multiply(world_pos, game.tw);
+    return round_vec(vec.multiply(world_pos, game.tw));
 }
 
 exports.mod = function(position, mod){
@@ -45,7 +49,9 @@ var direction_raw = exports.direction_raw = function(from, to){
 
 exports.direction = function(from, to){
     //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees 
-   return Math.round(direction_raw(from, to) /90) * 90;
+   var retv = Math.round(direction_raw(from, to) /90) * 90;
+   if(retv==360) retv = 0;
+   return retv;
 };
 
 exports.iter_adjacent = function(pos, callback, context){
@@ -69,6 +75,12 @@ exports.process_options = function(object, options, default_options){
     
     object.options = options;
     
+};
+
+exports.extend = function (target, source){
+    for(var property in source){
+        target[property] = source[property];
+    }
 };
 
 exports.instance_of = function(V, F) {
@@ -114,6 +126,11 @@ var iter2drange = exports.iter2drange = function(from, to, callback, context){
     }  
 };
 
+exports.draw_rect = function(dst_surface, rect, zoom, color, width){
+    
+    gamejs.draw.rect(dst_surface, color, retct, width);
+};
+
 exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, size){
     //wow this is a cryptic mess
     var dst_size = dst_surface.getSize();
@@ -135,8 +152,12 @@ exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, 
     var dst_rect = new gamejs.Rect([i(dst_offset[0]), i(dst_offset[1])], [i(w), i(h)]);
     var src_rect = new gamejs.Rect([i(src_offset[0]), i(src_offset[1])], 
                                    [i(w/zoom),      i(h/zoom)]);
-                             
-    dst_surface.blit(src_surface, dst_rect, src_rect); 
+       
+    try{                     
+        dst_surface.blit(src_surface, dst_rect, src_rect);
+    }catch(e){
+        console.log('draw_error', src_surface, dst_rect, src_rect);
+    } 
 
     
                      
