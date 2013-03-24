@@ -1,3 +1,5 @@
+var utils = require('../utils');
+
 var Action = exports.Action = function (options){
     //this is were object interaction action is implemented
     this._NOT_A_PROPERTY = true;
@@ -102,7 +104,16 @@ exports.move = action({
    },
    'name':'go to',
    'do':function(actor){
-       actor._controller.go_to(this.position);
+        if(actor.is_adjacent_to_pos(this.position)){
+            actor.move(utils.direction(actor.position, this.position));
+        } else {
+            actor._controller.go_to(this.position);
+        }
+        actor.world.spawn_particle('sprite', {
+            sprite_name:'action_move',
+            z: 0,
+            position:this.position
+        });
    } 
 });
 

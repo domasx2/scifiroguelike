@@ -4,6 +4,7 @@ var game = require('./game').game;
 var random = require('./random');
 var utils = require('./utils');
 var sprite = require('./sprite');
+var eventify = require('./lib/events').eventify;
 
 exports.particles = {};
 
@@ -12,6 +13,7 @@ exports.register_particle = function(name, cls){
 }
 
 var Particle = exports.Particle = function(options){
+    eventify(this);
     utils.process_options(this, options, {
         z:100,
         duration:null
@@ -66,12 +68,22 @@ SpriteParticle.prototype.is_finished = function(){
 };
 
 var ProjectileParticle = exports.ProjectileParticle = function(options){
+    /*
+    publishes 'enter_tile' event for each new tile it enters
+
+
+    */
     utils.process_options(this, options, {
         'pos_from':utils.required,
         'pos_to':utils.required,
-        'velocity':10 //tiles per second,
+        'velocity':10, //tiles per second,
+        'update_chunks_ms':20 
+
     });
+    this.finished = false;
+    this.tiles_hit = {};
     this.position = options.position = options.pos_from;
+    this.d = 0;
     ProjectileParticle.superConstructor.apply(this, [options]);
     
     this.length = vec.distance(this.pos_from, this.pos_to);
@@ -80,14 +92,43 @@ var ProjectileParticle = exports.ProjectileParticle = function(options){
 gamejs.utils.objects.extend(ProjectileParticle, SpriteParticle);
 
 ProjectileParticle.prototype.update = function(deltams){
+    var chunk;
+    while(deltams){
+        chunk = Math.min(deltams, this.update_chunks_ms);
+        deltams -= chunk;
+        this._update(chunk);
+    }
+
+};
+
+ProjectileParticle.prototype.finish = function(){
+    while(!this.is_finished()) this._update(this.update_chunks_ms);
+};
+
+ProjectileParticle.prototype.stop = function(){
+    this.d=1;
+    this.pos_to = this.position;
+};
+
+ProjectileParticle.prototype._update = function(deltams){
     SpriteParticle.prototype.update.apply(this, [deltams]);
-    this.d = this.age / ((this.length / this.velocity) * 1000);
-    this.position = vec.add(this.pos_from, vec.multiply(vec.subtract(this.pos_to, this.pos_from), this.d));
-    this.sprite.position = utils.pos_px(this.position);
+    if(this.d<1){
+        this.d = this.age / ((this.length / this.velocity) * 1000);
+    
+        this.position = vec.add(this.pos_from, vec.multiply(vec.subtract(this.pos_to, this.pos_from), this.d));
+        this.sprite.position = utils.pos_px(this.position);
+
+        var ptile = utils.round_vec(this.position);
+        var h = utils.hash_vec(ptile);
+        if(!this.tiles_hit[h]){
+            this.tiles_hit[h] = true;
+            this.fire('enter_tile', [this.position]);
+        }
+    }
 };
 
 ProjectileParticle.prototype.is_finished = function(){
-    return this.d >=1;
+    return this.finished || this.d >=1;
 };
 
 exports.register_particle('projectile', ProjectileParticle);
@@ -99,11 +140,10 @@ var SplatterParticle = exports.SplatterParticle = function(options){
         'blip_count':10,
         'position':utils.required,
         'duration':500,
-        'min_size':1,
+        'min_size':1, //blip size in pixels pre-zoom
         'max_size':2,
-        'min_velocity':0.5,
-        'max_velocity':1,
-        'velocity':1 //tiles per second
+        'min_velocity':0.5, //tiles per second
+        'max_velocity':1
     });
     SplatterParticle.superConstructor.apply(this, [options]);
     this.blips = [];

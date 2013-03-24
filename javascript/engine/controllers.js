@@ -97,6 +97,16 @@ PlayerController.prototype.act_on_destination = function(pos){
 
 PlayerController.prototype.keyboard_move = function(events){
     var moved = false;
+
+    //end turn on space
+    if(events.some(function(event){
+        if(event.type==gamejs.event.KEY_DOWN && event.key==gamejs.event.K_SPACE){
+            this.owner.end_turn();
+            return true;
+        }
+    }, this)) return true;
+
+    //move if direction key is held down
     gamejs.utils.objects.keys(MOVE_KEY_MATRIX).some(function(key){
         if(game.keys_pressed[key]){
             var angle = MOVE_KEY_MATRIX[key]; 
@@ -142,8 +152,10 @@ PlayerController.prototype.mouse_action = function(events){
                 if(_actions.length==1){
                     _actions[0].do(this.owner);
                 }else{
-                    var move_action = new actions.BoundAction({"position":world_pos}, actions.move);
-                    if(move_action.condition(this.owner)) _actions.push(move_action);
+                    if(_actions.length==0){
+                        var move_action = new actions.BoundAction({"position":world_pos}, actions.move);
+                        if(move_action.condition(this.owner)) _actions.push(move_action);
+                    }
                     if(_actions.length==1){
                         _actions[0].do(this.owner);
                     }else if(_actions.length>1) {
@@ -159,11 +171,7 @@ PlayerController.prototype.mouse_action = function(events){
 
 PlayerController.prototype.go_to = function(pos){
     this.destination = pos;  
-    this.owner.world.spawn_particle('sprite', {
-        sprite_name:'action_move',
-        z: 0,
-        position:pos
-    });
+    
 };
 
 PlayerController.prototype.act = function(events){

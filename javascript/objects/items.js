@@ -27,7 +27,8 @@ engine.game.objectmanager.c('pistol', {
     '_requires': 'ranged_weapon usesammo',
     'shots':1,
     'hits_per_shot':1,
-    'spread':3
+    'spread':3,
+    'base_damage':5
 });
 
 engine.game.objectmanager.c('wrench', {

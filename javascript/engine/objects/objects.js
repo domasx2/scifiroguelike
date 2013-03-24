@@ -213,7 +213,9 @@ var Object = {
             this.fire('set_'+property, [new_value, old_value]);
             this.world.fire('object_set_'+property, [this, new_value, old_value]); 
         }
-    }
+    },
+
+
     
     
 };
@@ -269,8 +271,7 @@ game.objectmanager.c('alive', {
         var opts = {
             'position':position
         }
-        utils.extend(opts, this._particle_opts);
-        this.world.spawn_particle(this._particle_type, opts);
+        this.world.spawn_particle(this._particle_type, opts, this._particle_opts);
    }
 });
 
@@ -329,8 +330,8 @@ var Creature = {
     
     'end_turn':function(){
         //call this to end turn
-        this.moves_left = 0;
-        this.actions_left = 0;
+        while(this.moves_left) this.consume_move();
+        while(this.actions_left) this.consume_action();
     },
     
     'enemies_with': function(obj){
@@ -555,5 +556,13 @@ game.objectmanager.c('door', {
         this.fire('close');
     },
     
-    'action_openclose':actions.openclose
+    'action_openclose':actions.openclose,
+
+    'action_move':actions.action({
+       'condition':function (actor){
+           return actor.can_move() &&  this.is_open;
+       },
+       'name':actions.move.name,
+       'do':actions.move.do
+    })
 });

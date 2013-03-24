@@ -51,6 +51,7 @@ var World = exports.World = function(options){
     this.objects = new utils.Collection();
     this.event_frames = [];
     this.particles = [];
+    this._new_particles = [];
     this.persistent_events = new events.PersistentEventFrame();
     this.turn_queue = new utils.Collection(); //all objects that can act, in sequence of their action
     this.turn_pending_queue = new utils.Collection();; //all objects that have not yet acted this turn
@@ -164,7 +165,10 @@ World.prototype.process_turn = function(events){
             } 
             process_queue = !this.current_actor.can_act();
         }
-        if(process_queue) this.shift_turn_queue();
+        if(process_queue){
+            this.shift_turn_queue();
+            events = [];
+        } 
         this.update_events(0);
         if(this.events_in_progress()) break;
     }
@@ -251,12 +255,12 @@ World.prototype.is_tile_threadable = function(position){
    return threadable;
 };
 
-World.prototype.spawn_particle = function(name, options){
+World.prototype.spawn_particle = function(name, options, mixin_options){
    var cls = particle.particles[name];
    var p = null;
    if(cls){
-       p = new cls(options);
-       this.particles.push(p);
+       p = new cls(utils.extend({}, mixin_options, options));
+       this._new_particles.push(p);
    }  else{
        console.log('Unknown particle: '+name);
    }
@@ -265,6 +269,8 @@ World.prototype.spawn_particle = function(name, options){
 
 World.prototype.update_particles = function(deltams){
     var particles = [];
+    this.particles.push.apply(this.particles, this._new_particles);
+    this._new_particles = [];
     this.particles.forEach(function(p){
         p.update(deltams);
         if(!p.is_finished()) particles.push(p); 

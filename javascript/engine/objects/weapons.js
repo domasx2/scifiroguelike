@@ -185,8 +185,18 @@ game.objectmanager.c('weapon', {
     
     //call this when this weapon wielded by owner hits object
     'hit':function(owner, object, position){
-        object.hit(this.calc_damage(owner, object), position);
-        this.fire('hit', [owner, object]);
+        var chance = this.calc_hit_chance(owner, object);
+        var c = random.generator.random();
+        console.log('chance '+chance+' vs '+c);
+        if(c<=chance){
+            object.hit(this.calc_damage(owner, object), position);
+            this.fire('hit', [owner, object]);
+            console.log('hit!');
+            return true; 
+        }else {
+            console.log('miss!');
+            return false
+        }
     },
     
     //can this weapon, wielded by owner, be used to attack pos?
@@ -220,19 +230,14 @@ game.objectmanager.c('melee_weapon', {
     },
     
     'swing':function(owner, target){
+        var hit =false;
         if(this.can_attack(owner, target)){
-               var chance = this.calc_hit_chance(owner, target);
-               var c = random.generator.random();
-               if(c<=chance){
-                   console.log('hit!');
-                   this.hit(owner, target);
-               }else {
-                   console.log('miss!');
-               }
-               this.fire('swing', [owner, target]);
+            this.fire('swing', [owner, target]);
+            hit = this.hit(owner, target);  
         } else {
             console.log('Swinging, but can no longer attack!', owner, target)
         }
+        return hit;
     }
 });
 
@@ -245,6 +250,7 @@ game.objectmanager.c('ranged_weapon', {
         'sprite_name':'bullet',
         'velocity':10
    },
+   'pierce':1, //objects that can be hit
    'spread':2,
    'effective_range':5,
    'max_range':10,
@@ -259,10 +265,7 @@ game.objectmanager.c('ranged_weapon', {
           pos_to:target_position,
           angle:parseInt(utils.direction_raw(owner.position, target_position))
       };
-      for(var key in this._particle_opts){
-          opts[key] = this._particle_opts[key];
-      }
-      return this.world.spawn_particle(this._particle_type, opts);
+      return this.world.spawn_particle(this._particle_type, opts,this._particle_opts);
    },
    
    'can_attack_ranged':function(owner, object){
@@ -285,7 +288,7 @@ game.objectmanager.c('ranged_weapon', {
                var dir = utils.direction_raw(owner.position, tp);
                var spread = this.calc_spread();
                var rspread = random.generator.float(-spread, spread) 
-               var target_pos = vec.add(owner.position, vec.rotate([0, -vec.distance(owner.position, tp)], gamejs.utils.math.radians(dir+rspread)));
+               var target_pos = vec.add(owner.position, vec.rotate([0, -this.max_range], gamejs.utils.math.radians(dir+rspread)));
                var particle = this.spawn_particle(owner, target_pos);
                var event = new events.ProjectileEvent({
                   'weapon':this,

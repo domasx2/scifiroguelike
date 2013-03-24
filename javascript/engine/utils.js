@@ -11,6 +11,10 @@ var round_vec = exports.round_vec = function(vec){
     return [parseInt(vec[0]), parseInt(vec[1])];
 };
 
+exports.hash_vec = function(vec){
+    return vec[0]+'_'+vec[1];
+}
+
 exports.cmp = function(vec1, vec2){
     return vec1[0]==vec2[0] && vec1[1]==vec2[1];  
 };
@@ -77,10 +81,19 @@ exports.process_options = function(object, options, default_options){
     
 };
 
-exports.extend = function (target, source){
-    for(var property in source){
-        target[property] = source[property];
+exports.extend = function (target){
+    if(target){
+        var source;
+        for(var i=1;i<arguments.length;i++){
+            source = arguments[i];
+            if(source){
+                for(var property in source){
+                    target[property] = source[property];
+                }
+            }
+        }
     }
+    return target;
 };
 
 exports.instance_of = function(V, F) {
@@ -291,8 +304,12 @@ var clonedict = exports.clonedict = function(d){
 };
 
 
-//collection of game Objects
 var Collection = exports.Collection = function(objects){
+    /*
+    Uuse this to store a collection of objects.
+    provides 'add', 'remove' events,
+    automatically drops objects that are destroyed
+    */
     this.objects = [];  
     this.objects_by_id = {};
     eventify(this);

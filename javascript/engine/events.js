@@ -138,7 +138,7 @@ RangedAttackEvent.prototype.update = function(deltams){
     var shot = 0
     if(this.age-this.init_shot_mark > 0){
         shot += 1+parseInt(Math.max(this.age - this.init_shot_mark, 0) / this.weapon.fire_rate);
-        shot =Math.min(shot, this.weapon.shots);
+        shot = Math.min(shot, this.weapon.shots);
     }
     while(this.shots_fired <shot){
         this.shots_fired +=1;
@@ -189,16 +189,50 @@ var ProjectileEvent = exports.ProjectileEvent = function(options){
         'weapon':utils.required,
         'target_pos':utils.required,
         'target':null,
-        'particle':utils.required
+        'particle':utils.required,
+        'wall_hit_particle_type':'splatter',
+        'wall_hit_particle_options':{
+            'color':'#FF6A00',
+            'min_size':1,
+            'max_size':1,
+            'blip_count':5
+        }
     });
-    
+    ProjectileEvent.superConstructor.apply(this, [options]);
+    this.objects_hit = [];
     options.duration = parseInt((this.particle.length / this.particle.velocity_px) * 1000);
+    this.particle.on('enter_tile', this.enter_tile, this);
 };
 
 gamejs.utils.objects.extend(ProjectileEvent, Event);
 
+ProjectileEvent.prototype.enter_tile = function(projectile, position){
+    var tile = utils.round_vec(position);
+    //construct from hell
+    this.weapon.world.objects.by_pos(tile).some(function(obj){
+        if(obj.is_type('alive')){
+            if(this.weapon.hit(this.owner, obj, position)){
+                this.objects_hit.push(obj);
+                if(this.objects_hit.length >=this.weapon.pierce){
+                    this.particle.stop();
+                    this.finish();
+                    return true;
+                }
+            }
+        }
+    }, this);
+    if(!this.finished && this.weapon.world.map.is_wall(tile)){
+        this.weapon.world.spawn_particle(this.wall_hit_particle_type, {
+            'position':position
+        }, this.wall_hit_particle_options);
+        this.particle.stop();
+        this.finish();
+    }
+    
+};
+
 ProjectileEvent.prototype.finish = function(){
-      if(this.target) this.weapon.hit(this.owner, this.target, this.particle.position);
+      this.particle.finish();
       Event.prototype.finish.apply(this, []);
 };
 
