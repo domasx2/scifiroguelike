@@ -16,7 +16,8 @@ var Particle = exports.Particle = function(options){
     eventify(this);
     utils.process_options(this, options, {
         z:100,
-        duration:null
+        duration:null,
+        'static':false
     });
     this.age = 0;
 };

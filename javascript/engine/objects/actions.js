@@ -109,11 +109,7 @@ exports.move = action({
         } else {
             actor._controller.go_to(this.position);
         }
-        actor.world.spawn_particle('sprite', {
-            sprite_name:'action_move',
-            z: 0,
-            position:this.position
-        });
+        actor.world.scene.spawn_mouse_move_particle(this.position);
    } 
 });
 

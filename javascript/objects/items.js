@@ -11,13 +11,26 @@ engine.game.objectmanager.c('pistol_clip',{
 engine.game.objectmanager.c('pistol_clip_lov',{
     '_requires':'pistol_clip',
     'sprite_name':'pistol_clip_lov',
+    'base_damage':6,
     'ammo_type':'LoV'
 });
 
 engine.game.objectmanager.c('pistol_clip_incendiary', {
    '_requires':'pistol_clip',
    'sprite_name':'pistol_clip_incendiary',
-   'ammo_type':'incendiary' 
+   'ammo_type':'incendiary',
+   'base_damage':5,
+   'thermal_damage':2,
+
+   'on_hit_add_fire_damage':function(weapon, owner, object, position){
+      console.log('inendiary works!');
+      object.hit(new engine.Damage({
+        'amount':this.thermal_damage,
+        'type':'thermal',
+        'weapon':weapon,
+        'owner':owner
+      }, position));
+   }
 });
 
 engine.game.objectmanager.c('pistol', {
@@ -28,7 +41,7 @@ engine.game.objectmanager.c('pistol', {
     'shots':1,
     'hits_per_shot':1,
     'spread':3,
-    'base_damage':5
+    'base_damage':1
 });
 
 engine.game.objectmanager.c('wrench', {

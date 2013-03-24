@@ -93,9 +93,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return false;
             };
             
-            this.iter_prefixed = function(base, callback, context){
+            this.iter_prefixed = function(base, callback, context, include_base){
                 for(key in this){
-                    if(key!=base && key.search(base)==0){
+                    if((include_base ||key!=base) && key.search(base)==0){
                         callback.apply(context, [this[key], key]);
                     }
                 }

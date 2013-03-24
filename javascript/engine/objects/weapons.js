@@ -12,8 +12,13 @@ game.objectmanager.c('clip', {
     'ammo':10,
     'capacity':10,
     'ammo_type':'generic',
+    'base_damage':6,
     '_requires':'item',
     
+    'on_calc_damage':function(dmg){
+        dmg.amount+=this.base_damage;
+    },
+
     'get_ammo':function(){
         return this.ammo;
     }
@@ -21,7 +26,10 @@ game.objectmanager.c('clip', {
 
 game.objectmanager.c('usesammo', {
      'clip_type':'clip', //object type for clip
-     '_clip':null,
+     '_clip':null, //current clip
+     '__clip':null, //last used clip. might be already unloaded when bullet hits, so 
+                    //need another reference.. at least can't figure out a better
+                    //way atm
      
      'ammo_per_shot':1,
      
@@ -47,7 +55,7 @@ game.objectmanager.c('usesammo', {
                                     return 'load '+clip.ammo_type;
                                 },
                                 'do':function(actor, clip){
-                                    var clip = actor.inventory.get_by_type(clip.main_type());
+                                    clip = actor.inventory.get_by_type(clip.main_type());
                                     if(!clip){
                                        console.log('No longer able to load clip', clip);
                                        return; 
@@ -83,6 +91,16 @@ game.objectmanager.c('usesammo', {
             this.fire('unload', [clip]);
             
         }
+     },
+
+     'on_hit_clip':function(owner, object, position){
+      //propagagte hit event to clip
+        this.__clip.fire('hit', [this, owner, object, position]);
+     },
+     
+     'on_calc_damage_clip':function(dmg){
+      //propagate calc damage event to clip
+        this.__clip.fire('calc_damage', [dmg]);
      },
      
      'inventory_action_unload_clip':actions.action({
@@ -123,7 +141,7 @@ game.objectmanager.c('usesammo', {
         }, this);
     },
 
-     'load_clip': function(clip, actor){
+    'load_clip': function(clip, actor){
          //why am I ashamed of this defensive programming? 
          if(this._clip){
             console.log('Already loaded!', this);
@@ -137,7 +155,7 @@ game.objectmanager.c('usesammo', {
              console.log('Actor does not have clip in inventory!', actor, clip);
          }
          actor.inventory.remove(clip);
-         this._clip = clip;
+         this._clip = this.__clip = clip;
          this.fire('reloaded', [clip]);
        
      },
@@ -149,7 +167,7 @@ game.objectmanager.c('usesammo', {
     'post_load_clip':function(data){
         if(data.clip) this._clip = this.world.objects.by_id(data.clip);
         else this._clip = null;
-    },
+    }
 });
 
 game.objectmanager.c('weapon', {
@@ -170,32 +188,44 @@ game.objectmanager.c('weapon', {
         this.iter_prefixed('calc_hit_chance', function(fn){
             acc = fn.apply(this, [owner, object, acc]);
         }, this);
+        object.iter_prefixed('calc_hit_chance', function(fn){
+            acc = fn.apply(object, [owner, this, acc]);
+        }, this);
         return Math.max(Math.min(acc, this.max_accuracy), this.min_accuracy);
     },
     
     //get damage this weapon does
     'calc_damage':function(owner, object){
-        return new objutils.Damage({
+        var dmg = new objutils.Damage({
             'amount':this.base_damage,
             'type':this.damage_type,
             'owner':owner,
             'weapon':this 
         });
+        this.fire('calc_damage', [dmg]);
+        return dmg;
     },
-    
+
     //call this when this weapon wielded by owner hits object
     'hit':function(owner, object, position){
+        object.hit(this.calc_damage(owner, object), position);
+        this.fire('hit', [owner, object, position]);
+        console.log('hit!');
+    },
+    
+    
+    //call this to try to hit object with this weapon and possibly miss
+    'tryhit':function(owner, object, position){
         var chance = this.calc_hit_chance(owner, object);
         var c = random.generator.random();
         console.log('chance '+chance+' vs '+c);
         if(c<=chance){
-            object.hit(this.calc_damage(owner, object), position);
-            this.fire('hit', [owner, object]);
-            console.log('hit!');
+            this.hit(owner, object, position);
             return true; 
         }else {
+            object.fire('miss', [owner, this, position]);
             console.log('miss!');
-            return false
+            return false;
         }
     },
     
@@ -233,7 +263,7 @@ game.objectmanager.c('melee_weapon', {
         var hit =false;
         if(this.can_attack(owner, target)){
             this.fire('swing', [owner, target]);
-            hit = this.hit(owner, target);  
+            hit = this.tryhit(owner, target);  
         } else {
             console.log('Swinging, but can no longer attack!', owner, target)
         }

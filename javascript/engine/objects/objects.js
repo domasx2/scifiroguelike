@@ -560,7 +560,7 @@ game.objectmanager.c('door', {
 
     'action_move':actions.action({
        'condition':function (actor){
-           return actor.can_move() &&  this.is_open;
+           return actor.can_move() &&  this.is_open && this.world.is_tile_threadable(this.position);
        },
        'name':actions.move.name,
        'do':actions.move.do

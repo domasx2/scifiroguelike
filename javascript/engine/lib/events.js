@@ -34,8 +34,16 @@ exports.eventify = function(obj){
     obj.fire = function(event, args){
         //console.log(event, args);
         if(this._suppress_events) return;
+        
+        if(this.iter_prefixed){
+            this.iter_prefixed('on_'+event, function(fn){
+                fn.apply(this, args || []);
+            }, this, true);
+        }
+
         if(!args) args = [this];
         else args.splice(0, 0, this);
+
         if(this._callbacks[event]){
             var l = [];
             this._callbacks[event].forEach(function(cb){

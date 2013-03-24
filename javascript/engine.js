@@ -29,6 +29,8 @@ exports.Event = exports.events.Event;
 
 exports.particle = require('./engine/particle');
 
+exports.Damage = require('./engine/objects/utils').Damage;
+
 require('./engine/objects/objects');
 require('./engine/objects/items');
 require('./engine/objects/weapons');

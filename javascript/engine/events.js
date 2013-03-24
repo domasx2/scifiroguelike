@@ -211,7 +211,7 @@ ProjectileEvent.prototype.enter_tile = function(projectile, position){
     //construct from hell
     this.weapon.world.objects.by_pos(tile).some(function(obj){
         if(obj.is_type('alive')){
-            if(this.weapon.hit(this.owner, obj, position)){
+            if(this.weapon.tryhit(this.owner, obj, position)){
                 this.objects_hit.push(obj);
                 if(this.objects_hit.length >=this.weapon.pierce){
                     this.particle.stop();

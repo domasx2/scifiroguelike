@@ -217,5 +217,12 @@ WorldScene.prototype.update = function(deltams, events){
     this.view.update(deltams);
 };
 
-
+WorldScene.prototype.spawn_mouse_move_particle = function(position){
+  this.world.spawn_particle('sprite', {
+      sprite_name:'action_move',
+      z: 0,
+      position:position,
+      'static': true
+  });
+};
 
