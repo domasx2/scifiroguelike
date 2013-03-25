@@ -26,11 +26,17 @@ var Object = {
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
     'static':true, //is it visible while in fog of war?
+    'blood_color':null, //spawns splatter particle on hit if specified
     '_controller': null,
     'z':10,
     
     '_name':'Object',
     '_description':'This could be anything!',
+
+    '_hit_particle_type':'splatter',
+    '_hit_particle_opts':{
+
+    },
     
     //METHODS
     'init':function(world){
@@ -215,7 +221,24 @@ var Object = {
         }
     },
 
+    'hit':function(damage, position){
+        this.fire('hit', [damage]);
+        console.log('hit!', this, damage);
+        this.spawn_hit_particle(position || this.get_center_position());
+    },
 
+    'spawn_hit_particle':function(position){
+        console.log('bc', this.blood_color);
+        if(this.blood_color){
+
+            var opts = {
+                'position':position,
+                'color':this.blood_color
+            }
+            var particle = this.world.spawn_particle(this._hit_particle_type, opts, this._hit_particle_opts);
+            console.log(this.blood_color, particle);
+        }
+   }
     
     
 };
@@ -228,10 +251,7 @@ game.objectmanager.c('alive', {
    'health':100,
    'alive':true,
 
-   '_particle_type':'splatter',
-   '_particle_opts':{
-
-   },
+   
    
    'die':function(damage){
        this.alive = false;
@@ -239,6 +259,7 @@ game.objectmanager.c('alive', {
        this.threadable = true;
        this.transparent = true;
        this.solid = false;
+       this.static = true;
        this.z=0;
        this.fire('die', [damage]);  
        console.log(this._name+' died!');
@@ -257,21 +278,11 @@ game.objectmanager.c('alive', {
        if(this.health === 0) this.die(damage);
    },
    
-   'hit':function(damage, position){
+   'on_hit':function(damage, position){
        //before processing (reduction, etc)
-       
-       this.fire('hit', [damage]);
        if(damage.amount>0){
             this.take_damage(damage); 
        }
-       this.spawn_hit_particle(position || this.get_center_position());
-   },
-
-   'spawn_hit_particle':function(position){
-        var opts = {
-            'position':position
-        }
-        this.world.spawn_particle(this._particle_type, opts, this._particle_opts);
    }
 });
 
@@ -319,6 +330,8 @@ var Creature = {
     'moves_left':2,
     'actions_left':1,
     'turn_in_progress': false,
+
+    'blood_color':'#FF0000', //red
     
     'can_act': function(){
         return this.alive  && (this.moves_left + this.actions_left);  
@@ -506,7 +519,8 @@ game.objectmanager.c('door', {
     'sprite':'closed',
    '_name':'door',
    '_description':'This is a solid looking door.',
-   
+   'blood_color':'#FFD800',
+
    'get_z':function(protagonist){
        if(protagonist && protagonist.can_see(this)) return 100;
        return this.z;
@@ -543,7 +557,7 @@ game.objectmanager.c('door', {
         this.is_open = true;
         this.transparent = true;
         this.threadable = true;
-        this.solid = true;
+        this.solid = false;
         this.fire('open');
     },
     
@@ -552,7 +566,7 @@ game.objectmanager.c('door', {
         this.is_open = false;
         this.transparent = false;
         this.threadable = false;
-        this.solid = false;
+        this.solid = true;
         this.fire('close');
     },
     

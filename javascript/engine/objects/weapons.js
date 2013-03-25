@@ -165,8 +165,8 @@ game.objectmanager.c('usesammo', {
     },
     
     'post_load_clip':function(data){
-        if(data.clip) this._clip = this.world.objects.by_id(data.clip);
-        else this._clip = null;
+        if(data.clip) this._clip = this.__clip = this.world.objects.by_id(data.clip);
+        else this._clip = this.__clip = null;
     }
 });
 
@@ -289,9 +289,9 @@ game.objectmanager.c('ranged_weapon', {
        return this.spread;
    },
    
-   'spawn_particle':function(owner, target_position){
+   'spawn_particle':function(owner, source_position, target_position){
       var opts = {
-          pos_from:vec.add(owner.get_center_position(), vec.multiply(constants.MOVE_MOD[owner.angle], [0.5, 0.5])),
+          pos_from:source_position,
           pos_to:target_position,
           angle:parseInt(utils.direction_raw(owner.position, target_position))
       };
@@ -314,12 +314,13 @@ game.objectmanager.c('ranged_weapon', {
    'shoot':function(owner, target){
        if(this.can_attack(owner, target)){
            for(var i=0;i<this.hits_per_shot;i++) {
-               var tp = vec.add(target.position, [0.5, 0.5])
-               var dir = utils.direction_raw(owner.position, tp);
+               var tp = target.get_center_position();
+               var pos_from = vec.add(owner.get_center_position(), vec.multiply(constants.MOVE_MOD[owner.angle], [0.5, 0.5]));
+               var dir = utils.direction_raw(pos_from, tp);
                var spread = this.calc_spread();
                var rspread = random.generator.float(-spread, spread) 
-               var target_pos = vec.add(owner.position, vec.rotate([0, -this.max_range], gamejs.utils.math.radians(dir+rspread)));
-               var particle = this.spawn_particle(owner, target_pos);
+               var target_pos = vec.add(pos_from, vec.rotate([0, -this.max_range], gamejs.utils.math.radians(dir+rspread)));
+               var particle = this.spawn_particle(owner, pos_from, target_pos);
                var event = new events.ProjectileEvent({
                   'weapon':this,
                   'owner':owner,

@@ -6,7 +6,7 @@ var game = require('./game').game;
 
 var required = exports.required = '_PROPERTY_REQUIRED';
 var i = parseInt;
-
+var normalise_degrees = gamejs.utils.math.normaliseDegrees;
 var round_vec = exports.round_vec = function(vec){
     return [parseInt(vec[0]), parseInt(vec[1])];
 };
@@ -51,12 +51,26 @@ var direction_raw = exports.direction_raw = function(from, to){
 }
 
 
-exports.direction = function(from, to){
+var direction = exports.direction = function(from, to){
     //going from tile 'from' to tile 'to' returns angle at which actor would be facing, in degrees 
-   var retv = Math.round(direction_raw(from, to) /90) * 90;
-   if(retv==360) retv = 0;
-   return retv;
+   return normalise_degrees(Math.round(direction_raw(from, to) /90) * 90);
 };
+
+exports.all_directions = function(from, to){
+    //going from tile 'from' to tile 'to' returns array of possible angles to face
+    //of which there might be two
+    var directions = [];
+    var raw_angle = direction_raw(from, to) / 90;
+    if((raw_angle % 1) == 0){
+        directions.push(normalise_degrees(raw_angle*90));
+    }else {
+        directions.push(normalise_degrees(Math.floor(raw_angle)*90));
+        directions.push(normalise_degrees(Math.ceil(raw_angle)*90));
+    }
+    var pref_direction = direction(from, to);
+    if(directions[0]!=pref_direction) directions.reverse();
+    return directions;
+}
 
 exports.iter_adjacent = function(pos, callback, context){
     constants.ANGLES.forEach(function(angle){

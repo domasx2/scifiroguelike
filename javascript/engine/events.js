@@ -120,7 +120,19 @@ var RangedAttackEvent = exports.RangedAttackEvent = function(options){
         'target':utils.required
     });
     RangedAttackEvent.superConstructor.apply(this, [options]);
-    this.owner.set_angle(utils.direction(this.owner.position, this.target.position));
+
+    //try to pick a direction to face that is not in fact a wall
+    //TODO: more complex LOS check
+    var directions = utils.all_directions(this.owner.position, this.target.position);
+    console.log('directions', directions);
+    var direction;
+    for(var i =0; i<directions.length;i++){
+        direction = directions[i];
+        if(!this.owner.world.map.is_wall(utils.shift(this.owner.position, direction))) break;
+    }
+    console.log('chose', direction);
+    this.owner.set_angle(direction);
+
     this.owner.set_sprite('attack_ranged');
     this.init_shot_mark = this.owner.active_sprite.definition.duration / 2;
     this.duration = this.owner.active_sprite.definition.duration+((this.weapon.shots-1)*this.weapon.fire_rate);
@@ -210,7 +222,16 @@ ProjectileEvent.prototype.enter_tile = function(projectile, position){
     var tile = utils.round_vec(position);
     //construct from hell
     this.weapon.world.objects.by_pos(tile).some(function(obj){
-        if(obj.is_type('alive')){
+        //solid object: gets hit, bullet stops
+        if(obj.solid){
+            this.weapon.hit(this.owner, obj, position);
+            this.objects_hit.push(obj);
+            this.particle.stop();
+            this.finish();
+            return true;
+        }
+        //alive but not solid: maybe hits, can pierce
+        else if(obj.is_type('alive')){
             if(this.weapon.tryhit(this.owner, obj, position)){
                 this.objects_hit.push(obj);
                 if(this.objects_hit.length >=this.weapon.pierce){
@@ -219,7 +240,7 @@ ProjectileEvent.prototype.enter_tile = function(projectile, position){
                     return true;
                 }
             }
-        }
+        } 
     }, this);
     if(!this.finished && this.weapon.world.map.is_wall(tile)){
         this.weapon.world.spawn_particle(this.wall_hit_particle_type, {
