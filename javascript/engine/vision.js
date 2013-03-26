@@ -43,6 +43,7 @@ var Vision = exports.Vision = function(world, object){
     this.redraw = false;
     this.objects = new utils.Collection(); //objects that are visible
     this.made_visible = [];
+    this.made_explored = [];
     this.prev_visible = [];
     this.world.on(['teleport', 'spawn'], this.object_came_into_view, this);
     this.world.on(['spawn', 'object_set_transparent'], this.object_transparency_changed, this);
@@ -68,6 +69,7 @@ Vision.prototype.init_fov = function(){
     this.visible = new utils.Array2D(this.world.map.size);
     this.prev_visible = this.made_visible;
     this.made_visible = new Array();
+    this.made_explored = new Array();
     this.redraw = true;
 };
 
@@ -75,16 +77,21 @@ Vision.prototype.can_see = function(pos, relative_to){
     var v = this.visible.get(pos)
     if(!v  && !(v===null)){
         var objs = this.world.objects.by_pos(pos);
-        if(!objs.some(function(obj){
+
+        var tblock = objs.some(function(obj){
             if(!obj.transparent && obj.transparency_block(relative_to))return true;
-        }, this)){
+        }, this);
+
+        this.explored.set(pos, true);  
+        
+        if(!tblock){
             this.visible.set(pos, true);
-            this.explored.set(pos, true);  
             this.made_visible.push(pos);
-            
             objs.forEach(function(obj){
                 if(!this.objects.has(obj)) this.objects.add(obj);
             }, this);
+        }else {
+            this.made_explored.push(pos);
         }
     }
 };
@@ -274,22 +281,34 @@ Vision.prototype.load_explored = function(explored){
 Vision.prototype.draw = function(view){
     if(this.redraw){
       var z = game.settings.ZOOM;
-      if(!this.surface){
-           this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
-           this.surface.fill('#000');
+      var surface = this.surface;
+      if(!surface){
+           surface = this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
+           surface.fill('#000');
       } 
       var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
       
-      this.prev_visible.forEach(function(pos){
-          if(!this.visible.get(pos)){
-              this.surface.blit(spritesheet.get_surface(0), 
+      function draw_fog(pos){
+        surface.blit(spritesheet.get_surface(0), 
                     new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)),
                     new gamejs.Rect([game.tw, 0], game.ts));
-          }
+      };
+
+      function clr(pos){
+        surface.clear(new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)));
+      };
+
+      this.prev_visible.forEach(function(pos){
+          if(!this.visible.get(pos)) draw_fog(pos);
       }, this);
-      
+
       this.made_visible.forEach(function(pos){
-           this.surface.clear(new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z))); 
+          clr(pos);
+      }, this);
+
+      this.made_explored.forEach(function(pos){
+         clr(pos);
+         draw_fog(pos);
       }, this);
 
       this.redraw = false;
