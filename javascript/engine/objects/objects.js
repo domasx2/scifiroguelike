@@ -12,7 +12,8 @@ var events = require('../events');
 var actions = require('./actions');
 
 
-var Object = {
+//base class. every entity that is spawned MUST require this!
+game.objectmanager.c('object', {
     
     //PROPERTIES,
     '_previous_position': null, //this is needed to know when to draw objects that are 
@@ -26,17 +27,12 @@ var Object = {
     'transparent':true, //can it be seen through?
     'solid': false,     //can projectiles pass through?
     'static':true, //is it visible while in fog of war?
-    'blood_color':null, //spawns splatter particle on hit if specified
-    '_controller': null,
     'z':10,
     
     '_name':'Object',
     '_description':'This could be anything!',
 
-    '_hit_particle_type':'splatter',
-    '_hit_particle_opts':{
-
-    },
+    
     
     //METHODS
     'init':function(world){
@@ -55,10 +51,6 @@ var Object = {
             
             //convert actions to bound action
             if(val && utils.instance_of(val, actions.Action)) this[key] = new actions.BoundAction(this, val);
-        }
-        
-        if(this._controller){
-            this._controller = new this._controller(this);
         }
     },
     
@@ -130,30 +122,6 @@ var Object = {
         }
     },
     
-    'has_explored':function(pos_or_obj){
-        var retv =false;
-        if(this.vision){
-            if(pos_or_obj.position){
-                retv = this.vision.explored.get(pos_or_obj.position);
-                if(!retv && pos_or_obj._previous_position) retv = this.vision.explored.get(pos_or_obj._previous_position);
-            }
-            else retv = this.vision.explored.get(pos_or_obj);
-        }
-        return retv;
-    },
-
-    'can_see': function(pos_or_obj){
-        var retv =false;
-        if(this.vision){
-            if(pos_or_obj.position){
-                retv = this.vision.visible.get(utils.round_vec(pos_or_obj.position));
-                if(!retv && pos_or_obj._previous_position) retv = this.vision.visible.get(utils.round_vec(pos_or_obj._previous_position));
-            }
-            else retv = this.vision.visible.get(utils.round_vec(pos_or_obj));
-        }
-        return retv;
-    },
-    
     'is_adjacent_to_pos':function(pos){
         var dx = Math.abs(pos[0]-this.position[0]);
         var dy = Math.abs(pos[1] - this.position[1]);  
@@ -221,36 +189,86 @@ var Object = {
         }
     },
 
+    
+});
+
+//has a controller, it's own turn and can act
+game.objectmanager.c('actor', {
+    '_controller': controllers.Controller,
+    'speed_move': 2, //moves per turn
+    'speed_act':1,   //actions per turn
+    
+    'moves_left':2, //moves left this turn
+    'actions_left':1, //actions left this turn
+    'turn_in_progress': false, //is set to true for duration of turn
+
+    'init_controller': function(world){
+         this._controller = new this._controller(this);
+    },
+
+    'start_turn':function(){
+        //called by world on  turn start
+        this.moves_left = this.speed_move;
+        this.actions_left = this.speed_act;
+        this.fire('start_turn');
+    },
+    
+    'consume_move':function(){
+        if(this.moves_left) this.moves_left--;
+        else this.consume_action();
+        this.fire('consume_move');
+    },
+    
+    'consume_action':function(){
+        if(this.actions_left) this.actions_left --;
+        else console.log('Consuming action but no actions left!', this);
+        this.fire('consume_action');
+    },
+
+    'can_act': function(){
+        return this.alive  && (this.moves_left + this.actions_left);  
+    },
+    
+    'can_move':function(){
+        return this.moves_left || this.actions_left;  
+    },
+    
+    'end_turn':function(){
+        //call this to end turn
+        while(this.moves_left) this.consume_move();
+        while(this.actions_left) this.consume_action();
+    }
+});
+
+//can be hit, publishes 'hit' event. !!! not that 'solid' objects can also be hit, but
+//cannot be attacked
+game.objectmanager.c('hittable', {
+    'hittable':true,
+    '_hit_particle_type':'splatter',
+    '_hit_particle_opts':{
+        'color': '#FF0000'
+    },
+
     'hit':function(damage, position){
         this.fire('hit', [damage]);
-        console.log('hit!', this, damage);
-        this.spawn_hit_particle(position || this.get_center_position());
+        if(damage.spawn_particle) this.spawn_hit_particle(position || this.get_center_position());
     },
 
     'spawn_hit_particle':function(position){
-        console.log('bc', this.blood_color);
-        if(this.blood_color){
-
-            var opts = {
-                'position':position,
-                'color':this.blood_color
-            }
-            var particle = this.world.spawn_particle(this._hit_particle_type, opts, this._hit_particle_opts);
-            console.log(this.blood_color, particle);
+        var opts = {
+            'position':position
         }
-   }
-    
-    
-};
+        var particle = this.world.spawn_particle(this._hit_particle_type, opts, this._hit_particle_opts);
+   } 
+});
 
-game.objectmanager.c('object', Object);
-
-
+//object can take damage and die.
+//publishes 'take_damage', 'die' events
 game.objectmanager.c('alive', {
    'max_health':100,
    'health':100,
    'alive':true,
-
+   '_requires':'hittable',
    
    
    'die':function(damage){
@@ -286,6 +304,7 @@ game.objectmanager.c('alive', {
    }
 });
 
+//can calculate visible area & objects, tracks explored tiles
 game.objectmanager.c('vision', {
     'vision_range':10,
     'auto_vision':false, //recalculate vision automatically when changes are detected?
@@ -312,41 +331,44 @@ game.objectmanager.c('vision', {
             if(this.auto_vision) this.vision.update();
         }, this);
   
+    },
+
+    'has_explored':function(pos_or_obj){
+        var retv =false;
+        if(this.vision){
+            if(pos_or_obj.position){
+                retv = this.vision.explored.get(pos_or_obj.position);
+                if(!retv && pos_or_obj._previous_position) retv = this.vision.explored.get(pos_or_obj._previous_position);
+            }
+            else retv = this.vision.explored.get(pos_or_obj);
+        }
+        return retv;
+    },
+
+    'can_see': function(pos_or_obj){
+        var retv =false;
+        if(this.vision){
+            if(pos_or_obj.position){
+                retv = this.vision.visible.get(utils.round_vec(pos_or_obj.position));
+                if(!retv && pos_or_obj._previous_position) retv = this.vision.visible.get(utils.round_vec(pos_or_obj._previous_position));
+            }
+            else retv = this.vision.visible.get(utils.round_vec(pos_or_obj));
+        }
+        return retv;
     }
     
 });
 
-var Creature = {
+//base creature class,
+//implements inventory & relationship TODO: extract these into components
+game.objectmanager.c('creature', {
     'team':'neutral',
     'threadable':false,
     'static':false,
     
     'inventory_size':10,
     'z':20,
-    
-    'speed_move': 2,
-    'speed_act':1,
-    
-    'moves_left':2,
-    'actions_left':1,
-    'turn_in_progress': false,
 
-    'blood_color':'#FF0000', //red
-    
-    'can_act': function(){
-        return this.alive  && (this.moves_left + this.actions_left);  
-    },
-    
-    'can_move':function(){
-        return this.moves_left || this.actions_left;  
-    },
-    
-    'end_turn':function(){
-        //call this to end turn
-        while(this.moves_left) this.consume_move();
-        while(this.actions_left) this.consume_action();
-    },
-    
     'enemies_with': function(obj){
         //is this creature hostile towards obj and vice/versa?
         //TODO: substantiate.. teams, etc
@@ -355,24 +377,7 @@ var Creature = {
         return false;
     },
     
-    'start_turn':function(){
-        //called by world on creatures turn start
-        this.moves_left = this.speed_move;
-        this.actions_left = this.speed_act;
-        this.fire('start_turn');
-    },
     
-    'consume_move':function(){
-        if(this.moves_left) this.moves_left--;
-        else this.consume_action();
-        this.fire('consume_move');
-    },
-    
-    'consume_action':function(){
-        if(this.actions_left) this.actions_left --;
-        else console.log('Consuming action but no actions left!', this);
-        this.fire('consume_action');
-    },
     
     'can_attack':function(object){
         if(this.actions_left){
@@ -436,11 +441,8 @@ var Creature = {
         }, this);
     },
     
-    '_requires':'object alive vision'  
-}
-
-game.objectmanager.c('creature', Creature);
-
+    '_requires':'object alive vision actor'  
+});
 
 /*CHEST
  * base chest object. contains items
@@ -510,7 +512,7 @@ game.objectmanager.c('chest', {
 
 
 game.objectmanager.c('door', {
-    '_requires':'object',
+    '_requires':'object hittable',
    'is_open':false,
    'threadable':false,
    'transparent':false,
@@ -519,26 +521,28 @@ game.objectmanager.c('door', {
     'sprite':'closed',
    '_name':'door',
    '_description':'This is a solid looking door.',
-   'blood_color':'#FFD800',
+   '_hit_particle_opts':{
+        'color': '#FFD800'
+    },
 
-   'get_z':function(protagonist){
-       if(protagonist && protagonist.can_see(this)) return 100;
+   'get_z': function( protagonist ){
+       if( protagonist && protagonist.can_see(this) ) return 100;
        return this.z;
     },
    
-   'set_default_sprite':function(){
+   'set_default_sprite': function(){
        this.set_sprite(this.is_open? 'open': 'closed');
    },
    
-   'init_sprite':function(){
+   'init_sprite': function(){
        this.set_default_sprite();
    },
    
-   'init_prev_position':function(){
-       this._previous_position = utils.mod(this.position, constants.MOVE_MOD_BACK[this.angle]);
+   'init_prev_position': function(){
+       this._previous_position = utils.mod( this.position, constants.MOVE_MOD_BACK[this.angle] );
    },
    
-   'transparency_block':function(looking_from){
+   'transparency_block':function( looking_from ){
         //block vision if looking to the tile from door perspective
         if(this.angle == 0){
             if(looking_from[1]>this.position[1]) return true;
@@ -557,6 +561,7 @@ game.objectmanager.c('door', {
         this.is_open = true;
         this.transparent = true;
         this.threadable = true;
+        this.hittable = false;
         this.solid = false;
         this.fire('open');
     },
@@ -567,6 +572,7 @@ game.objectmanager.c('door', {
         this.transparent = false;
         this.threadable = false;
         this.solid = true;
+        this.hittable = true;
         this.fire('close');
     },
     

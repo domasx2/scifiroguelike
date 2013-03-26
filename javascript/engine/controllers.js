@@ -171,7 +171,6 @@ PlayerController.prototype.mouse_action = function(events){
 
 PlayerController.prototype.go_to = function(pos){
     this.destination = pos;  
-    
 };
 
 PlayerController.prototype.act = function(events){

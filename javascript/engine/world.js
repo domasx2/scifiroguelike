@@ -184,17 +184,12 @@ World.prototype.update = function(deltams, events){
 World.prototype.spawn = function(type, options){
     options = options || {};
     var obj = game.objectmanager.e(type, options.id);
-    var key;
-    for(key in options){
-        if(options.hasOwnProperty(key)){
-            obj[key] = options[key];
-        }
-    }
+    utils.extend(obj, options);
     obj.init(this);
     this.objects.add(obj);
     obj.fire('spawn');
     this.fire('spawn', [obj]);
-    if(obj._controller) this.turn_queue.add(obj);
+    if(obj.is_type('actor')) this.turn_queue.add(obj);
     return obj;
 };
 
@@ -277,3 +272,4 @@ World.prototype.update_particles = function(deltams){
     });
     this.particles = particles;
 };
+

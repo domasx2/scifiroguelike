@@ -28,7 +28,8 @@ engine.game.objectmanager.c('pistol_clip_incendiary', {
         'amount':this.thermal_damage,
         'type':'thermal',
         'weapon':weapon,
-        'owner':owner
+        'owner':owner,
+        'spawn_particle':false
       }, position));
    }
 });

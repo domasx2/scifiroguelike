@@ -216,17 +216,24 @@ game.objectmanager.c('weapon', {
     
     //call this to try to hit object with this weapon and possibly miss
     'tryhit':function(owner, object, position){
-        var chance = this.calc_hit_chance(owner, object);
-        var c = random.generator.random();
-        console.log('chance '+chance+' vs '+c);
-        if(c<=chance){
-            this.hit(owner, object, position);
-            return true; 
-        }else {
-            object.fire('miss', [owner, this, position]);
-            console.log('miss!');
-            return false;
+        var hittable = object.is_type('hittable') && object.hittable;
+        if( object.solid ){
+            if(hittable) this.hit(owner, object, position);
+            return true;
+        } else if( hittable ) {
+            var chance = this.calc_hit_chance(owner, object);
+            var c = random.generator.random();
+            console.log('chance '+chance+' vs '+c);
+            if(c<=chance){
+                this.hit(owner, object, position);
+                return true; 
+            }else {
+                object.fire('miss', [owner, this, position]);
+                console.log('miss!');
+                return false;
+            }
         }
+        return false;
     },
     
     //can this weapon, wielded by owner, be used to attack pos?
