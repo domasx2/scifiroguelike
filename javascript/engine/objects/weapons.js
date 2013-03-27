@@ -229,6 +229,11 @@ game.objectmanager.c('weapon', {
                 return true; 
             }else {
                 object.fire('miss', [owner, this, position]);
+                this.world.spawn_particle('textblip', {
+                  'font':'miss',
+                  'text':'missed',
+                  'position':object.position
+                });
                 console.log('miss!');
                 return false;
             }

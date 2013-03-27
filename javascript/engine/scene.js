@@ -186,6 +186,7 @@ WorldScene.prototype.serialize = function(){
 };
 
 WorldScene.prototype.draw = function(){
+    //TODO: move this to View class
     var draw_order = [];
     var protagonist = this.protagonist;
     

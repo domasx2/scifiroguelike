@@ -1,6 +1,7 @@
-var gamejs = require('gamejs');
-var game = require('./game').game;
-var utils = require('./utils');
+var gamejs = require('gamejs'),
+    game = require('./game').game,
+    utils = require('./utils'),
+    CachedFont = require('./lib/cachedfont').CachedFont;
 
 var TileSheet = function(def){
     this.def = def;
@@ -71,9 +72,10 @@ SpriteSheet.prototype.prerotate = function(step, size){
     }
 };
 
-exports.Cache = function(resources){
+var Cache = exports.Cache = function(resources){
     this.spritesheets = {};
     this.tilesheets = {};
+    this.fonts = {}
     
     gamejs.utils.objects.keys(resources.tilesheets).forEach(function(key){
         this.tilesheets[key] = new TileSheet(resources.tilesheets[key]); 
@@ -105,4 +107,10 @@ exports.Cache = function(resources){
         };
         
     }, this);
+};
+
+Cache.prototype.get_font = function(font, color){
+    var hash = font+'_'+color;
+    if(!this.fonts[hash]) this.fonts[hash] = new CachedFont(font, color);
+    return this.fonts[hash];
 };

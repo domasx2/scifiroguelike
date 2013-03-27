@@ -19,17 +19,22 @@ exports.cmp = function(vec1, vec2){
     return vec1[0]==vec2[0] && vec1[1]==vec2[1];  
 };
 
+
+exports.pos_px_noround = function(world_pos){
+    return vec.multiply(world_pos, game.tw);
+};
+
 exports.pos_px = function(world_pos){
     //world tile position into pixel position
     return round_vec(vec.multiply(world_pos, game.tw));
-}
+};
 
 exports.mod = function(position, mod){
     //i don't know why i have this
     return vec.add(position, mod);  
 };
 
-var  shift = exports.shift = function(position, direction){
+var shift = exports.shift = function(position, direction){
     //direction is degress (0, 90, 180 or 270). move tile position by 1 in this direction
     return vec.add(position, constants.MOVE_MOD[direction]);
 };

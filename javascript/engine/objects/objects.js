@@ -272,11 +272,13 @@ game.objectmanager.c('alive', {
    
    
    'die':function(damage){
+        //todo: replace with a corpse object? 
        this.alive = false;
        this.set_sprite('dead');
        this.threadable = true;
        this.transparent = true;
        this.solid = false;
+       this.hittable = false;
        this.static = true;
        this.z=0;
        this.fire('die', [damage]);  
@@ -292,6 +294,11 @@ game.objectmanager.c('alive', {
        damage.amount = Math.min(this.health, damage.amount);
        this.health -= damage.amount;
        console.log(this._name+' took '+damage.amount+' '+damage.type+' damage! Health remaining: '+this.health );
+       this.world.spawn_particle('textblip', {
+            'font':'damage',
+            'text':damage.amount+'',
+            'position':this.position
+       });
        this.fire('take_damage', [damage]);
        if(this.health === 0) this.die(damage);
    },

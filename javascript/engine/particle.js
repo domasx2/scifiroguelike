@@ -183,4 +183,28 @@ SplatterParticle.prototype.update = function(deltams){
 
 exports.register_particle('splatter', SplatterParticle);
 
+TextBlipParticle = exports.TextBlipParticle = function(options){
+    utils.process_options(this, options, {
+        'font':utils.required,
+        'text':utils.required,
+        'position':utils.required,
+        'duration':1000,
+        'velocity':0.5 //tiles per second
+    });
+    this.position = this.position.slice(0);
+    TextBlipParticle.superConstructor.apply(this, [options]);
+};
+
+gamejs.utils.objects.extend(TextBlipParticle, Particle);
+
+TextBlipParticle.prototype.update = function(deltams){
+    this.position[1] -= this.velocity * (deltams /1000);
+    Particle.prototype.update.apply(this, [deltams]);
+};
+
+TextBlipParticle.prototype.draw = function(view){
+    view.draw_text(this.text, utils.pos_px_noround(this.position), this.font);
+};
+
+exports.register_particle('textblip', TextBlipParticle);
 

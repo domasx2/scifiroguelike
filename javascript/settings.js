@@ -6,3 +6,8 @@ exports.MOVE_DURATION = 400; //ms; how long it takes for a creature to move one 
 exports.FPS = 60;
 exports.VERSION = "0.08";
 exports.BG_COLOR = '#929292';
+exports.FONTS = {
+	damage: ['16px visitor', 'red'],
+	heal: ['16px visitor', 'green'],
+	miss: ['16px visitor', 'orange']
+} 

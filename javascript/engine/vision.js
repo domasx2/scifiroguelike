@@ -100,7 +100,11 @@ Vision.prototype.postprocess = function(){
     
     //remove objects that are no longer visible
     this.objects.objects.slice(0).forEach(function(obj){
+        try{
         if(!this.visible.get(obj.position)) this.objects.remove(obj); 
+        }catch(e){
+            console.log(e, this, this.object);
+        }
     }, this);
 };
 
