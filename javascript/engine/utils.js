@@ -75,7 +75,15 @@ exports.all_directions = function(from, to){
     var pref_direction = direction(from, to);
     if(directions[0]!=pref_direction) directions.reverse();
     return directions;
-}
+};
+
+exports.get_adjacent_positions = function(pos){
+    var retv = [];
+    constants.ANGLES.forEach(function(angle){
+         retv.push(shift(pos, angle));
+    });
+    return retv;
+};
 
 exports.iter_adjacent = function(pos, callback, context){
     constants.ANGLES.forEach(function(angle){
@@ -125,7 +133,16 @@ exports.instance_of = function(V, F) {
       return true;
     V = V.__proto__;
   }
-}
+};
+
+exports.get_path_next_step = function(path){
+    var npos = null;
+    while(path.from){
+        npos = path.point;
+        path = path.from;
+    }
+    return npos;
+};
 
 var iter2d = exports.iter2d = function(size, callback, context){
     for(var x=0;x<size[0];x++){
@@ -412,6 +429,36 @@ Collection.prototype.serialize = function(){
     }); 
     return retv;
 };
+
+Collection.prototype.filter = function(filter_fn){
+    //returns array of objects filtered by filter_fn
+    var retv = [];
+    this.iter(function(obj){
+        if(filter_fn(obj)) retv.push(obj);
+    });
+    return retv;
+};
+
+Collection.prototype.closest = function(position, filter_fn){
+    //returns an object closest to position, or null. filter_fn - optional, to fitler objects by.
+    var objects = [],
+        retv = null,
+        mdist = 1000000,
+        obj,
+        dist;
+    if(filter_fn) objects = this.filter(filter_fn);
+    else objects = this.objects;
+    for(var i=0;i<objects.length;i++){
+        obj = objects[i];
+        dist = obj.get_distance_to(position);
+        if(dist < mdist){
+            mdist = dist;
+            retv = obj;
+        }
+    }
+    return retv;
+
+}
 
 //mod js objects
 Array.prototype.remove = function(from, to) {

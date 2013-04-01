@@ -64,11 +64,15 @@ game.objectmanager.c('object', {
     },
     
     'get_distance_to_pos':function(pos){
+        //todo: replace all calls with 'get_distance_to' and remove
         return gamejs.utils.vectors.distance(this.position, pos);  
     },
     
-    'get_distance_to':function(obj){
-        return this.get_distance_to_pos(obj.position);
+    'get_distance_to':function(obj_or_pos){
+        if(!(obj_or_pos instanceof Array)){
+            obj_or_pos = obj_or_pos.position;
+        }
+        return gamejs.utils.vectors.distance(this.position, obj_or_pos); 
     },
     
     'destroy':function(){
@@ -372,7 +376,7 @@ game.objectmanager.c('creature', {
     'team':'neutral',
     'threadable':false,
     'static':false,
-    
+    '_default_weapon':false,
     'inventory_size':10,
     'z':20,
 
@@ -380,7 +384,7 @@ game.objectmanager.c('creature', {
         //is this creature hostile towards obj and vice/versa?
         //TODO: substantiate.. teams, etc
         if(obj.id==this.id) return false;
-        if(obj.is_type('creature')) return true;
+        if(obj.is_type('creature') && (obj.team !== this.team)) return true;
         return false;
     },
     

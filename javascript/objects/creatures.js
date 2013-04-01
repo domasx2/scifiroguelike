@@ -22,6 +22,6 @@ engine.game.objectmanager.c('crawler', {
    'team':'xeno',
    '_name':'Cralwer',
    '_description':'A bat-like creature with glowing red eyes',
-   '_controller':engine.controllers.roam,
+   '_controller':engine.controllers.HostileMeleeController,
    '_requires':'creature'
 });

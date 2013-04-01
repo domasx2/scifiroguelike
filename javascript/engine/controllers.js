@@ -5,6 +5,10 @@ var utils = require('./utils');
 var actions = require('./objects/actions');
 var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
+/*
+ *  CONTROLLER
+ *  base controller class
+ */
 
 var Controller = exports.Controller = function(owner){
     this.owner = owner;
@@ -24,6 +28,18 @@ Controller.prototype.act_on_destination = function(pos){
     return false;
 };
 
+Controller.prototype.try_moving_towards = function(pos){
+    var path = this.owner.vision.get_path(this.owner.position, pos),
+        npos;
+    if(path){
+        npos = utils.get_path_next_step(path);
+        if(npos){
+            return this.owner.move(utils.direction(this.owner.position, npos));
+        }
+    }
+    return false;
+};
+
 Controller.prototype.proceed = function(){
     //proceed towards destination.
     //if next tile is empty, move into it
@@ -33,11 +49,7 @@ Controller.prototype.proceed = function(){
     if(this.destination && (this.owner.can_move())){
         var path = this.owner.vision.get_path(this.owner.position, this.destination);
         if(path){
-            var npos = null;
-            while(path.from){
-                npos = path.point;
-                path = path.from;
-            }
+            var npos = utils.get_path_next_step(path);
             if(npos){
                 if(utils.cmp(npos, this.destination)) moved = this.act_on_destination(npos);
                 if(!moved) moved = this.owner.move(utils.direction(this.owner.position, npos));
@@ -49,6 +61,11 @@ Controller.prototype.proceed = function(){
     }
     return moved;
 };
+
+/*
+ * PLAYER CONTROLLER
+ * interprets player input
+ */
 
 var PlayerController = exports.PlayerController = function(owner){
     PlayerController.superConstructor.apply(this, [owner]);
@@ -192,4 +209,81 @@ exports.roam = make_controller(function(events){
     if(!this.owner.move(Math.floor((Math.random()*4))*90)) this.owner.consume_move();
     return false;
 });
+
+/*
+ * HOSTILE CONTROLLER
+ *
+ */
+
+var HostileMeleeController = exports.HostileMeleeController = function(owner){
+    HostileMeleeController.superConstructor.apply(this, [owner]);
+};
+
+gamejs.utils.objects.extend(HostileMeleeController, Controller);
+
+HostileMeleeController.prototype.last_known_enemy_position = null; 
+
+HostileMeleeController.prototype.attack_nearest = function(){
+    var enemy,
+        owner = this.owner,
+        pos,
+        path,
+        positions,
+        i;
+
+    //update vision and get closest visible enemy
+    owner.vision.update();
+    enemy = owner.vision.objects.closest(owner.position, function(obj){
+        return obj.is_type('creature') && obj.enemies_with(owner);
+    });
+
+
+    if(enemy){
+        this.last_known_enemy_position = enemy.position;
+        console.log('enemy: saw ', enemy);
+    } 
+
+    //if am adjacent to enemy, try attacking
+    if(enemy && owner.is_adjacent_to(enemy)) {
+        console.log('enemy: foe adjacent, try attacking!');
+        if(owner.can_attack(enemy)){
+            owner.attack(enemy);
+            return true;
+        } 
+    } else {
+        //enemy in sight but not adjacent - try moving adjacent to it
+        if(enemy){
+            console.log('enemy: gonna try moving towards you');
+            positions = utils.get_adjacent_positions(enemy.position);
+            for(i=0;i<positions.length;i++){
+                pos = positions[i];
+                console.log('enemy: trying adjacent position'+pos);
+                if(this.try_moving_towards(pos)) return true;
+            }
+        //no enemy in sight, but have last known position
+        }else if(this.last_known_enemy_position){
+            console.log('enemy: gonna try moving towards last known position'); //if not standing on it, try moving  towards it
+            if(!utils.cmp(this.last_known_enemy_position, owner.position) 
+                && this.try_moving_towards(this.last_known_enemy_position)) return true;
+            //failing, set it to null
+            else {
+                this.last_known_enemy_position = null;
+                // TODO: maybe implement something smarter when lost sight of enemy? 
+                //attempt to chace to next exit in this general direction?
+            }
+        }  
+    }
+
+    //if no other suitable action found, end turn;
+    console.log('enemy: skipping turn');
+    owner.end_turn();
+    return true;
+
+};
+
+HostileMeleeController.prototype.act = function(events){
+    return this.attack_nearest();
+};
+
+
 
