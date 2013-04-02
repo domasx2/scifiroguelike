@@ -8,7 +8,8 @@ DONE:
 0.06.1: optimize & improve fogofwar render  
 0.07: inventory: UI, pick up items, doors, ammo types  
 0.08: attack enemeis. melee & ranged weapons  
+0.09: enemies attack player  
   
 NEXT:  
-0.09: damage readout particles; UI log component  
-0.10: basic enemy AI  
+0.10:  UI log component  
+0.11: basic enemy AI  
