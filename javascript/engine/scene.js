@@ -1,6 +1,5 @@
-
-
 var gamejs = require('gamejs');
+var game = require('./game').game;
 var inventory = require('./inventory/inventory');
 var utils  = require('./utils');
 var World  = require('./world').World;
@@ -201,12 +200,12 @@ WorldScene.prototype.draw = function(){
     
     this.world.objects.iter(add_drawable);
     this.world.particles.forEach(add_drawable);
-    if(protagonist && protagonist.vision) add_drawable(protagonist.vision);
+    if(protagonist && protagonist.vision && game.settings.FOG_OF_WAR) add_drawable(protagonist.vision);
 
     draw_order.forEach(function(objlist){
         objlist.forEach(function(object){
             if(object.static || (!protagonist || !object.position || object.draw_always
-                || protagonist.can_see(object))) object.draw(this.view);
+                || !game.settings.FOG_OF_WAR || protagonist.can_see(object))) object.draw(this.view);
         }, this);
     }, this);
 };

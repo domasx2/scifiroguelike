@@ -246,6 +246,7 @@ game.objectmanager.c('weapon', {
     // this only validates conditions related to weapon itself, eg range
     'can_attack':function(owner, object){
         var can = true;
+        if(object.is_type('alive') && ! object.alive) return false;
         this.iter_prefixed('can_attack', function(fn){
             if(!fn.apply(this, [owner, object])) can = false;
         }, this);

@@ -232,7 +232,7 @@ HostileMeleeController.prototype.attack_nearest = function(){
     //update vision and get closest visible enemy
     owner.vision.update();
     enemy = owner.vision.objects.closest(owner.position, function(obj){
-        return obj.is_type('creature') && obj.enemies_with(owner);
+        return obj.is_type('creature') && obj.alive && obj.enemies_with(owner);
     });
 
     if(enemy){
