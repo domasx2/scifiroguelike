@@ -284,6 +284,15 @@ game.objectmanager.c('melee_weapon', {
 });
 
 
+//for use as a default weapon for npcs
+game.objectmanager.c('claw', {
+  'base_damage': 3,
+  '_requires': 'melee_weapon',
+  '_name': 'Claw',
+  '_description': 'A nasty looking, sharp claw'
+});
+
+
 game.objectmanager.c('ranged_weapon', {
    '_requires':'weapon',
    '_event':events.RangedAttackEvent,

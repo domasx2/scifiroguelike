@@ -125,13 +125,11 @@ var RangedAttackEvent = exports.RangedAttackEvent = function(options){
     //TODO: more complex LOS check
     
     var directions = utils.all_directions(this.owner.position, this.target.position);
-    console.log('directions', directions);
     var direction;
     for(var i =0; i<directions.length;i++){
         direction = directions[i];
         if(!this.owner.world.map.is_wall(utils.shift(this.owner.position, direction))) break;
     }
-    console.log('chose', direction);
     this.owner.set_angle(direction);
 
     this.owner.set_sprite('attack_ranged');

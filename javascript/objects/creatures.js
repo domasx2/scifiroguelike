@@ -21,6 +21,7 @@ engine.game.objectmanager.c('crawler', {
    'max_health':20,
    'team':'xeno',
    '_name':'Cralwer',
+   '_default_item_weapon_type':'claw',
    '_description':'A bat-like creature with glowing red eyes',
    '_controller':engine.controllers.HostileMeleeController,
    '_requires':'creature'

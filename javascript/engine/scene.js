@@ -205,7 +205,7 @@ WorldScene.prototype.draw = function(){
 
     draw_order.forEach(function(objlist){
         objlist.forEach(function(object){
-            if(object.static || (!protagonist || !object.position 
+            if(object.static || (!protagonist || !object.position || object.draw_always
                 || protagonist.can_see(object))) object.draw(this.view);
         }, this);
     }, this);

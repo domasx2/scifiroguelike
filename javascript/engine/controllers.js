@@ -98,13 +98,11 @@ PlayerController.prototype.act_on_destination = function(pos){
         if(actions.length){
             if(actions.length==1){
                 actions[0].do(this.owner);
-                console.log('did action');
             } else {
                 this.owner.world.scene.spawn_action_context_menu(
                     this.owner.world.scene.view.screen_position(utils.pos_px(pos)), 
                     actions);
             }
-            console.log('canceled destination');
             this.cancel_destination();
             return true;
         }
@@ -237,15 +235,11 @@ HostileMeleeController.prototype.attack_nearest = function(){
         return obj.is_type('creature') && obj.enemies_with(owner);
     });
 
-
     if(enemy){
         this.last_known_enemy_position = enemy.position;
-        console.log('enemy: saw ', enemy);
     } 
-
     //if am adjacent to enemy, try attacking
     if(enemy && owner.is_adjacent_to(enemy)) {
-        console.log('enemy: foe adjacent, try attacking!');
         if(owner.can_attack(enemy)){
             owner.attack(enemy);
             return true;
@@ -253,16 +247,13 @@ HostileMeleeController.prototype.attack_nearest = function(){
     } else {
         //enemy in sight but not adjacent - try moving adjacent to it
         if(enemy){
-            console.log('enemy: gonna try moving towards you');
             positions = utils.get_adjacent_positions(enemy.position);
             for(i=0;i<positions.length;i++){
                 pos = positions[i];
-                console.log('enemy: trying adjacent position'+pos);
-                if(this.try_moving_towards(pos)) return true;
+                if(owner.world.is_tile_threadable(pos) && this.try_moving_towards(pos)) return true;
             }
         //no enemy in sight, but have last known position
         }else if(this.last_known_enemy_position){
-            console.log('enemy: gonna try moving towards last known position'); //if not standing on it, try moving  towards it
             if(!utils.cmp(this.last_known_enemy_position, owner.position) 
                 && this.try_moving_towards(this.last_known_enemy_position)) return true;
             //failing, set it to null
@@ -275,7 +266,6 @@ HostileMeleeController.prototype.attack_nearest = function(){
     }
 
     //if no other suitable action found, end turn;
-    console.log('enemy: skipping turn');
     owner.end_turn();
     return true;
 

@@ -16,6 +16,7 @@ game.uimanager.c('character_status', {
         this.owner.on('start_turn', this.refresh_ac, this);
         this.owner.on('consume_move', this.consume_move, this);
         this.owner.on('consume_action', this.consume_action, this);
+        this.owner.on('take_damage', this.update_health, this);
         this.update_health();
         this.move_ticks = [];
         this.action_ticks = [];

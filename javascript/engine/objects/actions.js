@@ -104,7 +104,7 @@ exports.move = action({
    },
    'name':'go to',
    'do':function(actor){
-        if(actor.is_adjacent_to_pos(this.position)){
+        if(actor.is_adjacent_to(this.position)){
             actor.move(utils.direction(actor.position, this.position));
         } else {
             actor._controller.go_to(this.position);

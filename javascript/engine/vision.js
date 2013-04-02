@@ -14,10 +14,12 @@ var ASMap = function(vision, target){
     this.adjacent = function(origin) {
         var retv = [];
         constants.ADJACENT.forEach(function(mod){
-            var p =utils.mod(origin, mod);
+            var p = utils.mod(origin, mod);
             if(vision.explored.get(p) 
                 && ((target && utils.cmp(p, target)) 
-                     || vision.object.world.is_tile_threadable(p))) retv.push(p);
+                || vision.object.world.is_tile_threadable(p))){
+                retv.push(p);
+            } 
         }, this);
         return retv;
     };

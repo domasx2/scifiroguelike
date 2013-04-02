@@ -185,11 +185,13 @@ exports.register_particle('splatter', SplatterParticle);
 
 TextBlipParticle = exports.TextBlipParticle = function(options){
     utils.process_options(this, options, {
-        'font':utils.required,
-        'text':utils.required,
-        'position':utils.required,
-        'duration':1000,
-        'velocity':0.5 //tiles per second
+        'font': utils.required,
+        'text': utils.required,
+        'position': utils.required,
+        'duration': 1000,
+        'draw_always': true,
+        'z': 1000,
+        'velocity': 0.5 //tiles per second
     });
     this.position = this.position.slice(0);
     TextBlipParticle.superConstructor.apply(this, [options]);

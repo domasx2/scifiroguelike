@@ -62,12 +62,7 @@ game.objectmanager.c('object', {
     'get_z':function(scene){
         return this.z;
     },
-    
-    'get_distance_to_pos':function(pos){
-        //todo: replace all calls with 'get_distance_to' and remove
-        return gamejs.utils.vectors.distance(this.position, pos);  
-    },
-    
+
     'get_distance_to':function(obj_or_pos){
         if(!(obj_or_pos instanceof Array)){
             obj_or_pos = obj_or_pos.position;
@@ -126,14 +121,16 @@ game.objectmanager.c('object', {
         }
     },
     
-    'is_adjacent_to_pos':function(pos){
-        var dx = Math.abs(pos[0]-this.position[0]);
+    'is_adjacent_to':function(obj_or_pos){
+        //accepts position or object
+        if(!(obj_or_pos instanceof Array)){
+            var pos = obj_or_pos.position;
+        } else {
+            var pos = obj_or_pos;
+        }
+        var dx = Math.abs(pos[0] - this.position[0]);
         var dy = Math.abs(pos[1] - this.position[1]);  
         return (dx == 0 && dy == 1) || (dx==1 && dy==0);  
-    },
-    
-    'is_adjacent_to':function(obj){
-       return this.is_adjacent_to_pos(obj.position);
     },
     
     'hide': function(hide){
@@ -179,7 +176,7 @@ game.objectmanager.c('object', {
     },
     
     'serialize_sprite':function(data){
-        data.sprite = this.active_sprite.name.replace(this.sprite_name+'_', '');
+        if(this.active_sprite) data.sprite = this.active_sprite.name.replace(this.sprite_name+'_', '');
     },
     
     'post_load_sprite':function(data){
@@ -370,14 +367,44 @@ game.objectmanager.c('vision', {
     
 });
 
+game.objectmanager.c('has_inventory', {
+    'inventory_size':10,
+    '_equipment_slots':['weapon', 'armor', 'helmet'],
+
+
+    'init_inventory': function(world, data){
+        this.inventory = new Inventory(this);
+
+        this._equipment_slots.forEach(function(slot){
+            var type = this['_default_item_'+slot+'_type'];
+            if(type){
+                this['_default_item_' + slot] = this.world.spawn(type, this['_default_item_'+slot+'_options']);            }
+        }, this);
+    },
+    
+    'serialize_inventory': function(data){
+        data.inventory = this.inventory.serialize();
+    },
+    
+    'post_load_inventory': function(data){
+        if(data.inventory){
+            data.inventory.forEach(function(objid){
+                this.inventory.add(this.world.objects.by_id(objid));
+            }, this);
+        }
+    },
+
+    'get_equipped_item': function(slot){
+        return this.inventory.get_equipped_item(slot) || this['_default_item_' + slot] || null;
+    }
+});
+
 //base creature class,
 //implements inventory & relationship TODO: extract these into components
 game.objectmanager.c('creature', {
     'team':'neutral',
     'threadable':false,
     'static':false,
-    '_default_weapon':false,
-    'inventory_size':10,
     'z':20,
 
     'enemies_with': function(obj){
@@ -392,7 +419,7 @@ game.objectmanager.c('creature', {
     
     'can_attack':function(object){
         if(this.actions_left){
-            var weapon = this.inventory.get_equipped_item('weapon');
+            var weapon = this.get_equipped_item('weapon');
             if(weapon){
                 return weapon.can_attack(this, object);          
             }
@@ -402,7 +429,7 @@ game.objectmanager.c('creature', {
     
     'attack':function(object){
         this.consume_action();
-        var weapon = this.inventory.get_equipped_item('weapon');
+        var weapon = this.get_equipped_item('weapon');
         weapon.attack(this, object);
     },
     
@@ -432,27 +459,13 @@ game.objectmanager.c('creature', {
         return false;
     },
     
-    '_equipment_slots':['weapon', 'armor', 'helmet'],
+    
     
     '_controller':controllers.roam,
     
     'action_attack':actions.attack,
     
-    'init_inventory':function(world, data){
-        this.inventory = new Inventory(this);
-    },
-    
-    'serialize_inventory':function(data){
-        data.inventory = this.inventory.serialize();
-    },
-    
-    'post_load_inventory':function(data){
-        data.inventory.forEach(function(objid){
-            this.inventory.add(this.world.objects.by_id(objid));
-        }, this);
-    },
-    
-    '_requires':'object alive vision actor'  
+    '_requires':'object alive vision actor has_inventory'  
 });
 
 /*CHEST
