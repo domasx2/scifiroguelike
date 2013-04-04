@@ -33,24 +33,28 @@ Populator.prototype.fill_chest = function(generator, chest){
 Populator.prototype.select_safe_empty_tile = function(generator, piece, world, tiles){
     //select a safe empty tile from tiles that will not block the piece by filling it
     //tiles should belong to piece
-    var i, k,c, pos;
-    var removed = [];
+    var i, k,c, pos,
+        removed = [],
+        gpos, exit1, exit2;
     while(tiles.length){
         i = generator.rnd.int(0, tiles.length-1);
         pos = tiles[i];
-        removed = [pos];
+        gpos = piece.global_pos(pos);
+        removed = [gpos];
         tiles.remove(i);
         //check that there are no objects in the tile
-        if(world.objects.by_pos(piece.global_pos(pos)).length) continue;
+        if(world.objects.by_pos(gpos).length) continue;
         c=false;
         //if more than 1 exit, check that all are accessible
         if(piece.exits.length>1){
             for(i=0;i<piece.exits.length;i++){
                 for(k=i+1;k<piece.exits.length;k++){
+                    exit1 = piece.exits[i];
+                    exit2 = piece.exits[k];
                     if(i==k) continue;
-                    if(!world.get_route(piece.global_pos(piece.exits[i][0]),
-                                        piece.global_pos(piece.exits[k][0]),
-                                        true,
+                    if(!world.get_route(piece.global_pos(utils.shift_back(exit1[0], exit1[1])),
+                                        piece.global_pos(utils.shift_back(exit2[0], exit2[1])),
+                                        false,
                                         removed)){
                         c=true;
                         break;                        
@@ -59,7 +63,6 @@ Populator.prototype.select_safe_empty_tile = function(generator, piece, world, t
                 if(c) break;
             }
             if(c) continue;
-        
         } 
         
         //make sure that no exit is blocked

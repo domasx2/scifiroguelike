@@ -18,7 +18,8 @@ exports.images = ['./public/img/tiles/default.png',
                   './public/img/misc/bullet.png',
                   
                   './public/img/objects/chest.png',
-                  './public/img/objects/door.png'];
+                  './public/img/objects/door.png',
+                  './public/img/objects/crate.png'];
                   
       
       
@@ -228,6 +229,13 @@ exports.sprites = {
     },
     
     //OBJECTS
+
+    //crate
+    'crate_static':{
+        'type':'static',
+        'spritesheet_url':'./public/img/objects/crate.png',   
+    }, 
+
     //chest
     'chest_full':{
         'type':'static',

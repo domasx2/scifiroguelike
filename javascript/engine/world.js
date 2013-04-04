@@ -12,20 +12,22 @@ var WMap = exports.WMap = function(world, ignore_doors, solid_positions){
     //helper for astar calculation
     this.world = world;
     this.ignore_doors = ignore_doors;
-    this.solid_positions;
+    this.solid_positions = solid_positions;
     
     this.adjacent = function(origin) {
         var retv = [];
         constants.ADJACENT.forEach(function(mod){
             var p = utils.mod(origin, mod);
             if(this.world.map.is_wall(p)) return;
+            if(this.solid_positions){
+                for(var i=0;i<this.solid_positions.length;i++){
+                    if(utils.cmp(this.solid_positions[i], p)){
+                        return true;  
+                    } 
+                }   
+            }
             if(!this.world.objects.by_pos(p).some(function(obj){
                 if(!obj.threadable && !(this.ignore_doors && obj.is_type('door'))) return true;
-                if(this.solid_positions){
-                    for(var i=0;i<this.solid_positions.length;i++){
-                        if(utils.cmp(this.solid_positions[i], p)) return true;
-                    }   
-                }
             }, this)) retv.push(p);
         }, this);
         return retv;

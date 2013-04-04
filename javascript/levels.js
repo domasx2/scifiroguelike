@@ -41,7 +41,7 @@ exports.penitentiary={
                                 {type:'pistol_clip_incendiary'}
                             ]
                         }
-                    ],
+                    ]
                 },
                 any: {
                     objects:[
@@ -77,6 +77,14 @@ exports.penitentiary={
                         },
                         {
                             type:'crawler',
+                            prob:0.5
+                        },
+                        {
+                            type:'crate',
+                            prob:0.5
+                        },
+                        {
+                            type:'crate',
                             prob:0.5
                         }
                         
