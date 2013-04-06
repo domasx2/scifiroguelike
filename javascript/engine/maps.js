@@ -27,9 +27,6 @@ var Map = exports.Map = function(options){
                                                  
     if(!this.wall_surface) 
         this.wall_surface = this.draw_walls();
-        
-    this.floor_surface = zoom_layer(this.floor_surface);
-    this.wall_surface = zoom_layer(this.wall_surface);
   
 };
 
@@ -42,13 +39,6 @@ Map.load = function(data){
     return map;
 };
 
-var zoom_layer = exports.zoom_layer = function(layer){
-    var z = game.settings.ZOOM;
-    if(z==1) return layer;
-    var s = new gamejs.Surface(gamejs.utils.vectors.multiply(layer.getSize(), z));
-    s.blit(layer, new gamejs.Rect([0, 0], s.getSize()), new gamejs.Rect([0, 0], layer.getSize()));
-    return s;
-};
 
 Map.prototype.serialize = function(){
     return {
@@ -59,17 +49,18 @@ Map.prototype.serialize = function(){
 };
 
 Map.prototype.new_surface = function(){
-    return new gamejs.Surface([this.size[0]*game.settings.TILE_WIDTH,
-                               this.size[1]*game.settings.TILE_WIDTH]);
+    return new gamejs.Surface([this.size[0]*game.settings.TILE_WIDTH*game.settings.ZOOM,
+                               this.size[1]*game.settings.TILE_WIDTH*game.settings.ZOOM]);
 };
 
 Map.prototype.draw_walls = function(tilesheet){
     console.log('drawing walls..');
-    var tt = utils.t();
-    var t = game.settings.TILE_WIDTH;
-    var tile_size = [t, t];
-    var surface = this.new_surface();
-    var hash, x, y, ofsts;
+    var tt = utils.t(),
+        t = game.settings.TILE_WIDTH,
+        z = game.settings.ZOOM,
+        tile_size = [t*z, t*z],
+        surface = this.new_surface(),
+        hash, x, y, ofsts;
     this.walls.iter2d(function(p, wall){
         if(wall){
             hash=''
@@ -78,12 +69,13 @@ Map.prototype.draw_walls = function(tilesheet){
                     hash += this.walls.get([p[0]+x, p[1]+y])===false ? '0' : '1';
                 }
             }
-            gamejs.draw.rect(surface, game.settings.BG_COLOR, new gamejs.Rect([p[0]*t, p[1]*t], tile_size));
+            gamejs.draw.rect(surface, game.settings.BG_COLOR, 
+                new gamejs.Rect([p[0]*t*z, p[1]*t*z], tile_size));
             ofsts = this.tilesheet.hash2ofst[hash];
             if(ofsts) ofsts.forEach(function(ofst){
                 surface.blit(this.tilesheet.surface, 
-                    new gamejs.Rect([p[0]*t, p[1]*t], tile_size), 
-                    new gamejs.Rect([ofst[0]*t, ofst[1]*t], tile_size));
+                    new gamejs.Rect([p[0]*t*z, p[1]*t*z], tile_size), 
+                    new gamejs.Rect([ofst[0]*t*z, ofst[1]*t*z], tile_size));
             }, this);   
         } 
     }, this);
@@ -93,17 +85,19 @@ Map.prototype.draw_walls = function(tilesheet){
 
 Map.prototype.draw_floor = function(tilesheet){
     console.log('drawing floor..');
-    var tt=utils.t();
-    var t = game.settings.TILE_WIDTH;
-    var tile_size = [t, t];
-    var surface = this.new_surface();
+    var tt=utils.t(),
+        z = game.settings.ZOOM,
+        t = game.settings.TILE_WIDTH,
+        tile_size = [t*z, t*z],
+        surface = this.new_surface(),
+        ofst;
                                       
     this.walls.iter2d(function(pos, wall){
         if(!wall){
-            var ofst = this.tilesheet.floor_ofst;
+            ofst = this.tilesheet.floor_ofst;
             surface.blit(this.tilesheet.surface, 
-                    new gamejs.Rect([pos[0]*t, pos[1]*t], tile_size), 
-                    new gamejs.Rect([ofst[0]*t, ofst[1]*t], tile_size));
+                    new gamejs.Rect([pos[0]*t*z, pos[1]*t*z], tile_size), 
+                    new gamejs.Rect([ofst[0]*t*z, ofst[1]*t*z], tile_size));
         }
     }, this);
     console.log('done. '+(utils.t()-tt));

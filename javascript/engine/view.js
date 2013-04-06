@@ -1,7 +1,7 @@
-var gamejs = require('gamejs');
-var vec = gamejs.utils.vectors;
-var utils = require('./utils');
-var game = require('./game').game;
+var gamejs = require('gamejs'),
+    vec = gamejs.utils.vectors,
+    utils = require('./utils'),
+    game = require('./game').game;
 
 var View = exports.View = function(options) {
   /*
@@ -43,11 +43,11 @@ View.prototype.center_of_map = function() {
 };
 
 View.prototype.set_offset_x = function(x) {
-  this.offset = [Math.max(0, Math.min(x, this.world.map.size_px[0] * this.zoom - parseInt(this.width / this.zoom))), this.offset[1]];
+  this.offset = [Math.max(0, Math.min(x, this.world.map.size_px[0] * this.zoom - this.width)), this.offset[1]];
 };
 
 View.prototype.set_offset_y = function(y) {
-  this.offset = [this.offset[0], Math.max(0, Math.min(y, this.world.map.size_px[1] * this.zoom - parseInt(this.height / this.zoom)))];
+  this.offset = [this.offset[0], Math.max(0, Math.min(y, this.world.map.size_px[1] * this.zoom - this.height))];
 };
 
 View.prototype.get_visible_tiles = function() {
@@ -65,7 +65,14 @@ View.prototype.draw_rect = function(rect, color, width) {
 };
 
 View.prototype.draw_map_layer_surface = function(surface) {
-  utils.draw(this.surface, surface, [0, 0], this.offset, 1);
+  var view_size = this.surface.getSize(),
+      available_size = vec.subtract(surface.getSize(), this.offset),
+      size = [Math.min(view_size[0], available_size[0]),
+              Math.min(view_size[1], available_size[1])];
+
+  this.surface.blit(surface,
+                    new gamejs.Rect([0, 0], size),
+                    new gamejs.Rect(this.offset, size));
 };
 
 View.prototype.draw_text = function(text, dst_position, font) {
@@ -83,8 +90,13 @@ View.prototype.screen_position = function(world_position) {
 };
 
 View.prototype.draw_surface = function(surface, dst_position, src_position, src_size) {
-  //var ofst = [dst_position[0] * this.zoom - this.offset[0], dst_position[1] * this.zoom - this.offset[1]];
-  utils.draw(this.surface, surface, this.screen_position(dst_position), src_position, this.zoom, src_size);
+  src_position = vec.multiply(src_position || [0, 0], this.zoom);
+  src_size = src_size ? vec.multiply(src_size, this.zoom) : surface.getSize();
+  this.surface.blit(surface, 
+                    new gamejs.Rect(this.screen_position(dst_position),
+                                    src_size),
+                    new gamejs.Rect(src_position,
+                                    src_size));
 };
 
 View.prototype.update = function(deltams) {

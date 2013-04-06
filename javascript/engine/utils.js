@@ -175,43 +175,6 @@ var iter2drange = exports.iter2drange = function(from, to, callback, context){
     }  
 };
 
-exports.draw_rect = function(dst_surface, rect, zoom, color, width){
-    
-    gamejs.draw.rect(dst_surface, color, retct, width);
-};
-
-exports.draw = function(dst_surface, src_surface, dst_offset, src_offset, zoom, size){
-    //wow this is a cryptic mess
-    var dst_size = dst_surface.getSize();
-    var dst_available = [dst_size[0]-dst_offset[0], dst_size[1]-dst_offset[1]];
-    
-    if(size){
-        var src_size = size;
-        var src_available = [size[0] * zoom, size[1] * zoom];
-    } else {
-        var src_size = src_surface.getSize();
-        var src_available = [(src_size[0] - src_offset[0]) * zoom, (src_size[1] - src_offset[1]) * zoom];
-    }
-    
-    var w = Math.max(Math.min(dst_available[0], src_available[0]), 0);
-    var h = Math.max(Math.min(dst_available[1], src_available[1]), 0);
-    
-    if(!i(w/zoom) || !i(h/zoom)) return;
-
-    var dst_rect = new gamejs.Rect([i(dst_offset[0]), i(dst_offset[1])], [i(w), i(h)]);
-    var src_rect = new gamejs.Rect([i(src_offset[0]), i(src_offset[1])], 
-                                   [i(w/zoom),      i(h/zoom)]);
-       
-    try{                     
-        dst_surface.blit(src_surface, dst_rect, src_rect);
-    }catch(e){
-        console.log('draw_error', src_surface, dst_rect, src_rect);
-    } 
-
-    
-                     
-};
-
 //todo: optimize this? allow only bool values?
 var Array2D = exports.Array2D = function(size, val){
     this.rows = [];

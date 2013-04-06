@@ -1,11 +1,26 @@
 var gamejs = require('gamejs'),
+    vec = gamejs.utils.vectors,
     game = require('./game').game,
     utils = require('./utils'),
     CachedFont = require('./lib/cachedfont').CachedFont;
 
+function zoomsurface(surface){
+    if(game.settings.zoom!=1){
+        var old_size = surface.getSize(),
+            new_size = utils.round_vec(vec.multiply(old_size, game.settings.ZOOM));
+            s = new gamejs.Surface(new_size);
+            s.blit(surface, 
+                    new gamejs.Rect([0, 0], new_size), 
+                    new gamejs.Rect([0, 0], old_size));
+            return s;
+    } else {
+        return surface;
+    }
+}
+
 var TileSheet = function(def){
     this.def = def;
-    this.surface = gamejs.image.load(def.url); 
+    this.surface = zoomsurface(gamejs.image.load(def.url)); 
     this.floor_ofst = def.floor;
     
     
@@ -33,7 +48,7 @@ var TileSheet = function(def){
 
 var SpriteSheet = function(url){
     this.url = url;
-    this.surfaces = {0:gamejs.image.load(url)}; 
+    this.surfaces = {0:zoomsurface(gamejs.image.load(url))}; 
     this.min_angle_step = 0;
 };
 
@@ -50,6 +65,7 @@ SpriteSheet.prototype.get_surface = function(angle){
 };
 
 SpriteSheet.prototype.prerotate = function(step, size){
+    size = vec.multiply(size, game.settings.ZOOM);
     this.min_angle_step = Math.min(this.min_angle_step || 360, step);
     var source = this.surfaces[0];
     var source_size = source.getSize();
@@ -73,20 +89,26 @@ SpriteSheet.prototype.prerotate = function(step, size){
 };
 
 var Cache = exports.Cache = function(resources){
+    this.resources = resources;
+    this.init();
+};
+
+
+Cache.prototype.init = function() {
     this.spritesheets = {};
     this.tilesheets = {};
     this.fonts = {}
     
-    gamejs.utils.objects.keys(resources.tilesheets).forEach(function(key){
-        this.tilesheets[key] = new TileSheet(resources.tilesheets[key]); 
+    gamejs.utils.objects.keys(this.resources.tilesheets).forEach(function(key){
+        this.tilesheets[key] = new TileSheet(this.resources.tilesheets[key]); 
     }, this);
     
-    resources.images.forEach(function(url){
+    this.resources.images.forEach(function(url){
         this.spritesheets[url] = new SpriteSheet(url);
     }, this);
     
-    gamejs.utils.objects.keys(resources.sprites).forEach(function(sprite_def_key){
-        var sprite_def = resources.sprites[sprite_def_key];
+    gamejs.utils.objects.keys(this.resources.sprites).forEach(function(sprite_def_key){
+        var sprite_def = this.resources.sprites[sprite_def_key];
         
         
         //initialize some optional attrs

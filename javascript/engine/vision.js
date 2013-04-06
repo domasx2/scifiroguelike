@@ -297,7 +297,7 @@ Vision.prototype.draw = function(view){
       function draw_fog(pos){
         surface.blit(spritesheet.get_surface(0), 
                     new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)),
-                    new gamejs.Rect([game.tw, 0], game.ts));
+                    new gamejs.Rect([game.tw*z, 0], mvec(game.ts, z)));
       };
 
       function clr(pos){

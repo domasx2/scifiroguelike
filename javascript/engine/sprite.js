@@ -24,13 +24,19 @@ Sprite.prototype.get_position = function(){
 },
 
 Sprite.prototype.draw = function (view){
-    view.draw_surface(this.spritesheet.get_surface(this.angle), this.get_position(), this.offset, this.definition.cell_size)
+    view.draw_surface(this.spritesheet.get_surface(this.angle), 
+                      this.get_position(), 
+                      this.offset, 
+                      this.definition.cell_size)
 };
 
 Sprite.prototype.get_surface = function(){
-      var surface = new gamejs.Surface(this.definition.cell_size);
-      surface.blit(this.spritesheet.get_surface(this.angle), new gamejs.Rect([0, 0], this.definition.cell_size), new gamejs.Rect(this.offset, this.definition.cell_size));
-      return surface;
+        var cf = vec.multiply(this.definition.cell_size, game.settings.ZOOM),
+            surface = new gamejs.Surface(cf);
+        surface.blit(this.spritesheet.get_surface(this.angle), 
+                    new gamejs.Rect([0, 0], cf), 
+                    new gamejs.Rect(this.offset, cf));
+        return surface;
 };
 
 Sprite.prototype.update = function(deltams){};
