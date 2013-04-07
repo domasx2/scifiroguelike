@@ -263,9 +263,10 @@ Vision.prototype.compute_quadrant = function(position, maxRadius, dx, dy){
 }        
 
 Vision.prototype.load_explored = function(explored){
+    //todo: z should be taken from view..
     var z = game.settings.ZOOM;
     this.explored = explored;
-    var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
+    var s = game.cache.get_surface('fogofwar_dark');
     if(!this.surface){
        this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
        this.surface.fill('#000');
@@ -276,9 +277,9 @@ Vision.prototype.load_explored = function(explored){
             drect = new gamejs.Rect(mvec(pos,game.tw*z), mvec(game.ts, z));
             this.surface.clear(drect); 
             if(!this.visible.get(pos)){
-                this.surface.blit(spritesheet.get_surface(0), 
+                this.surface.blit(s, 
                     drect,
-                    new gamejs.Rect([game.tw, 0], game.ts));
+                    new gamejs.Rect([0, 0], s.getSize()));
             }
         } 
     }, this);
@@ -286,38 +287,39 @@ Vision.prototype.load_explored = function(explored){
 
 Vision.prototype.draw = function(view){
     if(this.redraw){
-      var z = game.settings.ZOOM;
-      var surface = this.surface;
-      if(!surface){
-           surface = this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
+        var surface = this.surface;
+        if(!surface){
+           surface = this.surface = new gamejs.Surface(mvec(this.world.map.size_px, view.zoom));
            surface.fill('#000');
-      } 
-      var spritesheet = game.cache.spritesheets[game.sprite_defs['fogofwar_dark'].spritesheet_url];
-      
-      function draw_fog(pos){
-        surface.blit(spritesheet.get_surface(0), 
-                    new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)),
-                    new gamejs.Rect([game.tw*z, 0], mvec(game.ts, z)));
-      };
+        } 
+        var s = game.cache.get_surface('fogofwar_explored'),
+            sz = s.getSize();
 
-      function clr(pos){
-        surface.clear(new gamejs.Rect(mvec(pos, game.tw*z), mvec(game.ts, z)));
-      };
 
-      this.prev_visible.forEach(function(pos){
-          if(!this.visible.get(pos)) draw_fog(pos);
-      }, this);
+        function draw_fog(pos){
+            surface.blit(s, 
+                    new gamejs.Rect(mvec(pos, game.tw * view.zoom), sz),
+                    new gamejs.Rect([0, 0], sz));
+        };
 
-      this.made_visible.forEach(function(pos){
-          clr(pos);
-      }, this);
+        function clr(pos){
+            surface.clear(new gamejs.Rect(mvec(pos, game.tw*view.zoom), mvec(game.ts, view.zoom)));
+        };
 
-      this.made_explored.forEach(function(pos){
-         clr(pos);
-         draw_fog(pos);
-      }, this);
+        this.prev_visible.forEach(function(pos){
+            if(!this.visible.get(pos)) draw_fog(pos);
+        }, this);
 
-      this.redraw = false;
+        this.made_visible.forEach(function(pos){
+            clr(pos);
+        }, this);
+
+        this.made_explored.forEach(function(pos){
+            clr(pos);
+            draw_fog(pos);
+        }, this);
+
+        this.redraw = false;
    }
    view.draw_map_layer_surface(this.surface);
 };

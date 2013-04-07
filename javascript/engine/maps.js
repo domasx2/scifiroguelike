@@ -1,7 +1,8 @@
-var gamejs = require('gamejs');
-var tmx    = require('gamejs/tmx');
-var utils = require('./utils');
-var game = require('./game').game;
+var gamejs = require('gamejs'),
+    vec = gamejs.utils.vectors,
+    tmx    = require('gamejs/tmx'),
+    utils = require('./utils'),
+    game = require('./game').game;
 
 
 
@@ -16,17 +17,16 @@ var Map = exports.Map = function(options){
     
     this.tilesheet = game.cache.tilesheets[this.tilesheet];
     
-    this.size_px = [this.size[0] * game.settings.TILE_WIDTH,
-                    this.size[1] * game.settings.TILE_WIDTH]; 
-    
+    this.size_px = vec.multiply(this.size, game.tw);
+
     //default wall map with no walls
     if(!this.walls) this.walls = new utils.Array2D(this.size, false);
     
     if(!this.floor_surface) 
-        this.floor_surface = this.draw_floor();
+        this.floor_surface = this.draw_floor(game.settings.ZOOM);
                                                  
     if(!this.wall_surface) 
-        this.wall_surface = this.draw_walls();
+        this.wall_surface = this.draw_walls(game.settings.ZOOM);
   
 };
 
@@ -48,18 +48,15 @@ Map.prototype.serialize = function(){
     };
 };
 
-Map.prototype.new_surface = function(){
-    return new gamejs.Surface([this.size[0]*game.settings.TILE_WIDTH*game.settings.ZOOM,
-                               this.size[1]*game.settings.TILE_WIDTH*game.settings.ZOOM]);
+Map.prototype.new_surface = function(zoom){
+    return new gamejs.Surface(vec.multiply(this.size, game.tw * zoom));
 };
 
-Map.prototype.draw_walls = function(tilesheet){
+Map.prototype.draw_walls = function(zoom){
     console.log('drawing walls..');
     var tt = utils.t(),
-        t = game.settings.TILE_WIDTH,
-        z = game.settings.ZOOM,
-        tile_size = [t*z, t*z],
-        surface = this.new_surface(),
+        tile_size = vec.multiply(game.ts, zoom),
+        surface = this.new_surface(zoom),
         hash, x, y, ofsts;
     this.walls.iter2d(function(p, wall){
         if(wall){
@@ -70,12 +67,12 @@ Map.prototype.draw_walls = function(tilesheet){
                 }
             }
             gamejs.draw.rect(surface, game.settings.BG_COLOR, 
-                new gamejs.Rect([p[0]*t*z, p[1]*t*z], tile_size));
+                             new gamejs.Rect(vec.multiply(p, game.tw*zoom), tile_size));
             ofsts = this.tilesheet.hash2ofst[hash];
             if(ofsts) ofsts.forEach(function(ofst){
                 surface.blit(this.tilesheet.surface, 
-                    new gamejs.Rect([p[0]*t*z, p[1]*t*z], tile_size), 
-                    new gamejs.Rect([ofst[0]*t*z, ofst[1]*t*z], tile_size));
+                    new gamejs.Rect(vec.multiply(p, game.tw * zoom), tile_size), 
+                    new gamejs.Rect(vec.multiply(ofst, game.tw), game.ts));
             }, this);   
         } 
     }, this);
@@ -83,21 +80,19 @@ Map.prototype.draw_walls = function(tilesheet){
     return surface;                                        
 };
 
-Map.prototype.draw_floor = function(tilesheet){
+Map.prototype.draw_floor = function(zoom){
     console.log('drawing floor..');
     var tt=utils.t(),
-        z = game.settings.ZOOM,
-        t = game.settings.TILE_WIDTH,
-        tile_size = [t*z, t*z],
-        surface = this.new_surface(),
+        tile_size = vec.multiply(game.ts, zoom),
+        surface = this.new_surface(zoom),
         ofst;
                                       
     this.walls.iter2d(function(pos, wall){
         if(!wall){
             ofst = this.tilesheet.floor_ofst;
             surface.blit(this.tilesheet.surface, 
-                    new gamejs.Rect([pos[0]*t*z, pos[1]*t*z], tile_size), 
-                    new gamejs.Rect([ofst[0]*t*z, ofst[1]*t*z], tile_size));
+                    new gamejs.Rect(vec.multiply(pos, game.tw * zoom), tile_size), 
+                    new gamejs.Rect(vec.multiply(ofst, game.tw), game.ts));
         }
     }, this);
     console.log('done. '+(utils.t()-tt));
@@ -108,6 +103,7 @@ Map.prototype.is_wall = function(position){
     return this.walls.get(position);  
 };
 
+/*
 exports.from_tmx = function(url){
     var tmxmap = new tmx.Map(url);
     var wall_layer, floor_layer = null;
@@ -139,7 +135,7 @@ function draw_tmx_layer_surface(layer, map){
     /*
      * pre-render layer surface
      */
-
+/*
    var surface = new gamejs.Surface(map.width * map.tileWidth, map.height * map.tileHeight);
    surface.setAlpha(layer.opacity);
 
@@ -160,3 +156,5 @@ function draw_tmx_layer_surface(layer, map){
    });
    return surface;
 };
+
+*/

@@ -89,13 +89,12 @@ View.prototype.screen_position = function(world_position) {
   return vec.subtract(vec.multiply(world_position, this.zoom), this.offset);
 };
 
-View.prototype.draw_surface = function(surface, dst_position, src_position, src_size) {
-  src_position = vec.multiply(src_position || [0, 0], this.zoom);
-  src_size = src_size ? vec.multiply(src_size, this.zoom) : surface.getSize();
+View.prototype.draw_surface = function(surface, dst_position) {
+  src_size = surface.getSize();
   this.surface.blit(surface, 
                     new gamejs.Rect(this.screen_position(dst_position),
                                     src_size),
-                    new gamejs.Rect(src_position,
+                    new gamejs.Rect([0, 0],
                                     src_size));
 };
 

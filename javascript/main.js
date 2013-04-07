@@ -9,6 +9,7 @@ require('./objects/items');
 require('./objects/objects');
 require('./objects/creatures');
 
+var display = game.display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
 
 gamejs.preload(resources.images);
 
@@ -16,7 +17,6 @@ gamejs.ready(function() {
     game.init(settings, resources);
     gamejs.display.setCaption('SciFi roguelike project');
     
-    var display = game.display = gamejs.display.setMode(settings.DISPLAY_SIZE, gamejs.display.DISABLE_SMOOTHING);
 
     if(window.mapgendemo) game.set_scene(new MapGenDemoScene({'display':display}));
     else game.set_scene(GameScene.initial(display));

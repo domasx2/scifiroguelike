@@ -16,12 +16,11 @@ Game.prototype.init = function(settings,  resources){
      */
     this.sprite_defs = resources.sprites;
     this.settings = settings;
-    this.resources = resources;
-    this.cache = new (require('./cache').Cache)(resources); //workaround circular ref
-    this.scene = null;
     this.tw = settings.TILE_WIDTH;
     this.ts = [this.tw,this.tw];
-    
+    this.resources = resources;
+    this.cache = new (require('./cache').Cache)(resources, settings.ZOOM); //workaround circular ref
+    this.scene = null;
 }
 
 Game.prototype.set_scene = function(scene){
