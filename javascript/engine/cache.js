@@ -87,6 +87,7 @@ var SpriteSheet = function(def, cache){
 
 SpriteSheet.prototype.get_surface = function(angle, frame){
     frame = frame || 0;
+    angle = angle || 0;
     if(this.surfaces[frame][angle]) {
         return this.surfaces[frame][angle];
     }
@@ -126,7 +127,7 @@ Cache.prototype.init = function() {
 };
 
 Cache.prototype.get_surface = function(sprite_name, angle, frame){
-    return this.spritesheets[sprite_name].surfaces[frame || 0][angle || 0];
+    return this.spritesheets[sprite_name].get_surface(angle, frame);
 
 }
 

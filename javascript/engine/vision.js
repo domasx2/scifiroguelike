@@ -266,7 +266,7 @@ Vision.prototype.load_explored = function(explored){
     //todo: z should be taken from view..
     var z = game.settings.ZOOM;
     this.explored = explored;
-    var s = game.cache.get_surface('fogofwar_dark');
+    var s = game.cache.get_surface('fogofwar_explored');
     if(!this.surface){
        this.surface = new gamejs.Surface(mvec(this.world.map.size_px,z));
        this.surface.fill('#000');

@@ -25,7 +25,11 @@ Sprite.prototype.get_position = function () {
 };
 
 Sprite.prototype.draw = function (view) {
-    view.draw_surface(this.get_surface(), this.get_position());
+    try {
+        view.draw_surface(this.get_surface(), this.get_position());
+    } catch(e) {
+        console.log('failed to draw sprite', this.name, this.angle, this.definition, game.cache.spritesheets['bullet']);
+    }
 };
 
 Sprite.prototype.get_surface = function () {

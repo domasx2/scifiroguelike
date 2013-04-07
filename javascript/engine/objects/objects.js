@@ -273,7 +273,7 @@ game.objectmanager.c('alive', {
    
    
    'die':function(damage){
-        //todo: replace with a corpse object? 
+        //todo: maybe replace with a corpse object? 
        this.alive = false;
        this.set_sprite('dead');
        this.threadable = true;
@@ -363,6 +363,16 @@ game.objectmanager.c('vision', {
             else retv = this.vision.visible.get(utils.round_vec(pos_or_obj));
         }
         return retv;
+    },
+
+    'serialize_vision': function(data){
+        if(this.is_type('protagonist')) data.vision_explored = this.vision.explored.serialize_bool();
+    },
+
+    'post_load_vision':function(data){
+        if(data.vision_explored) {
+            this.vision.load_explored(utils.Array2D.load_bool(data.vision_explored));
+        }
     }
     
 });
