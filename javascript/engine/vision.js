@@ -34,10 +34,11 @@ var ASMap = function(vision, target){
 };
 
 var Vision = exports.Vision = function(world, object){
+    // publishes event 'seen_by'
     eventify(this);
     this.z = 50;
     this.world = world;
-    this.object = object;
+    this.object = object; //todo: rename to owner
     this.explored = new utils.Array2D(world.map.size);
     this.visible = null;
     this.init_fov();
@@ -49,6 +50,10 @@ var Vision = exports.Vision = function(world, object){
     this.prev_visible = [];
     this.world.on(['teleport', 'spawn'], this.object_came_into_view, this);
     this.world.on(['spawn', 'object_set_transparent'], this.object_transparency_changed, this);
+
+    this.objects.on('add', function(collection, object){
+        object.fire('seen_by', [this.object]);
+    }, this);
 };
 
 Vision.prototype.object_transparency_changed = function(world, object){

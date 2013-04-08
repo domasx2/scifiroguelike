@@ -16,6 +16,14 @@ var Scene = exports.Scene = function(options){
     
 };
 
+Scene.prototype.update = function(msduration, events){
+
+};
+
+Scene.prototype.draw = function(){
+
+};
+
 Scene.prototype.destroy = function(){
     
 };
@@ -40,7 +48,8 @@ var WorldScene = exports.WorldScene = function(options){
 
     this.view = new view.View({
         world: this.world,
-        surface: this.display
+        surface: this.display,
+        scene: this
     });
     
     this.ui = {};
@@ -184,32 +193,6 @@ WorldScene.prototype.serialize = function(){
       }
 };
 
-WorldScene.prototype.draw = function(){
-    //TODO: move this to View class
-    var draw_order = [];
-    var protagonist = this.protagonist;
-    
-    function add_drawable(object){
-        var z = object.get_z ? object.get_z(protagonist) : object.z;
-        if(!draw_order[z]) draw_order[z]=[object];
-        else draw_order[z].push(object);
-    };
-    
-    this.view.draw_map_layer_surface(this.world.map.floor_surface);
-    this.view.draw_map_layer_surface(this.world.map.wall_surface);
-    
-    this.world.objects.iter(add_drawable);
-    this.world.particles.forEach(add_drawable);
-    if(protagonist && protagonist.vision && game.settings.FOG_OF_WAR) add_drawable(protagonist.vision);
-
-    draw_order.forEach(function(objlist){
-        objlist.forEach(function(object){
-            if(object.static || (!protagonist || !object.position || object.draw_always
-                || !game.settings.FOG_OF_WAR || protagonist.can_see(object))) object.draw(this.view);
-        }, this);
-    }, this);
-};
-
 
 WorldScene.prototype.update = function(deltams, events){
     this.handle_events(events);
@@ -226,3 +209,7 @@ WorldScene.prototype.spawn_mouse_move_particle = function(position){
   });
 };
 
+
+WorldScene.prototype.draw = function(){
+  this.view.draw();
+};

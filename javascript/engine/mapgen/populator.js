@@ -40,7 +40,7 @@ Populator.prototype.select_safe_empty_tile = function(generator, piece, world, t
         i = generator.rnd.int(0, tiles.length-1);
         pos = tiles[i];
         gpos = piece.global_pos(pos);
-        removed = [gpos];
+       
         tiles.remove(i);
         //check that there are no objects in the tile
         if(world.objects.by_pos(gpos).length) continue;
@@ -51,6 +51,13 @@ Populator.prototype.select_safe_empty_tile = function(generator, piece, world, t
                 for(k=i+1;k<piece.exits.length;k++){
                     exit1 = piece.exits[i];
                     exit2 = piece.exits[k];
+
+                    //make sure tile to add and all exits are 'solid'
+                    removed = [gpos];
+                    piece.exits.forEach(function(exit){
+                        removed.push(piece.global_pos(exit[0]));
+                    });
+
                     if(i==k) continue;
                     if(!world.get_route(piece.global_pos(utils.shift_back(exit1[0], exit1[1])),
                                         piece.global_pos(utils.shift_back(exit2[0], exit2[1])),

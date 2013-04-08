@@ -238,6 +238,14 @@ game.objectmanager.c('actor', {
         //call this to end turn
         while(this.moves_left) this.consume_move();
         while(this.actions_left) this.consume_action();
+    },
+
+    'serialize_controller': function(data){
+        data.controller_data = this._controller.data;
+    },
+
+    'post_load_controller': function(data){
+        this._controller.data = data.controller_data;
     }
 });
 

@@ -12,7 +12,11 @@ var MOVE_KEY_MATRIX = constants.MOVE_KEY_MATRIX;
 
 var Controller = exports.Controller = function(owner){
     this.owner = owner;
-    this.destination = null;
+
+    //put all your saveable data here and make sure it's serializable
+    this.data = {
+        destination: null
+    };
 };
 
 Controller.prototype.act = function(events){
@@ -21,7 +25,7 @@ Controller.prototype.act = function(events){
 };
 
 Controller.prototype.cancel_destination = function(){
-    this.destination = null;
+    this.data.destination = null;
 };
 
 Controller.prototype.act_on_destination = function(pos){
@@ -46,12 +50,12 @@ Controller.prototype.proceed = function(){
     //if next tile is not empty but also the destination, act on it
     //else unable to proceed, cancel destination
     var moved = false;
-    if(this.destination && (this.owner.can_move())){
-        var path = this.owner.vision.get_path(this.owner.position, this.destination);
+    if(this.data.destination && (this.owner.can_move())){
+        var path = this.owner.vision.get_path(this.owner.position, this.data.destination);
         if(path){
             var npos = utils.get_path_next_step(path);
             if(npos){
-                if(utils.cmp(npos, this.destination)) moved = this.act_on_destination(npos);
+                if(utils.cmp(npos, this.data.destination)) moved = this.act_on_destination(npos);
                 if(!moved) moved = this.owner.move(utils.direction(this.owner.position, npos));
             } 
         }
@@ -93,7 +97,7 @@ var PlayerController = exports.PlayerController = function(owner){
 gamejs.utils.objects.extend(PlayerController, Controller);
 
 PlayerController.prototype.act_on_destination = function(pos){
-    if(utils.cmp(pos, this.destination)){
+    if(utils.cmp(pos, this.data.destination)){
         var actions = this.collect_actions(pos);
         if(actions.length){
             if(actions.length==1){
@@ -185,7 +189,7 @@ PlayerController.prototype.mouse_action = function(events){
 };
 
 PlayerController.prototype.go_to = function(pos){
-    this.destination = pos;  
+    this.data.destination = pos;  
 };
 
 PlayerController.prototype.act = function(events){
@@ -211,10 +215,20 @@ exports.roam = make_controller(function(events){
 /*
  * HOSTILE CONTROLLER
  *
+ *not the 'awake' mechanic:
+  creature is initially 'asleep', and only 'wakes up' if seen by an active hostile
+  thus, calculations are not performed until creature seen by player
  */
 
 var HostileMeleeController = exports.HostileMeleeController = function(owner){
     HostileMeleeController.superConstructor.apply(this, [owner]);
+    this.data.awake = false;
+    this.owner.on('seen_by', function(owner, obj){
+        if(obj.enemies_with(this.owner)){
+            this.data.awake = true;
+            this.data.last_known_enemy_position = obj.position;   
+        } 
+    }, this);
 };
 
 gamejs.utils.objects.extend(HostileMeleeController, Controller);
@@ -236,7 +250,7 @@ HostileMeleeController.prototype.attack_nearest = function(){
     });
 
     if(enemy){
-        this.last_known_enemy_position = enemy.position;
+        this.data.last_known_enemy_position = enemy.position;
     } 
     //if am adjacent to enemy, try attacking
     if(enemy && owner.is_adjacent_to(enemy)) {
@@ -253,12 +267,12 @@ HostileMeleeController.prototype.attack_nearest = function(){
                 if(owner.world.is_tile_threadable(pos) && this.try_moving_towards(pos)) return true;
             }
         //no enemy in sight, but have last known position
-        }else if(this.last_known_enemy_position){
-            if(!utils.cmp(this.last_known_enemy_position, owner.position) 
-                && this.try_moving_towards(this.last_known_enemy_position)) return true;
+        }else if(this.data.last_known_enemy_position){
+            if(!utils.cmp(this.data.last_known_enemy_position, owner.position) 
+                && this.try_moving_towards(this.data.last_known_enemy_position)) return true;
             //failing, set it to null
             else {
-                this.last_known_enemy_position = null;
+                this.data.last_known_enemy_position = null;
                 // TODO: maybe implement something smarter when lost sight of enemy? 
                 //attempt to chace to next exit in this general direction?
             }
@@ -272,7 +286,13 @@ HostileMeleeController.prototype.attack_nearest = function(){
 };
 
 HostileMeleeController.prototype.act = function(events){
-    return this.attack_nearest();
+    if(this.data.awake){
+        return this.attack_nearest();
+    } else {
+        this.owner.end_turn();
+        return true;
+    }
+    
 };
 
 

@@ -10,6 +10,7 @@ var View = exports.View = function(options) {
    */
 
   utils.process_options(this, options, {
+    scene: utils.required,
     world: utils.required,
     surface: utils.required,
     width: game.settings.DISPLAY_SIZE[0],
@@ -106,3 +107,28 @@ View.prototype.update = function(deltams) {
     this.set_offset_y(parseInt(pos[1] * this.zoom - this.height / 2) + (cs[1] * this.zoom) / 2);
   }
 };
+
+View.prototype.draw = function(){
+    var draw_order = [];
+    var protagonist = this.scene.protagonist;
+    
+    function add_drawable(object){
+        var z = object.get_z ? object.get_z(protagonist) : object.z;
+        if(!draw_order[z]) draw_order[z]=[object];
+        else draw_order[z].push(object);
+    };
+    
+    this.draw_map_layer_surface(this.world.map.floor_surface);
+    this.draw_map_layer_surface(this.world.map.wall_surface);
+    
+    this.world.objects.iter(add_drawable);
+    this.world.particles.forEach(add_drawable);
+    if(protagonist && protagonist.vision && game.settings.FOG_OF_WAR) add_drawable(protagonist.vision);
+
+    draw_order.forEach(function(objlist){
+        objlist.forEach(function(object){
+            if(object.static || (!protagonist || !object.position || object.draw_always
+                || !game.settings.FOG_OF_WAR || protagonist.can_see(object))) object.draw(this);
+        }, this);
+    }, this);
+}
