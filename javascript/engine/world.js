@@ -155,7 +155,7 @@ World.prototype.shift_turn_queue = function(){
     return false;
 };
 
-World.prototype.process_turn = function(events){
+World.prototype.process_turn = function(event){
     if(!this.turn_queue.len()) return;
     var process_queue = true;
     while(process_queue){
@@ -169,19 +169,24 @@ World.prototype.process_turn = function(events){
         }
         if(process_queue){
             this.shift_turn_queue();
-            events = [];
+            event = null;
         } 
         this.update_events(0);
         if(this.events_in_progress()) break;
     }
 };
 
-World.prototype.update = function(deltams, events){
-    if(!this.events_in_progress()) this.process_turn(events);
+World.prototype.update = function(deltams){
     this.update_events(deltams);
     this.update_objects(deltams);
     this.update_particles(deltams);
 };
+
+World.prototype.handle_event = function(event) {
+    if(!this.events_in_progress()) {
+        this.process_turn(event);
+    }
+}
 
 World.prototype.spawn = function(type, options){
     options = options || {};
