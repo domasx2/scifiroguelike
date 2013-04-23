@@ -114,16 +114,14 @@ PlayerController.prototype.act_on_destination = function(pos){
     return false;
 };
 
-PlayerController.prototype.keyboard_move = function(events){
+PlayerController.prototype.keyboard_move = function(event){
     var moved = false;
 
     //end turn on space
-    if(events.some(function(event){
         if(event.type==gamejs.event.KEY_DOWN && event.key==gamejs.event.K_SPACE){
             this.owner.end_turn();
             return true;
         }
-    }, this)) return true;
 
     //move if direction key is held down
     gamejs.utils.objects.keys(MOVE_KEY_MATRIX).some(function(key){
@@ -162,8 +160,7 @@ PlayerController.prototype.collect_actions = function(world_pos){
 };
 
 
-PlayerController.prototype.mouse_action = function(events){
-    events.forEach(function(event){
+PlayerController.prototype.mouse_action = function(event){
         if(event.type == gamejs.event.MOUSE_DOWN){
             var world_pos = this.owner.world.scene.view.world_pos(event.pos);
             if(world_pos){
@@ -185,15 +182,14 @@ PlayerController.prototype.mouse_action = function(events){
                 }
             }
         }
-    }, this);
 };
 
 PlayerController.prototype.go_to = function(pos){
     this.data.destination = pos;  
 };
 
-PlayerController.prototype.act = function(events){
-    return this.keyboard_move(events) || this.mouse_action(events) || this.proceed() || true;
+PlayerController.prototype.act = function(event){
+    return this.keyboard_move(event) || this.mouse_action(event) || this.proceed() || true;
 };
 
 

@@ -16,15 +16,13 @@ var MapGenDemoScene = exports.MapGenDemoScene = function(options){
 
 gamejs.utils.objects.extend(MapGenDemoScene, engine.scene.WorldScene);
 
-MapGenDemoScene.prototype.handle_events = function(events){
-    events.forEach(function(event){
+MapGenDemoScene.prototype.handle_event = function(event){
         if((event.type === gamejs.event.KEY_DOWN)){
             if(event.key==gamejs.event.K_UP) this.view.move_offset_y(-16);
             else if(event.key==gamejs.event.K_DOWN) this.view.move_offset_y(16);
             else if(event.key==gamejs.event.K_LEFT) this.view.move_offset_x(-16);
             else if(event.key==gamejs.event.K_RIGHT) this.view.move_offset_x(16);
         }
-    }, this);
 };
 
 MapGenDemoScene.prototype.load_form = function(){

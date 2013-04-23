@@ -21,18 +21,28 @@ gamejs.ready(function() {
     if(window.mapgendemo) game.set_scene(new MapGenDemoScene({'display':display}));
     else game.set_scene(GameScene.initial(display));
 
-    var tick = function(deltams) {
+
+    gamejs.onTick(function(deltams) {
         if(deltams>100) console.log(deltams);
         deltams=20;
-        var events = gamejs.event.get();
-        handle_events(events);
         if(game.scene){
-            game.scene.update(deltams, events);
+            game.scene.update(deltams);
             display.fill('#000');
             game.scene.draw();
         }
-    };
-    gamejs.time.fpsCallback(tick, this, settings.FPS);
+    });
+    gamejs.onEvent(function(event) {
+        if(event.type == gamejs.event.KEY_DOWN){
+            if(event.key == gamejs.event.K_9){
+                save();
+            }
+            if(event.key == gamejs.event.K_0){
+                load();
+            }
+        }
+        game.handle_event(event);
+        game.scene.handle_event(event);
+    });
 });
 
 
@@ -57,17 +67,3 @@ function load(){
     }
     
 }
-
-function handle_events(events){
-    game.handle_events(events);
-    events.forEach(function(event){
-        if(event.type == gamejs.event.KEY_DOWN){
-            if(event.key == gamejs.event.K_9){
-                save();
-            }  
-            if(event.key == gamejs.event.K_0){
-                load();
-            }  
-        }
-    });
-};

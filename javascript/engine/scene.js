@@ -16,7 +16,7 @@ var Scene = exports.Scene = function(options){
     
 };
 
-Scene.prototype.update = function(msduration, events){
+Scene.prototype.update = function(msduration){
 
 };
 
@@ -28,7 +28,7 @@ Scene.prototype.destroy = function(){
     
 };
 
-Scene.prototype.handle_events = function(events){
+Scene.prototype.handle_event = function(event){
     
 };
 
@@ -194,11 +194,14 @@ WorldScene.prototype.serialize = function(){
 };
 
 
-WorldScene.prototype.update = function(deltams, events){
-    this.handle_events(events);
-    this.world.update(deltams, events);
+WorldScene.prototype.update = function(deltams){
+    this.world.update(deltams);
     this.view.update(deltams);
 };
+
+WorldScene.prototype.handle_event = function(event) {
+  this.world.handle_event(event);
+}
 
 WorldScene.prototype.spawn_mouse_move_particle = function(position){
   this.world.spawn_particle('sprite', {
