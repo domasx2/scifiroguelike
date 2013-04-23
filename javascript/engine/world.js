@@ -6,6 +6,7 @@ var game = require('./game').game;
 var Map = require('./maps').Map;
 var particle = require('./particle');
 var eventify = require('./lib/events').eventify;
+var collection = require('./objects/collection');
 
 
 var WMap = exports.WMap = function(world, ignore_doors, solid_positions){
@@ -50,13 +51,13 @@ var World = exports.World = function(options){
     });
     eventify(this);
     this.scene = null;
-    this.objects = new utils.Collection();
+    this.objects = new collection.Collection();
     this.event_frames = [];
     this.particles = [];
     this._new_particles = [];
     this.persistent_events = new events.PersistentEventFrame();
-    this.turn_queue = new utils.Collection(); //all objects that can act, in sequence of their action
-    this.turn_pending_queue = new utils.Collection();; //all objects that have not yet acted this turn
+    this.turn_queue = new collection.Collection(); //all objects that can act, in sequence of their action
+    this.turn_pending_queue = new collection.Collection();; //all objects that have not yet acted this turn
     this.current_actor = null;
 };
 
@@ -90,7 +91,7 @@ World.load = function(data){
 };
 
 World.prototype.get_adjacent_objects = function(pos, type){
-    var retv = new utils.Collection();
+    var retv = new collection.Collection();
     constants.ADJACENT.forEach(function(mod){
         this.objects.by_pos(utils.mod(pos, mod)).forEach(function(obj){
            if(!type || obj.is_type(type)) retv.add(obj); 
@@ -100,7 +101,7 @@ World.prototype.get_adjacent_objects = function(pos, type){
 }
 
 World.prototype.load_collection = function(obj_ids, cls){
-    if(!cls) cls = utils.Collection;
+    if(!cls) cls = collection.Collection;
     var retv = new cls();
     obj_ids.forEach(function(id){
         retv.add(this.objects.by_id(id)); 

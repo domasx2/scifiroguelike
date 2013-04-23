@@ -16,6 +16,7 @@ game.uimanager.c('base',{
      
      'create_dom':function(scene){
           this.dom = $('<div>'+this.title+'</div>');
+          this.fire('create_dom');
           this.attach_dom();
           this.position_dom();
      },
@@ -53,13 +54,13 @@ game.uimanager.c('dialog', {
     'close_button':false,
     
     'create_dom':function(){
-        this.dialog = $('<div class="item-container" id="ui_'+this.id+'" title="'+this.title+'"></div>').dialog({
-            minWidth: 50,
-            minHeight: 100,
+        var dialog_options = {
             width: 200,
             height: 120,
             position: this.position
-        });
+        }
+        this.fire('dialog_options', [dialog_options]);
+        this.dialog = $('<div class="item-container" id="ui_'+this.id+'" title="'+this.title+'"></div>').dialog(dialog_options);
         this.dom = this.dialog.parent();
     
         this.dom.find('.ui-dialog-titlebar-close').remove();
@@ -69,6 +70,7 @@ game.uimanager.c('dialog', {
             this.dom.find('.ui-dialog-titlebar').append(this.close_btn);
             this.close_btn.click($.proxy(this.close, this));
         }
+        this.fire('create_dom');
     },
     
     'close':function(){

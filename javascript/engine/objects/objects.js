@@ -4,12 +4,12 @@ var utils = require('../utils');
 var sprite = require('../sprite');
 var game = require('../game').game;
 var Vision = require('../vision').Vision;
-var Inventory = require('../inventory/inventory').Inventory; 
 var controllers = require('../controllers');
 var eventify = require('../lib/events').eventify;
 var constants = require('../constants');
 var events = require('../events');
 var actions = require('./actions');
+var collection = require('./collection');
 
 
 //base class. every entity that is spawned MUST require this!
@@ -53,13 +53,13 @@ game.objectmanager.c('object', {
             if(val && utils.instance_of(val, actions.Action)) this[key] = new actions.BoundAction(this, val);
         }
     },
-    
+
     //used by dragons for obscure magic rituals
-    'transparency_block':function(looking_from){
+    'transparency_block': function (looking_from) {
          return false;  
     },
     
-    'get_z':function(scene){
+    'get_z': function (scene) {
         return this.z;
     },
 
@@ -188,8 +188,7 @@ game.objectmanager.c('object', {
             this.fire('set_'+property, [new_value, old_value]);
             this.world.fire('object_set_'+property, [this, new_value, old_value]); 
         }
-    },
-
+    }
     
 });
 
@@ -390,8 +389,8 @@ game.objectmanager.c('has_inventory', {
     '_equipment_slots':['weapon', 'armor', 'helmet'],
 
 
-    'init_inventory': function(world, data){
-        this.inventory = new Inventory(this);
+    'init_inventory': function (world, data){
+        this.inventory = new collection.Inventory(this);
 
         this._equipment_slots.forEach(function(slot){
             var type = this['_default_item_'+slot+'_type'];
@@ -400,11 +399,11 @@ game.objectmanager.c('has_inventory', {
         }, this);
     },
     
-    'serialize_inventory': function(data){
+    'serialize_inventory': function (data){
         data.inventory = this.inventory.serialize();
     },
     
-    'post_load_inventory': function(data){
+    'post_load_inventory': function (data){
         if(data.inventory){
             data.inventory.forEach(function(objid){
                 this.inventory.add(this.world.objects.by_id(objid));
@@ -412,8 +411,37 @@ game.objectmanager.c('has_inventory', {
         }
     },
 
-    'get_equipped_item': function(slot){
+    'get_equipped_item': function (slot){
         return this.inventory.get_equipped_item(slot) || this['_default_item_' + slot] || null;
+    },
+
+    'put_into': function (item, container) {
+        if(this.inventory.has(item)){
+            this.drop(item);
+            container.put(item);
+        }
+    },
+
+    'pick_up': function (item) {
+        if (this.inventory.has_space()) {
+            this.inventory.add(item);
+            item.hide();
+            this.fire('pick_up_item', [item]);
+            item.fire('pick_up', [this]);
+            return true;
+        }
+        return false;
+    },
+
+    'drop': function (item) {
+        if(!this.inventory.has(item)){
+            console.log('ERROR do not have item', this, item);
+            return;
+        };
+        this.inventory.remove(item);
+        item.teleport(this.position);
+        item.fire('drop', [this]);
+        this.fire('drop_item', [item]);
     }
 });
 
@@ -477,13 +505,37 @@ game.objectmanager.c('creature', {
         return false;
     },
     
-    
-    
     '_controller':controllers.roam,
     
     'action_attack':actions.attack,
     
     '_requires':'object alive vision actor has_inventory'  
+});
+
+game.objectmanager.c('container', {
+    'content': null,
+
+    'remove': function (item) {
+        this.content.remove(item);
+    },
+
+    'put': function (item) {
+        this.content.add(item);
+    },
+
+    'init_content': function () {
+        this.content = new collection.Container();
+    },
+    
+    'serialize_content': function (data) {
+        data.content = this.content.serialize();
+    },
+    
+    'post_load_content': function (data) {
+        data.content.forEach(function(objid){
+            this.content.add(this.world.objects.by_id(objid));
+        }, this);
+    }
 });
 
 /*CHEST
@@ -492,39 +544,28 @@ game.objectmanager.c('creature', {
  */
 game.objectmanager.c('chest', {
     
-    'sprite_name':'chest',
-    'sprite':'full',
-    'threadable':false,
-    'is_open':false,
-    'locked':false,
+    'sprite_name': 'chest',
+    'sprite': 'full',
+    'threadable': false,
+    'is_open': false,
+    'locked': false,
     
-    '_name':'Chest',
-    '_description':'It surely contains something awesome.',
+    '_name': 'Chest',
+    '_description': 'It surely contains something awesome.',
     
-    '_requires':'object',
+    '_requires': 'object container',
     
-    
-    'init_content':function(){
-        this.content = new utils.Collection();
-        this.content.on('add', this.set_default_sprite, this);
+
+    'init_default_sprite': function () {
         this.set_default_sprite();
+        this.content.on('add', this.set_default_sprite, this);
     },
-    
-    'init_align':function(){
+
+     'init_align':function(){
         utils.align_obj_to_wall(this);  
     },
-    
-    'serialize_content':function(data){
-        data.content = this.content.serialize();
-    },
-    
-    'post_load_content':function(data){
-        data.content.forEach(function(objid){
-            this.content.add(this.world.objects.by_id(objid));
-        }, this);
-    },
-    
-    'set_default_sprite':function(){
+
+    'set_default_sprite': function () {
         if(!this.is_open){
             if(this.content.len()) this.set_sprite('full');
             else this.set_sprite('empty');
@@ -583,6 +624,8 @@ game.objectmanager.c('door', {
    'init_prev_position': function(){
        this._previous_position = utils.mod( this.position, constants.MOVE_MOD_BACK[this.angle] );
    },
+
+  
    
    'transparency_block':function( looking_from ){
         //block vision if looking to the tile from door perspective

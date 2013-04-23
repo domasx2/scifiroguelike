@@ -1,6 +1,5 @@
 var gamejs = require('gamejs');
 var game = require('./game').game;
-var inventory = require('./inventory/inventory');
 var utils  = require('./utils');
 var World  = require('./world').World;
 var view   = require('./view');
@@ -8,6 +7,7 @@ var events = require('./events');
 var ui_container = require('./ui/container');
 var ui_character = require('./ui/character');
 var ui_utils = require('./ui/utils');
+var collection = require('./objects/collection');
 
 var Scene = exports.Scene = function(options){
     utils.process_options(this, options, {
@@ -167,7 +167,7 @@ WorldScene.prototype.init_ui = function(){
         }
         
         this.spawn_ui('ground_items', {
-           'collection':new inventory.GroundItems(this.protagonist),
+           'collection':new collection.GroundItems(this.protagonist),
            'owner':this.protagonist,
            'position':[10, 120]
         });

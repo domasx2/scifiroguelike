@@ -151,3 +151,22 @@ body{
 .ac-action {
 	background-color: orange;
 }
+
+.item-container {
+	overflow: visible !important;
+	padding: 0px !important;
+}
+.inventory-container .row {
+	height: 42px;
+}
+
+.inventory-slot {
+	width: 42px;
+	height: 42px;
+	vertical-align: top;
+	border: solid 1px gray;
+	display: inline-block;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}

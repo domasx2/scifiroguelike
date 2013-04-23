@@ -4,6 +4,7 @@ var game = require('./game').game;
 var constants = require('./constants');
 var mvec = gamejs.utils.vectors.multiply;
 var eventify = require('./lib/events').eventify;
+var collection = require('./objects/collection');
 
 var ASMap = function(vision, target){
     /*
@@ -44,7 +45,7 @@ var Vision = exports.Vision = function(world, object){
     this.init_fov();
     this.surface = null;
     this.redraw = false;
-    this.objects = new utils.Collection(); //objects that are visible
+    this.objects = new collection.Collection(); //objects that are visible
     this.made_visible = [];
     this.made_explored = [];
     this.prev_visible = [];
