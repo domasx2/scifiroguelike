@@ -386,7 +386,7 @@ game.objectmanager.c('vision', {
 
 game.objectmanager.c('has_inventory', {
     'inventory_size':10,
-    '_equipment_slots':['weapon', 'armor', 'helmet'],
+    '_equipment_slots':['weapon', 'body', 'head'],
 
 
     'init_inventory': function (world, data){

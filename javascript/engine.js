@@ -36,6 +36,7 @@ require('./engine/objects/items');
 require('./engine/objects/weapons');
 
 require('./engine/ui/base');
+require('./engine/ui/items');
 require('./engine/ui/container');
 require('./engine/ui/character');
 

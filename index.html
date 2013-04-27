@@ -21,9 +21,8 @@
     <script src="./public/jquery-1.9.1.js"></script>
     <script src="./public/jquery-ui-1.10.2.custom.js"></script>
 	<script src="./public/jquery.blockui.js"></script>
-    <script src="./public/jquery.gridster.min.js"></script>
+    <script src="./public/moustache.js"></script>
 	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/themes/base/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="./public/jquery.gridster.min.css">
 	<link rel="stylesheet" type="text/css" href="./public/style.css">
     <script src="./public/yabble.js"></script>
     <script src="./public/gamejs.min.js"></script>
@@ -43,5 +42,31 @@
         Powered by <a href="http://gamejs.org">GameJs</a>.
         </p>
     </div>
+    <script type="text/template" id="template-character">
+        <div class="character-ui">
+            <div class="character-status">
+                <label class="character-title">Protagonist</label>
+                <div class="health">
+                    <div class="filler"></div>
+                    <label>100/100</label>
+                </div>
+                <div class="action-points"></div>
+            </div>
+            <ul class="equipment-slots">
+                <li data-slot="weapon">
+                    <label>WPN</label>
+                    <div class="slot"></div>
+                </li>
+                <li data-slot="body">
+                    <label>BODY</label>
+                    <div class="slot"></di>
+                </li>
+                <li data-slot="head">
+                    <label>HEAD</label>
+                    <div class="slot"></di>
+                </li>
+            </ul>
+        </div>
+    </script>
 </body>
 </html>

@@ -172,6 +172,7 @@ game.objectmanager.c('usesammo', {
 
 game.objectmanager.c('weapon', {
     '_requires':'item equippable',
+    '_slot': 'weapon',
     'base_accuracy':0.7,
     'max_accuracy':0.95,
     'min_accuracy':0.01,

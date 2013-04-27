@@ -11,6 +11,7 @@ game.uimanager.c('base',{
      },
      
      'position':[0, 0],
+     'owner': utils.required,
      
      'title':'Ui component',
      
@@ -53,7 +54,7 @@ game.uimanager.c('dialog', {
     
     'close_button':false,
     
-    'create_dom':function(){
+    'create_dom': function () {
         var dialog_options = {
             width: 200,
             height: 120,
@@ -73,7 +74,7 @@ game.uimanager.c('dialog', {
         this.fire('create_dom');
     },
     
-    'close':function(){
+    'close': function () {
         this.hide();
         this.fire('close');
     }

@@ -312,3 +312,35 @@ Array.prototype.remove = function(from, to) {
   return this.push.apply(this, rest);
 };
 
+
+exports.objectsEqual = function(obj, x) {
+  var p;
+  for(p in obj) {
+      if(typeof(x[p])=='undefined') {return false;}
+  }
+
+  for(p in obj) {
+      if (obj[p]) {
+          switch(typeof(obj[p])) {
+              case 'object':
+                  if (!obj[p].equals(x[p])) { return false; } break;
+              case 'function':
+                  if (typeof(x[p])=='undefined' ||
+                      (p != 'equals' && obj[p].toString() != x[p].toString()))
+                      return false;
+                  break;
+              default:
+                  if (obj[p] != x[p]) { return false; }
+          }
+      } else {
+          if (x[p])
+              return false;
+      }
+  }
+
+  for(p in x) {
+      if(typeof(obj[p])=='undefined') {return false;}
+  }
+
+  return true;
+}

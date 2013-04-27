@@ -33,11 +33,17 @@ game.objectmanager.c('item', {
 game.objectmanager.c('equippable', {
     'equipped': false,
     '_slot': 'weapon',
+    '_equipped_by': null,
 
     'init_equippable': function() {
         this.on('drop', function(owner) {
             if (this.equipped) this.unequip(owner);
         }, this);
+
+    },
+
+    'on_remove_from_container':function(container){
+        if(this.equipped) this.unequip()
     },
 
     'inventory_action_equip': actions.action({
@@ -56,11 +62,17 @@ game.objectmanager.c('equippable', {
             return this.equipped;
         },
         'do': function(actor) {
-            this.unequip(actor);
+            this.unequip();
         }
     }),
 
+    'serialize_equipped_by': function(data){
+        if(this._equipped_by) data.equipped_by = this._equipped_by.id;
+    },
 
+    'post_load_equipped_by': function(data){
+        if(data.equipped_by) this._equipped_by = this.world.objects.by_id(data.equipped_by);
+    },
 
     'equip': function(owner) {
         if (!this.equipped) {
@@ -68,19 +80,21 @@ game.objectmanager.c('equippable', {
                 if (item.is_type('equippable') && item._slot == this._slot && item.equipped) item.unequip(owner);
             }, this)
             this.equipped = true;
+            this._equipped_by = owner;
             this.fire('equip', [owner]);
-            owner.fire('equip', [this]);
+            this._equipped_by.fire('equip', [this]);
         } else {
-            console.warning("Equipping already equipped item??", this, owner);
+            console.log("Equipping already equipped item??", this, owner);
         }
     },
-    'unequip': function(owner) {
+    'unequip': function() {
         if (this.equipped) {
             this.equipped = false;
-            this.fire('unequip', [owner]);
-            owner.fire('unequip', [this]);
+            this.fire('unequip', [this._equipped_by]);
+            this._equipped_by.fire('unequip', [this]);
+            this._equipped_by = null;
         } else {
-            console.warning('Unequipping equipped item??', this, owner);
+            console.log('Unequipping equipped item??', this);
         }
     }
 });

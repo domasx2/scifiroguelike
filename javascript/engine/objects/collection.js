@@ -26,22 +26,28 @@ Collection.prototype.get_by_type = function(type){
 };
 
 Collection.prototype.add = function(obj){
-    this.objects.push(obj);
-    this.objects_by_id[obj.id] = obj;
-    this.fire('add', [obj]);
-    obj.on('destroy', this.remove, this);
+    if(!this.has(obj)){
+        this.objects.push(obj);
+        this.objects_by_id[obj.id] = obj;
+        this.fire('add', [obj]);
+        this.observe('object', obj);
+        obj.on('destroy', this.remove, this);
+    }
 };
 
 Collection.prototype.remove = function(obj){
-    for(var i=0;i<this.objects.length;i++){
-        if(this.objects[i].id == obj.id){
-            this.objects.splice(i, 1);
-            break;
+    if(this.has(obj)){
+        for(var i=0;i<this.objects.length;i++){
+            if(this.objects[i].id == obj.id){
+                this.objects.splice(i, 1);
+                break;
+            }
         }
+        delete this.objects_by_id[obj.id];
+        this.fire('remove', [obj]);
+        this.unobserve(obj);
+        obj.off('destroy', this.remove, this);
     }
-    delete this.objects_by_id[obj.id];
-    this.fire('remove', [obj]);
-    obj.off('destroy', this.remove, this);
 };
 
 
@@ -130,13 +136,66 @@ var Container = exports.Container = function(objects){
         }
         obj.fire('put_into_container', [container]);
     });
+
+    this.on('remove', function(container, obj){
+        obj.fire('remove_from_container', [container]);
+    });
 };
 
 gamejs.utils.objects.extend(Container, Collection);
 
+var Equipped = exports.Equipped = function(inventory){
+    this.inventory = inventory;
+    Equipped.superConstructor.apply(this, []);
+
+    this.inventory.on('add', function(inventory, obj){
+        if(obj.equipped) this.add(obj);
+    }, this);
+
+    this.inventory.on('remove', function(inventory, obj){
+        this.remove(obj);
+    }, this)
+
+    this.inventory.on('object:equip', function(inventory, obj){
+        this.add(obj);
+    }, this);
+
+    this.inventory.on('object:unequip', function(inventory, obj){
+        this.remove(obj);
+    }, this);
+};
+
+gamejs.utils.objects.extend(Equipped, Collection);
+
+var Backpack = exports.Backpack = function(inventory){
+    this.inventory = inventory;
+    Backpack.superConstructor.apply(this, []);
+
+    this.inventory.on('add', function(inventory, obj){
+        if(!obj.equipped) this.add(obj);
+    }, this);
+
+    this.inventory.on('remove', function(inventory, obj){
+        this.remove(obj);
+    }, this)
+
+    this.inventory.on('object:equip', function(inventory, obj){
+        this.remove(obj);
+    }, this);
+
+    this.inventory.on('object:unequip', function(inventory, obj){
+        this.add(obj);
+    }, this);
+};
+
+gamejs.utils.objects.extend(Backpack, Collection);
+
 var Inventory = exports.Inventory = function (owner) {
     this.owner = owner;
     Inventory.superConstructor.apply(this, []);
+    this.equipped = new Equipped(this);
+    this.backpack = new Backpack(this);
+
 };
 
 gamejs.utils.objects.extend(Inventory, Container);

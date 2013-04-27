@@ -21,6 +21,9 @@ body{
         	
 }
 
+.ui-draggable-dragging {
+	z-index: 100000;
+}
 
 /* DIALOG */
 .ui-dialog {
@@ -102,9 +105,35 @@ body{
 }
 
 /*CHARACTER STATUS */
-.character-status {
+.character-ui {
 	position: fixed;
 	
+}
+
+.character-ui .character-status, .character-ui .equipment-slots {
+	display: inline-block;
+	vertical-align: top
+}
+
+.character-ui .equipment-slots {
+	margin: 0px;
+	padding: 0px;
+}
+
+
+.character-ui .equipment-slots li {
+	display: inline-block;
+}
+
+.character-ui .equipment-slots li label {
+	color: white;
+}
+
+.character-ui .equipment-slots .slot {
+	width: 42px;
+	height: 42px;
+	background-color: white;
+	margin: auto;
 }
 
 .character-title {
@@ -164,7 +193,7 @@ body{
 	width: 42px;
 	height: 42px;
 	vertical-align: top;
-	border: solid 1px gray;
+	border: solid 1px #D8D8D8;
 	display: inline-block;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;

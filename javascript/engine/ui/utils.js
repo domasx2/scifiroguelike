@@ -9,7 +9,7 @@ exports.disable_between_turns = function(dom, owner){
     owner.on('start_turn', function(){
         dom.unblock();
     });
-}
+};
 
 exports.bound_actions_to_menu_items = function(actions, actor){
     var items = [];
@@ -20,4 +20,10 @@ exports.bound_actions_to_menu_items = function(actions, actor){
         });
     });
     return items;
+};
+
+
+exports.render_template = function (template_id, values) {
+    var tmplt = Mustache.render($('#template-' + template_id).html(), values || {}).replace(/\n/g, '').trim();
+    return $(tmplt);
 };

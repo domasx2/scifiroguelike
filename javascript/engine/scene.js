@@ -142,6 +142,7 @@ WorldScene.prototype.spawn_ui = function(type, options){
             obj[key] = options[key];
         }
     }
+    obj.owner = this.protagonist;
     for(key in obj){
         if(obj[key] == utils.required){
             console.log('ui init error: '+key+' required!', obj);
@@ -159,7 +160,7 @@ WorldScene.prototype.init_ui = function(){
     if(this.protagonist) {
         if(this.protagonist.inventory){
             this.spawn_ui('inventory', {
-                'collection':this.protagonist.inventory,
+                'collection':this.protagonist.inventory.backpack,
                 'owner':this.protagonist,
                 'position':[10, 10],
                 'id':'inventory'
