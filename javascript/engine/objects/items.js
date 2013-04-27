@@ -7,7 +7,7 @@ game.objectmanager.c('item', {
     '_container': null,
 
     'on_put_into_container': function(container) {
-        if(this._container && this._container.has(this)){
+        if(this._container && this._container.has(this) && this._container != container){
             this._container.remove(this);
         }
         this._container = container;

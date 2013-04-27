@@ -89,6 +89,7 @@ game.objectmanager.c('usesammo', {
             actor.inventory.add(clip);
             this._clip = null;
             this.fire('unload', [clip]);
+            console.log(actor.inventory.has(clip));
             
         }
      },
