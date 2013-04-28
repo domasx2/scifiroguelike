@@ -15,6 +15,7 @@ game.uimanager.c('item_container', {
     'collection': utils.required,
     'owner': utils.required,
     'item_class': 'item',
+    'slot_class': 'item_slot',
     'rows': 2,
     'columns': 4,
     'table': null,
@@ -23,7 +24,7 @@ game.uimanager.c('item_container', {
     '_last_dropped_slot': null, 
 
     'on_drop_move': function (item, slot) {
-        if(item.slot.container === slot.container){
+        if(item.slot && item.slot.container === slot.container){
             if(!slot.item){
                 slot.attach(item);
             }
@@ -57,7 +58,7 @@ game.uimanager.c('item_container', {
             row = $('<div class="row"></div>');
             this.table.append(row);
             for(x=0;x<this.columns;x++){
-                slot = this.scene.spawn_ui('item_slot', {
+                slot = this.scene.spawn_ui(this.slot_class, {
                     'container': this
                 });
                 row.append(slot.dom);
@@ -132,20 +133,9 @@ game.uimanager.c('inventory', {
     '_requires': 'item_container',
     'title': 'Inventory',
     'item_class': 'inventory_item',
+    'slot_class': 'inventory_slot',
     'rows': 5,
     'columns': 5,
-
-    'on_drop_pick_up': function(item, slot){
-        if(!this.owner.inventory.has(item.item)){
-            this.owner.pick_up(item.item);
-        }
-    },
-
-    'on_drop_unequip': function(item, slot){
-        if(this.owner.inventory.has(item.item) && item.item.equipped){
-            item.item.unequip();
-        }
-    },
    
     'remove_item_from_dom': function(item){
         item.dom.remove();

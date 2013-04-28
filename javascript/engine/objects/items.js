@@ -25,7 +25,15 @@ game.objectmanager.c('item', {
         'do': function (actor) {
             actor.drop(this);
         }
-    })
+    }),
+
+    'remove_from_container': function(){
+        if(this._container) this._container.remove(this);
+    },
+
+    'combine': function(item, actor){
+
+    }
 });
 
 

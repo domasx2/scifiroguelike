@@ -144,11 +144,31 @@ game.uimanager.c('item_slot', {
     }
 });
 
-game.uimanager.c('equipment_slot', {
+game.uimanager.c('inventory_slot', {
     '_requires': 'item_slot',
+
+    'on_drop_handle': function(item){
+        if(this.item && this.item.item != item.item){
+            if(this.item.item.combine(item.item, this.owner)){
+                return;
+            } 
+        }
+        if(!this.owner.inventory.has(item.item)){
+            this.owner.pick_up(item.item);
+            return;
+        }
+         if(this.owner.inventory.has(item.item) && item.item.equipped){
+            item.item.unequip();
+        }
+    },
+
+});
+
+game.uimanager.c('equipment_slot', {
+    '_requires': 'inventory_slot',
     'slot_type': utils.required,
 
-    'on_drop': function (item) {
+    'on_drop_equip': function (item) {
         if(item.item.is_type('equippable') && item.item._slot == this.slot_type){
             if(this.item) this.item.item.unequip();
             if(!this.owner.inventory.has(item.item)) this.owner.pick_up(item.item);
