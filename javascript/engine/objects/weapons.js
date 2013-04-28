@@ -21,7 +21,22 @@ game.objectmanager.c('clip', {
 
     'get_ammo': function() {
         return this.ammo;
-    }
+    },
+
+    'inventory_action_load_clip': actions.action({
+        condition: function(actor) {
+            var wpn = actor.inventory.get_equipped_item('weapon');
+            if(wpn && wpn.is_type('usesammo') && this.is_type(wpn.clip_type) && !wpn._clip){
+                return true;
+            }
+            return false;
+        },
+        name: 'load',
+        'do': function(actor) {
+            var wpn = actor.inventory.get_equipped_item('weapon');
+            return wpn.load_clip(this, actor);
+        }
+    })
 });
 
 game.objectmanager.c('usesammo', {

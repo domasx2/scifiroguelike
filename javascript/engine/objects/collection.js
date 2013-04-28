@@ -201,7 +201,7 @@ var Inventory = exports.Inventory = function (owner) {
 gamejs.utils.objects.extend(Inventory, Container);
 
 Inventory.prototype.has_space = function(){
-    return this.owner.inventory_size > this.len();
+    return this.owner.inventory_size > this.backpack.len();
 };
 
 Inventory.prototype.get_equipped_item = function(slot){

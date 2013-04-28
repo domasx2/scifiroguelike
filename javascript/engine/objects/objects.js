@@ -385,7 +385,7 @@ game.objectmanager.c('vision', {
 });
 
 game.objectmanager.c('has_inventory', {
-    'inventory_size':10,
+    'inventory_size':25,
     '_equipment_slots':['weapon', 'body', 'head'],
 
 

@@ -83,16 +83,18 @@ game.objectmanager.c('equippable', {
     },
 
     'equip': function(owner) {
-        if (!this.equipped) {
-            owner.inventory.iter(function(item) {
-                if (item.is_type('equippable') && item._slot == this._slot && item.equipped) item.unequip(owner);
-            }, this)
-            this.equipped = true;
-            this._equipped_by = owner;
-            this.fire('equip', [owner]);
-            this._equipped_by.fire('equip', [this]);
-        } else {
-            console.log("Equipping already equipped item??", this, owner);
+        if(owner.inventory.has(this)){
+            if (!this.equipped) {
+                owner.inventory.iter(function(item) {
+                    if (item.is_type('equippable') && item._slot == this._slot && item.equipped) item.unequip(owner);
+                }, this)
+                this.equipped = true;
+                this._equipped_by = owner;
+                this.fire('equip', [owner]);
+                this._equipped_by.fire('equip', [this]);
+            } else {
+                console.log("Equipping already equipped item??", this, owner);
+            }
         }
     },
     'unequip': function() {
