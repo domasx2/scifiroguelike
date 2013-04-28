@@ -28,15 +28,13 @@ Game.prototype.set_scene = function(scene){
     this.scene = scene;    
 };
 
-Game.prototype.handle_events = function(events){
-    events.forEach(function(event){
-        if(event.type == gamejs.event.KEY_DOWN){
-            this.keys_pressed[event.key] = true;
-        } 
-        else if(event.type == gamejs.event.KEY_UP){
-            delete this.keys_pressed[event.key];   
-        }
-    }, this);  
+Game.prototype.handle_event = function(event){
+    if(event.type == gamejs.event.KEY_DOWN){
+        this.keys_pressed[event.key] = true;
+    } 
+    else if(event.type == gamejs.event.KEY_UP){
+        delete this.keys_pressed[event.key];   
+    }
 };
 
 exports.game = window.game = new Game();
